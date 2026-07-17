@@ -15,9 +15,7 @@
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
 
-    "declaration": true,
-    "outDir": "./dist",
-    "rootDir": "./src"
+    "noEmit": true
   },
   "include": ["src"]
 }
