@@ -36,3 +36,13 @@
 .active:hover {
   color: var(--color-bg);
 }
+
+/* Compact on desktop where a mouse points; on touch sized screens the segments
+   grow to a 44px tap target. */
+@media (max-width: 768px) {
+  .option {
+    height: 44px;
+    min-width: 44px;
+    font-size: var(--text-sm);
+  }
+}

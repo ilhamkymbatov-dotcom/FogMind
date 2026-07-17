@@ -5,6 +5,7 @@ export const kk: Dictionary = {
   'nav.howItWorks': 'Қалай жұмыс істейді',
   'nav.product': 'Өнім',
   'nav.getStarted': 'Бастау',
+  'nav.menu': 'Мәзір',
 
   'hero.title': 'Кез келген материалды үйренуге ыңғайлы картаға айналдырыңыз',
   'hero.subtitle':

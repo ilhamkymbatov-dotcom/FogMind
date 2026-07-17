@@ -40,6 +40,8 @@
 }
 
 .link {
+  display: inline-flex;
+  align-items: center;
   color: var(--color-muted);
   font-size: var(--text-sm);
   line-height: var(--leading-sm);
@@ -47,6 +49,18 @@
   transition: color 120ms ease;
 }
 
-.link:hover {
+.link:hover,
+.link:active {
   color: var(--color-fg);
+}
+
+/* Roomier rows for touch on small screens. */
+@media (max-width: 768px) {
+  .inner {
+    gap: var(--space-6);
+  }
+
+  .link {
+    min-height: 44px;
+  }
 }

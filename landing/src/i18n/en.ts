@@ -7,6 +7,7 @@ export const en = {
   'nav.howItWorks': 'How it works',
   'nav.product': 'Product',
   'nav.getStarted': 'Get started',
+  'nav.menu': 'Menu',
 
   'hero.title': 'Turn any material into a map you can actually learn',
   'hero.subtitle':

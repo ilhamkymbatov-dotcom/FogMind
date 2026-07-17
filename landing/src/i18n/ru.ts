@@ -5,6 +5,7 @@ export const ru: Dictionary = {
   'nav.howItWorks': 'Как это работает',
   'nav.product': 'Продукт',
   'nav.getStarted': 'Начать',
+  'nav.menu': 'Меню',
 
   'hero.title': 'Превратите любой материал в карту, по которой можно учиться',
   'hero.subtitle':
