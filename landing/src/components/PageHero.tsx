@@ -1,6 +1,9 @@
+import { motion, useScroll, useTransform } from 'framer-motion'
+import { useRef } from 'react'
 import { useTranslation, type TranslationKey } from '../i18n'
 import { Container } from './Container'
 import { ScrollReveal } from './motion/ScrollReveal'
+import { usePrefersReducedMotion } from './motion/useMediaQuery'
 import styles from './PageHero.module.css'
 
 export interface PageHeroProps {
@@ -8,19 +11,33 @@ export interface PageHeroProps {
   subtitleKey: TranslationKey
 }
 
-/** The opening section of a content page: a large centered title and one line. */
+/**
+ * The opening section of a content page: a large centered title and one line.
+ * As the user scrolls past, the text gently lifts, shrinks and fades, which
+ * gives the page depth without touching layout.
+ */
 export function PageHero({ titleKey, subtitleKey }: PageHeroProps) {
   const { t } = useTranslation()
+  const ref = useRef<HTMLElement>(null)
+  const reduced = usePrefersReducedMotion()
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] })
+  const y = useTransform(scrollYProgress, [0, 1], [0, -36])
+  const opacity = useTransform(scrollYProgress, [0, 0.85], [1, 0])
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.98])
+
+  const inner = (
+    <ScrollReveal>
+      <div className={styles.inner}>
+        <h1 className={styles.title}>{t(titleKey)}</h1>
+        <p className={styles.subtitle}>{t(subtitleKey)}</p>
+      </div>
+    </ScrollReveal>
+  )
 
   return (
-    <section className={styles.hero}>
+    <section ref={ref} className={styles.hero}>
       <Container>
-        <ScrollReveal>
-          <div className={styles.inner}>
-            <h1 className={styles.title}>{t(titleKey)}</h1>
-            <p className={styles.subtitle}>{t(subtitleKey)}</p>
-          </div>
-        </ScrollReveal>
+        {reduced ? inner : <motion.div style={{ y, opacity, scale }}>{inner}</motion.div>}
       </Container>
     </section>
   )

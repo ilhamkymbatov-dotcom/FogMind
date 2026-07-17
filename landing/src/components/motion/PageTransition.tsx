@@ -1,15 +1,17 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import type { ReactNode } from 'react'
+import { EASE_OUT } from './Stagger'
+import { usePrefersReducedMotion } from './useMediaQuery'
 
 /**
- * Fades and slides the routed page in on navigation.
+ * Fades, lifts and very slightly scales the routed page in on navigation.
  *
  * Rendered once, in AnimatedRoutes, keyed by pathname so it remounts per
  * route. Enter only by design, see the comment in AnimatedRoutes. Pages must
  * not wrap themselves in it, or transitions run twice.
  */
 export function PageTransition({ children }: { children: ReactNode }) {
-  const reduceMotion = useReducedMotion()
+  const reduceMotion = usePrefersReducedMotion()
 
   if (reduceMotion) {
     return <div>{children}</div>
@@ -17,9 +19,9 @@ export function PageTransition({ children }: { children: ReactNode }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, ease: 'easeOut' }}
+      initial={{ opacity: 0, y: 20, scale: 0.992 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.45, ease: EASE_OUT }}
     >
       {children}
     </motion.div>

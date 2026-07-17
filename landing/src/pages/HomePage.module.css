@@ -1,7 +1,16 @@
 /* Hero ------------------------------------------------------------------- */
 
+/* Relative with hidden overflow so the fog and constellation layers clip to
+   the hero. The content layer stacks above both. */
 .hero {
+  position: relative;
+  overflow: hidden;
   padding-block: var(--space-8);
+}
+
+.heroContent {
+  position: relative;
+  z-index: 2;
 }
 
 .heroInner {
@@ -92,6 +101,17 @@
 .teaserLink:active {
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+/* The arrow leans into the link on hover and press. */
+.teaserLink svg {
+  transition: transform 160ms ease;
+}
+
+.teaserLink:hover svg,
+.teaserLink:focus-visible svg,
+.teaserLink:active svg {
+  transform: translateX(3px);
 }
 
 /* Closing call to action ------------------------------------------------- */

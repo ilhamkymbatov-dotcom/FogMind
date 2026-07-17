@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react'
 import { useTranslation, type TranslationKey } from '../i18n'
 import { Container } from './Container'
-import { ScrollReveal } from './motion/ScrollReveal'
+import { Parallax } from './motion/Parallax'
+import { Stagger, StaggerItem } from './motion/Stagger'
 import styles from './FeatureSection.module.css'
 
 export interface FeatureSectionProps {
@@ -15,8 +16,9 @@ export interface FeatureSectionProps {
 
 /**
  * One large alternating section: heading and body on one side, an icon built
- * visual on the other. The pages alternate `reverse` to get the Apple style
- * left right rhythm. On narrow screens everything stacks, text first.
+ * visual on the other. The heading, body and visual reveal in sequence, and
+ * the visual drifts on a gentle parallax so it moves at a slightly different
+ * rate than the text. On narrow screens everything stacks, text first.
  */
 export function FeatureSection({ titleKey, bodyKey, visual, reverse = false }: FeatureSectionProps) {
   const { t } = useTranslation()
@@ -24,15 +26,19 @@ export function FeatureSection({ titleKey, bodyKey, visual, reverse = false }: F
   return (
     <section className={styles.section}>
       <Container>
-        <ScrollReveal>
-          <div className={[styles.grid, reverse ? styles.reverse : ''].filter(Boolean).join(' ')}>
-            <div className={styles.text}>
+        <Stagger className={[styles.grid, reverse ? styles.reverse : ''].filter(Boolean).join(' ')}>
+          <div className={styles.text}>
+            <StaggerItem>
               <h2 className={styles.title}>{t(titleKey)}</h2>
+            </StaggerItem>
+            <StaggerItem>
               <p className={styles.body}>{t(bodyKey)}</p>
-            </div>
-            <div>{visual}</div>
+            </StaggerItem>
           </div>
-        </ScrollReveal>
+          <StaggerItem>
+            <Parallax>{visual}</Parallax>
+          </StaggerItem>
+        </Stagger>
       </Container>
     </section>
   )

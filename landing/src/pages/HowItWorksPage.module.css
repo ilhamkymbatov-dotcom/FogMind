@@ -1,0 +1,137 @@
+/* Pinned journey ---------------------------------------------------------- */
+
+/* The tall outer track gives the scroll room; the inner block pins while the
+   user moves through it and the graph assembles step by step. */
+.journey {
+  position: relative;
+  height: 340vh;
+}
+
+.sticky {
+  position: sticky;
+  top: 64px;
+  height: calc(100vh - 64px);
+  display: flex;
+  align-items: center;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: var(--space-7);
+  width: 100%;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.stepRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  min-height: 44px;
+  align-items: center;
+}
+
+.stepIndex {
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  font-weight: var(--weight-medium);
+  color: var(--color-muted);
+  min-width: 20px;
+  transition: color 200ms ease;
+}
+
+.stepTitle {
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+  font-weight: var(--weight-bold);
+  color: var(--color-muted);
+  transition: color 200ms ease, opacity 200ms ease;
+  opacity: 0.55;
+}
+
+.stepRowActive .stepIndex {
+  color: var(--color-accent);
+}
+
+.stepRowActive .stepTitle {
+  color: var(--color-fg);
+  opacity: 1;
+}
+
+/* Reserved height so the swapping body text never shifts the layout. */
+.stepBody {
+  margin-top: var(--space-4);
+  min-height: calc(var(--leading-base) * 4);
+  max-width: 44ch;
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  color: var(--color-muted);
+}
+
+/* Graph panel ------------------------------------------------------------- */
+
+.graphPanel {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background-color: var(--color-surface);
+  padding: var(--space-5);
+}
+
+.graphSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-4);
+  padding-top: var(--space-4);
+  transition: opacity 400ms ease;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  font-weight: var(--weight-medium);
+  color: var(--color-muted);
+}
+
+/* Stacked fallback: narrow screens and reduced motion ---------------------- */
+
+.stacked {
+  padding-block: var(--space-7);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+}
+
+.stackedStep {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.stackedTitle {
+  font-size: var(--text-xl);
+  line-height: var(--leading-xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.01em;
+}
+
+.stackedBody {
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  color: var(--color-muted);
+  max-width: 46ch;
+}

@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { I18nProvider } from './i18n'
 import { Nav } from './components/Nav'
 import { Footer } from './components/Footer'
+import { GlobalFog } from './components/fx/GlobalFog'
 import { PageTransition } from './components/motion/PageTransition'
 
 const HomePage = lazy(() => import('./pages/HomePage'))
@@ -45,6 +46,8 @@ function App() {
           <AnimatedRoutes />
         </main>
         <Footer />
+        {/* Part of the shell, not a page: the brand fog survives navigation. */}
+        <GlobalFog />
       </BrowserRouter>
     </I18nProvider>
   )

@@ -1,4 +1,5 @@
 import {
+  CircleCheck,
   CloudFog,
   Eye,
   FileText,
@@ -37,7 +38,9 @@ function QuestionsVisual() {
 function FogVisual() {
   return (
     <div className={visuals.panel}>
-      <CloudFog className={visuals.panelIcon} size={44} aria-hidden="true" />
+      <CloudFog className={visuals.panelIcon} size={ICON} aria-hidden="true" />
+      <MessageCircleQuestion className={visuals.panelAccent} size={ICON} aria-hidden="true" />
+      <CircleCheck className={visuals.panelIcon} size={ICON} aria-hidden="true" />
     </div>
   )
 }

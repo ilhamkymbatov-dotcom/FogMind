@@ -21,11 +21,24 @@
   cursor: pointer;
   transition:
     color 120ms ease,
-    background-color 120ms ease;
+    background-color 120ms ease,
+    transform 120ms ease;
 }
 
 .option:hover {
   color: var(--color-fg);
+}
+
+.option:active {
+  transform: scale(0.94);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .option,
+  .option:active {
+    transition: none;
+    transform: none;
+  }
 }
 
 .active {
