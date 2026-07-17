@@ -1,10 +1,15 @@
 import { LANGUAGES, useTranslation, type Language } from '../i18n'
 import styles from './LanguageSwitcher.module.css'
 
+/**
+ * Display labels only. The locale code stays 'kk' everywhere (dictionary,
+ * localStorage, types); Kazakh just reads as KZ to users, who recognise the
+ * country code rather than the ISO language code.
+ */
 const LABELS: Record<Language, string> = {
   en: 'EN',
   ru: 'RU',
-  kk: 'KK',
+  kk: 'KZ',
 }
 
 export function LanguageSwitcher() {

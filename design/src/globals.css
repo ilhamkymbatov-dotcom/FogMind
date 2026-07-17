@@ -76,7 +76,11 @@ select {
   /* Corners stay sharp. This is the maximum, never raise it. */
   --radius: 2px;
 
-  --font-sans: 'Space Grotesk', sans-serif;
+  /* Two families, one chain, because Space Grotesk ships no Cyrillic glyphs.
+     The browser falls back per glyph, so Latin renders in Space Grotesk and
+     Cyrillic in Golos Text with no per language classes. Order matters: Space
+     Grotesk must come first or it never gets a chance at the Latin text. */
+  --font-sans: 'Space Grotesk', 'Golos Text', sans-serif;
 
   /* Spacing */
   --space-1: 4px;
