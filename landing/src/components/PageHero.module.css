@@ -1,0 +1,32 @@
+.hero {
+  padding-block: var(--space-8) var(--space-7);
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-4);
+}
+
+.title {
+  max-width: 24ch;
+  font-size: clamp(var(--text-xl), 5vw, var(--text-2xl));
+  line-height: 1.15;
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  max-width: 52ch;
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+  color: var(--color-muted);
+}
+
+@media (max-width: 860px) {
+  .hero {
+    padding-block: var(--space-7) var(--space-6);
+  }
+}
