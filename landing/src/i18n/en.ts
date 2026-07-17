@@ -19,12 +19,12 @@ export const en = {
   'steps.upload.title': 'Upload your material',
   'steps.upload.body': 'Drop in a PDF, DOCX, Markdown or plain text file.',
   'steps.map.title': 'We build your knowledge map',
-  'steps.map.body': 'AI extracts the key concepts and connects them into a graph.',
+  'steps.map.body': 'The key concepts are pulled out and connected into a graph.',
   'steps.clear.title': 'Clear the fog by answering',
   'steps.clear.body': 'Answer questions on each concept to reveal the map piece by piece.',
 
   'features.title': 'Built for real learning',
-  'features.questions.title': 'AI generated questions',
+  'features.questions.title': 'Questions from your material',
   'features.questions.body': 'Every concept comes with questions written from your own material.',
   'features.adaptive.title': 'Adaptive difficulty',
   'features.adaptive.body': 'Questions grow harder as you improve, so you are always challenged.',
@@ -44,7 +44,7 @@ export const en = {
   'hiw.upload.title': 'Upload your material',
   'hiw.upload.body':
     'Start with what you already have. FogMind reads PDF, DOCX, Markdown and plain text, so lecture notes, textbooks and articles all fit.',
-  'hiw.reads.title': 'The AI reads and structures it',
+  'hiw.reads.title': 'Your material is read and structured',
   'hiw.reads.body':
     'FogMind finds the topics inside your material and how they relate to each other, then turns that structure into something you can see.',
   'hiw.map.title': 'Your knowledge map appears',
@@ -52,7 +52,7 @@ export const en = {
     'Every concept becomes a node, every relationship a connection. You see the whole subject at a glance instead of a wall of pages.',
   'hiw.fog.title': 'Clear the fog',
   'hiw.fog.body':
-    'New nodes start hidden in fog. Answer AI generated questions about a concept to reveal it, keep answering to master it.',
+    'New nodes start hidden in fog. Answer questions from your material about a concept to reveal it, keep answering to master it.',
   'hiw.fog.stage1': 'Fogged',
   'hiw.fog.stage2': 'Answer questions',
   'hiw.fog.stage3': 'Mastered',
@@ -66,7 +66,7 @@ export const en = {
   'product.graph.title': 'Interactive knowledge graph',
   'product.graph.body':
     'Your material becomes a spatial map of connected concepts you can explore, rearrange and grow.',
-  'product.questions.title': 'AI generated questions',
+  'product.questions.title': 'Questions from your material',
   'product.questions.body':
     'Every node comes with questions written from your own material, in multiple formats from free recall to multiple choice.',
   'product.fog.title': 'The fog mechanic',
