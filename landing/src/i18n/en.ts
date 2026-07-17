@@ -11,25 +11,19 @@ export const en = {
 
   'hero.title': 'Turn any material into a map you can actually learn',
   'hero.subtitle':
-    'FogMind turns your PDFs, DOCX, Markdown and plain text into an interactive knowledge graph. Answer questions to clear the fog and watch your understanding grow.',
+    'FogMind turns your study material into an interactive knowledge graph. Answer questions to clear the fog and watch your understanding grow.',
   'hero.primary': 'Get started',
   'hero.secondary': 'See how it works',
 
-  'steps.title': 'How it works',
-  'steps.upload.title': 'Upload your material',
-  'steps.upload.body': 'Drop in a PDF, DOCX, Markdown or plain text file.',
-  'steps.map.title': 'We build your knowledge map',
-  'steps.map.body': 'The key concepts are pulled out and connected into a graph.',
-  'steps.clear.title': 'Clear the fog by answering',
-  'steps.clear.body': 'Answer questions on each concept to reveal the map piece by piece.',
+  'home.hiw.heading': 'The process',
+  'home.hiw.line':
+    'Upload your material and watch it turn into a map you clear one concept at a time.',
+  'home.hiw.link': 'See how it works',
 
-  'features.title': 'Built for real learning',
-  'features.questions.title': 'Questions from your material',
-  'features.questions.body': 'Every concept comes with questions written from your own material.',
-  'features.adaptive.title': 'Adaptive difficulty',
-  'features.adaptive.body': 'Questions grow harder as you improve, so you are always challenged.',
-  'features.progress.title': 'Visual progress',
-  'features.progress.body': 'The fog lifts as you learn, so you always see what is left.',
+  'home.product.heading': 'The product',
+  'home.product.line':
+    'A living knowledge graph, questions drawn from your own pages, and mastery you can watch spread.',
+  'home.product.link': 'Explore the product',
 
   'cta.title': 'Ready to clear the fog',
   'cta.button': 'Get started',
@@ -43,7 +37,7 @@ export const en = {
   'hiw.hero.subtitle': 'From a file to a living map of your knowledge in minutes.',
   'hiw.upload.title': 'Upload your material',
   'hiw.upload.body':
-    'Start with what you already have. FogMind reads PDF, DOCX, Markdown and plain text, so lecture notes, textbooks and articles all fit.',
+    'Start with what you already have. Lecture notes, a textbook chapter, a dense article, whatever you are studying goes straight in.',
   'hiw.reads.title': 'Your material is read and structured',
   'hiw.reads.body':
     'FogMind finds the topics inside your material and how they relate to each other, then turns that structure into something you can see.',
@@ -56,9 +50,9 @@ export const en = {
   'hiw.fog.stage1': 'Fogged',
   'hiw.fog.stage2': 'Answer questions',
   'hiw.fog.stage3': 'Mastered',
-  'hiw.adaptive.title': 'Adaptive progress',
+  'hiw.adaptive.title': 'Your progress is saved',
   'hiw.adaptive.body':
-    'Questions adjust to how you perform, and your progress is saved so every session picks up where the last one ended.',
+    'Every answer is remembered. Leave and come back, and your map waits exactly where you left it, fog and all.',
 
   'product.hero.title': 'Everything you need to actually learn',
   'product.hero.subtitle':

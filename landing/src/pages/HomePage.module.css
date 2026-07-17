@@ -35,52 +35,63 @@
   gap: var(--space-3);
 }
 
-/* Shared section shell --------------------------------------------------- */
+/* Teasers ---------------------------------------------------------------- */
 
 .section {
   padding-block: var(--space-8);
 }
 
-.sectionTitle {
-  font-size: var(--text-xl);
-  line-height: var(--leading-xl);
-  font-weight: var(--weight-bold);
-  letter-spacing: -0.01em;
-  margin-bottom: var(--space-6);
-}
-
-/* Card grids ------------------------------------------------------------- */
-
-.grid {
+.teaserGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--space-4);
 }
 
-.card {
+.teaser {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   background-color: var(--color-bg);
-  padding: var(--space-5);
+  padding: var(--space-6);
 }
 
-.cardIcon {
-  color: var(--color-accent);
+.teaserHeading {
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.01em;
 }
 
-.cardTitle {
+.teaserLine {
   font-size: var(--text-base);
   line-height: var(--leading-base);
-  font-weight: var(--weight-bold);
+  color: var(--color-muted);
+  max-width: 40ch;
 }
 
-.cardBody {
-  font-size: var(--text-sm);
-  line-height: var(--leading-sm);
-  color: var(--color-muted);
+/* The link fills a 44px tall row so the whole label is a comfortable touch
+   target, and the underline appears on hover, focus and active alike. */
+.teaserLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  margin-top: auto;
+  color: var(--color-accent);
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+}
+
+.teaserLink:hover,
+.teaserLink:focus-visible,
+.teaserLink:active {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 /* Closing call to action ------------------------------------------------- */
@@ -110,7 +121,7 @@
 /* Responsive ------------------------------------------------------------- */
 
 @media (max-width: 860px) {
-  .grid {
+  .teaserGrid {
     grid-template-columns: 1fr;
   }
 

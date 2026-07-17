@@ -1,47 +1,46 @@
-import {
-  Eye,
-  MessageCircleQuestion,
-  SlidersHorizontal,
-  Sparkles,
-  Upload,
-  Waypoints,
-  type LucideIcon,
-} from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { useTranslation, type TranslationKey } from '../i18n'
 import { Button } from '../components/Button'
 import { Container } from '../components/Container'
 import { ScrollReveal } from '../components/motion/ScrollReveal'
 import styles from './HomePage.module.css'
 
-interface CardSpec {
-  icon: LucideIcon
-  titleKey: TranslationKey
-  bodyKey: TranslationKey
+interface TeaserSpec {
+  headingKey: TranslationKey
+  lineKey: TranslationKey
+  linkKey: TranslationKey
+  to: string
 }
 
-const STEP_CARDS: readonly CardSpec[] = [
-  { icon: Upload, titleKey: 'steps.upload.title', bodyKey: 'steps.upload.body' },
-  { icon: Waypoints, titleKey: 'steps.map.title', bodyKey: 'steps.map.body' },
-  { icon: MessageCircleQuestion, titleKey: 'steps.clear.title', bodyKey: 'steps.clear.body' },
+/**
+ * Home stays high level. Rather than repeat the How it works and Product copy,
+ * each teaser gives one line and a link into the page that owns the detail.
+ */
+const TEASERS: readonly TeaserSpec[] = [
+  { headingKey: 'home.hiw.heading', lineKey: 'home.hiw.line', linkKey: 'home.hiw.link', to: '/how-it-works' },
+  {
+    headingKey: 'home.product.heading',
+    lineKey: 'home.product.line',
+    linkKey: 'home.product.link',
+    to: '/product',
+  },
 ]
 
-const FEATURE_CARDS: readonly CardSpec[] = [
-  { icon: Sparkles, titleKey: 'features.questions.title', bodyKey: 'features.questions.body' },
-  { icon: SlidersHorizontal, titleKey: 'features.adaptive.title', bodyKey: 'features.adaptive.body' },
-  { icon: Eye, titleKey: 'features.progress.title', bodyKey: 'features.progress.body' },
-]
-
-function CardGrid({ cards }: { cards: readonly CardSpec[] }) {
+function Teasers() {
   const { t } = useTranslation()
 
   return (
-    <div className={styles.grid}>
-      {cards.map(({ icon: Icon, titleKey, bodyKey }, index) => (
-        <ScrollReveal key={titleKey} delay={index * 0.08}>
-          <div className={styles.card}>
-            <Icon className={styles.cardIcon} size={24} aria-hidden="true" />
-            <h3 className={styles.cardTitle}>{t(titleKey)}</h3>
-            <p className={styles.cardBody}>{t(bodyKey)}</p>
+    <div className={styles.teaserGrid}>
+      {TEASERS.map(({ headingKey, lineKey, linkKey, to }, index) => (
+        <ScrollReveal key={headingKey} delay={index * 0.08}>
+          <div className={styles.teaser}>
+            <h2 className={styles.teaserHeading}>{t(headingKey)}</h2>
+            <p className={styles.teaserLine}>{t(lineKey)}</p>
+            <Link to={to} className={styles.teaserLink}>
+              {t(linkKey)}
+              <ArrowRight size={16} aria-hidden="true" />
+            </Link>
           </div>
         </ScrollReveal>
       ))}
@@ -73,19 +72,7 @@ function HomePage() {
 
       <section className={styles.section}>
         <Container>
-          <ScrollReveal>
-            <h2 className={styles.sectionTitle}>{t('steps.title')}</h2>
-          </ScrollReveal>
-          <CardGrid cards={STEP_CARDS} />
-        </Container>
-      </section>
-
-      <section className={styles.section}>
-        <Container>
-          <ScrollReveal>
-            <h2 className={styles.sectionTitle}>{t('features.title')}</h2>
-          </ScrollReveal>
-          <CardGrid cards={FEATURE_CARDS} />
+          <Teasers />
         </Container>
       </section>
 

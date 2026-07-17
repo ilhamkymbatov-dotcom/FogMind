@@ -3,7 +3,7 @@ import {
   CircleCheck,
   CloudFog,
   FileText,
-  Gauge,
+  History,
   MessageCircleQuestion,
   Sparkles,
   TrendingUp,
@@ -19,22 +19,14 @@ import visuals from '../components/FeatureSection.module.css'
 
 const ICON = 28
 
-/** Format chips: PDF, DOCX and Markdown read the same in every language. */
+/**
+ * Icon only, no format chips. The supported formats live on the Product page
+ * so they are not stated identically on two pages.
+ */
 function UploadVisual() {
-  const { t } = useTranslation()
-  const formats = ['PDF', 'DOCX', 'Markdown', t('product.formats.plain')]
-
   return (
     <div className={visuals.panel}>
-      <Upload className={visuals.panelAccent} size={ICON} aria-hidden="true" />
-      <div className={visuals.chipGrid}>
-        {formats.map((label) => (
-          <span key={label} className={visuals.chip}>
-            <FileText size={14} aria-hidden="true" />
-            {label}
-          </span>
-        ))}
-      </div>
+      <Upload className={visuals.panelAccent} size={44} aria-hidden="true" />
     </div>
   )
 }
@@ -85,10 +77,10 @@ function FogVisual() {
   )
 }
 
-function AdaptiveVisual() {
+function ProgressVisual() {
   return (
     <div className={visuals.panel}>
-      <Gauge className={visuals.panelIcon} size={ICON} aria-hidden="true" />
+      <History className={visuals.panelIcon} size={ICON} aria-hidden="true" />
       <TrendingUp className={visuals.panelAccent} size={ICON} aria-hidden="true" />
     </div>
   )
@@ -120,7 +112,7 @@ function HowItWorksPage() {
       <FeatureSection
         titleKey="hiw.adaptive.title"
         bodyKey="hiw.adaptive.body"
-        visual={<AdaptiveVisual />}
+        visual={<ProgressVisual />}
       />
 
       <CtaBand />
