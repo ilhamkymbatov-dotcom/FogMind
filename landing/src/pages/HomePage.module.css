@@ -1,0 +1,122 @@
+/* Hero ------------------------------------------------------------------- */
+
+.hero {
+  padding-block: var(--space-8);
+}
+
+.heroInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-5);
+  padding-block: var(--space-7);
+}
+
+.heroTitle {
+  max-width: 22ch;
+  font-size: clamp(var(--text-xl), 5.5vw, var(--text-3xl));
+  line-height: 1.1;
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
+}
+
+.heroSubtitle {
+  max-width: 56ch;
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+  color: var(--color-muted);
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+/* Shared section shell --------------------------------------------------- */
+
+.section {
+  padding-block: var(--space-8);
+}
+
+.sectionTitle {
+  font-size: var(--text-xl);
+  line-height: var(--leading-xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.01em;
+  margin-bottom: var(--space-6);
+}
+
+/* Card grids ------------------------------------------------------------- */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background-color: var(--color-bg);
+  padding: var(--space-5);
+}
+
+.cardIcon {
+  color: var(--color-accent);
+}
+
+.cardTitle {
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  font-weight: var(--weight-bold);
+}
+
+.cardBody {
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--color-muted);
+}
+
+/* Closing call to action ------------------------------------------------- */
+
+.cta {
+  padding-block: var(--space-8);
+}
+
+.ctaInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-7) var(--space-5);
+}
+
+.ctaTitle {
+  font-size: var(--text-xl);
+  line-height: var(--leading-xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.01em;
+}
+
+/* Responsive ------------------------------------------------------------- */
+
+@media (max-width: 860px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero,
+  .section,
+  .cta {
+    padding-block: var(--space-7);
+  }
+}
