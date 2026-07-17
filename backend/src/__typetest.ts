@@ -11,8 +11,10 @@
  * than the calls below.
  */
 
-import { supabase } from './supabaseClient'
+import { createSupabaseClient } from './supabaseClient'
 import type { Document, Progress } from './types/database'
+
+const supabase = createSupabaseClient('https://example.supabase.co', 'anon-key')
 
 type Equals<A, B> =
   (<G>() => G extends A ? 1 : 2) extends <G>() => G extends B ? 1 : 2 ? true : false

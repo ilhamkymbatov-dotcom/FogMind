@@ -18,11 +18,18 @@
 
     "strict": true,
 
+    /* Shared backend package, resolved from source. Must stay in step with the
+       alias in vite.config.ts. */
+    "paths": {
+      "@fogmind/backend": ["../backend/src/index.ts"],
+      "@fogmind/backend/*": ["../backend/src/*"]
+    },
+
     /* Linting */
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["src", "../backend/src"]
 }
