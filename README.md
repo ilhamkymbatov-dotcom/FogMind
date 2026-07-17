@@ -12,10 +12,23 @@ This repository is a monorepo containing two applications and one shared logic p
   landing/     Marketing and presentation site (Vite + React + TypeScript)
   frontend/    Main product application (Vite + React + TypeScript)
   backend/     Shared Supabase logic layer (plain TypeScript, no framework)
+  design/      Shared design tokens and global CSS
 ```
 
 Each package manages its own dependencies and is installed independently. There is no workspace
 runner configured yet.
+
+The two shared packages are consumed as source through aliases rather than as installed
+dependencies. Each alias is declared twice, once in the app's `vite.config.ts` and once in its
+`tsconfig.app.json`, and the two must be kept in step:
+
+| Alias | Resolves to | Used by |
+| --- | --- | --- |
+| `@fogmind/backend` | `backend/src` | frontend |
+| `@fogmind/design` | `design/src` | frontend, landing |
+
+`design/src/globals.css` is the only definition of the design tokens. Both apps import it from
+their `main.tsx`. Do not copy it into an app.
 
 ## Requirements
 

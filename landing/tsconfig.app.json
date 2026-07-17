@@ -18,6 +18,12 @@
 
     "strict": true,
 
+    /* Shared design package, resolved from source. Must stay in step with the
+       alias in vite.config.ts. */
+    "paths": {
+      "@fogmind/design/*": ["../design/src/*"]
+    },
+
     /* Linting */
     "noUnusedLocals": true,
     "noUnusedParameters": true,

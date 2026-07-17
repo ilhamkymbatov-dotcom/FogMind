@@ -1,0 +1,9 @@
+{
+  "name": "@fogmind/design",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    "./globals.css": "./src/globals.css"
+  }
+}

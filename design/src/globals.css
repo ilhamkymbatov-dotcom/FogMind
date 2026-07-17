@@ -1,11 +1,13 @@
 /*
  * FogMind design tokens and base styles.
  *
+ * The single source of truth for the visual language. Both apps import this
+ * one file through the @fogmind/design alias, so there is no second copy to
+ * keep in step.
+ *
  * Light theme only by design. Do not add a dark mode, a prefers-color-scheme
  * block, or a theme toggle. The color-scheme declaration below tells the
  * browser to keep native controls light even when the OS is set to dark.
- *
- * This file is duplicated in frontend/src/styles/globals.css. Change both.
  */
 
 /* Reset ------------------------------------------------------------------ */
@@ -99,6 +101,10 @@ select {
   --leading-xl: 36px;
   --text-2xl: 40px;
   --leading-2xl: 48px;
+  /* Display size. Tight leading, since a heading this large reads as a shape
+     before it reads as text. */
+  --text-3xl: 56px;
+  --leading-3xl: 62px;
 
   /* Weights. Headings and emphasis take bold, body text takes regular. */
   --weight-regular: 400;
