@@ -1,0 +1,142 @@
+/*
+ * FogMind design tokens and base styles.
+ *
+ * Light theme only by design. Do not add a dark mode, a prefers-color-scheme
+ * block, or a theme toggle. The color-scheme declaration below tells the
+ * browser to keep native controls light even when the OS is set to dark.
+ *
+ * This file is duplicated in frontend/src/styles/globals.css. Change both.
+ */
+
+/* Reset ------------------------------------------------------------------ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+figure,
+blockquote,
+dl,
+dd,
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+img,
+picture,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* Tokens ----------------------------------------------------------------- */
+
+:root {
+  color-scheme: light;
+
+  /* Color. Monochrome base plus exactly one accent. Never add a second accent
+     and never introduce a gradient. */
+  --color-bg: #ffffff;
+  --color-fg: #000000;
+  --color-muted: #6b6b6b;
+  --color-border: #e5e5e5;
+  --color-surface: #fafafa;
+  --color-accent: #0055ff;
+  --color-accent-hover: #0044cc;
+
+  /* Corners stay sharp. This is the maximum, never raise it. */
+  --radius: 2px;
+
+  --font-sans: 'Space Grotesk', sans-serif;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* Type scale, each size paired with its line height. */
+  --text-xs: 12px;
+  --leading-xs: 16px;
+  --text-sm: 14px;
+  --leading-sm: 20px;
+  --text-base: 16px;
+  --leading-base: 24px;
+  --text-lg: 20px;
+  --leading-lg: 28px;
+  --text-xl: 28px;
+  --leading-xl: 36px;
+  --text-2xl: 40px;
+  --leading-2xl: 48px;
+
+  /* Weights. Headings and emphasis take bold, body text takes regular. */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-bold: 700;
+}
+
+/* Base ------------------------------------------------------------------- */
+
+html {
+  font-size: var(--text-base);
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  font-weight: var(--weight-regular);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: var(--weight-bold);
+  line-height: 1.2;
+}
+
+/* Focus ------------------------------------------------------------------ */
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}

@@ -1,0 +1,72 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Sizes */
+
+.sm {
+  height: 32px;
+  padding: 0 var(--space-3);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+}
+
+.md {
+  height: 40px;
+  padding: 0 var(--space-4);
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+}
+
+/* Variants */
+
+.primary {
+  background-color: var(--color-accent);
+  color: var(--color-bg);
+}
+
+.primary:hover:not(:disabled) {
+  background-color: var(--color-accent-hover);
+}
+
+.secondary {
+  background-color: var(--color-bg);
+  border-color: var(--color-border);
+  color: var(--color-fg);
+}
+
+.secondary:hover:not(:disabled) {
+  border-color: var(--color-fg);
+}
+
+.ghost {
+  background-color: transparent;
+  color: var(--color-fg);
+}
+
+.ghost:hover:not(:disabled) {
+  background-color: var(--color-surface);
+}
+
+/* The icon tracks the label size rather than sitting at a fixed dimension. */
+.icon {
+  flex-shrink: 0;
+}
