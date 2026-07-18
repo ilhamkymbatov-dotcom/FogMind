@@ -3,7 +3,7 @@
  * (user_id, node_id).
  */
 import type { FogMindClient } from '../supabaseClient'
-import type { Progress, ProgressInsert } from '../types/database'
+import type { Progress, ProgressInsert, ProgressUpdate } from '../types/database'
 
 export interface InitialProgressInput {
   user_id: string
@@ -36,5 +36,21 @@ export async function listProgressForNodes(
   if (nodeIds.length === 0) return []
   const { data, error } = await client.from('progress').select('*').in('node_id', nodeIds)
   if (error) throw new Error(`Could not load progress: ${error.message}`)
+  return data
+}
+
+/** Persists a change to a progress row (state, counts, last reviewed). */
+export async function updateProgress(
+  client: FogMindClient,
+  id: string,
+  patch: ProgressUpdate,
+): Promise<Progress> {
+  const { data, error } = await client
+    .from('progress')
+    .update(patch)
+    .eq('id', id)
+    .select()
+    .single()
+  if (error) throw new Error(`Could not save progress: ${error.message}`)
   return data
 }

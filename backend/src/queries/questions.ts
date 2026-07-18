@@ -28,6 +28,20 @@ export async function listQuestionsForNode(
   return data
 }
 
+export async function listQuestionsForNodes(
+  client: FogMindClient,
+  nodeIds: string[],
+): Promise<Question[]> {
+  if (nodeIds.length === 0) return []
+  const { data, error } = await client
+    .from('questions')
+    .select('*')
+    .in('node_id', nodeIds)
+    .order('difficulty', { ascending: true })
+  if (error) throw new Error(`Could not load questions: ${error.message}`)
+  return data
+}
+
 export async function countQuestionsForNodes(
   client: FogMindClient,
   nodeIds: string[],

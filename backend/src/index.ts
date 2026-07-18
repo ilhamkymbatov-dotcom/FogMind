@@ -46,10 +46,12 @@ export { insertEdges, listEdgesForDocument, countEdges } from './queries/edges'
 export {
   insertQuestions,
   listQuestionsForNode,
+  listQuestionsForNodes,
   countQuestionsForNodes,
 } from './queries/questions'
 export {
   createInitialProgressForNodes,
   listProgressForNodes,
+  updateProgress,
   type InitialProgressInput,
 } from './queries/progress'
