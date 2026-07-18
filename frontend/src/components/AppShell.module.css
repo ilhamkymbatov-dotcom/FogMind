@@ -1,0 +1,60 @@
+.shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  height: 64px;
+  padding-inline: var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+}
+
+.wordmark {
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
+  color: var(--color-fg);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.email {
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--color-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.signOut {
+  min-height: 44px;
+}
+
+.main {
+  flex: 1;
+}
+
+/* The email label eats space on narrow phones; hide it and keep the action. */
+@media (max-width: 480px) {
+  .email {
+    display: none;
+  }
+}

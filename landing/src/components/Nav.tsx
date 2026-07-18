@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import { useTranslation } from '../i18n'
 import { Button } from './Button'
+import { SIGNUP_URL } from '../lib/appUrl'
 import { Container } from './Container'
 import { LanguageSwitcher } from './LanguageSwitcher'
 import styles from './Nav.module.css'
@@ -60,7 +61,7 @@ export function Nav() {
 
           <div className={styles.actions}>
             <LanguageSwitcher />
-            <Button to="/signup" variant="primary" size="sm">
+            <Button href={SIGNUP_URL} variant="primary" size="sm">
               {t('nav.getStarted')}
             </Button>
           </div>
@@ -97,7 +98,7 @@ export function Nav() {
 
               <div className={styles.panelActions}>
                 <LanguageSwitcher />
-                <Button to="/signup" variant="primary" size="lg">
+                <Button href={SIGNUP_URL} variant="primary" size="lg">
                   {t('nav.getStarted')}
                 </Button>
               </div>

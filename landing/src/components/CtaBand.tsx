@@ -1,5 +1,6 @@
 import { useTranslation } from '../i18n'
 import { Button } from './Button'
+import { SIGNUP_URL } from '../lib/appUrl'
 import { Container } from './Container'
 import { ScrollReveal } from './motion/ScrollReveal'
 import styles from './CtaBand.module.css'
@@ -14,7 +15,7 @@ export function CtaBand() {
         <ScrollReveal>
           <div className={styles.inner}>
             <h2 className={styles.title}>{t('cta.title')}</h2>
-            <Button to="/signup" variant="primary" size="lg">
+            <Button href={SIGNUP_URL} variant="primary" size="lg">
               {t('cta.button')}
             </Button>
           </div>

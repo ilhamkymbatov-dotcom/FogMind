@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useTranslation, type TranslationKey } from '../i18n'
 import { Button } from '../components/Button'
+import { SIGNUP_URL } from '../lib/appUrl'
 import { Container } from '../components/Container'
 import { Constellation } from '../components/fx/Constellation'
 import { ScrollReveal } from '../components/motion/ScrollReveal'
@@ -73,7 +74,7 @@ function Hero() {
       <h1 className={styles.heroTitle}>{t('hero.title')}</h1>
       <p className={styles.heroSubtitle}>{t('hero.subtitle')}</p>
       <div className={styles.heroActions}>
-        <Button to="/signup" variant="primary" size="lg">
+        <Button href={SIGNUP_URL} variant="primary" size="lg">
           {t('hero.primary')}
         </Button>
         <Button to="/how-it-works" variant="secondary" size="lg">
@@ -111,7 +112,7 @@ function HomePage() {
           <ScrollReveal>
             <div className={styles.ctaInner}>
               <h2 className={styles.ctaTitle}>{t('cta.title')}</h2>
-              <Button to="/signup" variant="primary" size="lg">
+              <Button href={SIGNUP_URL} variant="primary" size="lg">
                 {t('cta.button')}
               </Button>
             </div>
