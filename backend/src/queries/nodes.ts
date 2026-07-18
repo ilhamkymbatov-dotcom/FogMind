@@ -1,9 +1,35 @@
 /**
- * Data access for the nodes table.
- *
- * Will hold: fetching every node in a document to build the knowledge graph,
- * bulk inserting nodes produced by the AI extraction step, updating a node's
- * title or summary, and persisting canvas position after a drag.
+ * Data access for the nodes table. Bulk insert accepts rows that already carry
+ * their id, so edges and questions can reference nodes before the round trip.
  */
+import type { FogMindClient } from '../supabaseClient'
+import type { Node, NodeInsert } from '../types/database'
 
-export {}
+export async function insertNodes(client: FogMindClient, rows: NodeInsert[]): Promise<Node[]> {
+  if (rows.length === 0) return []
+  const { data, error } = await client.from('nodes').insert(rows).select()
+  if (error) throw new Error(`Could not save nodes: ${error.message}`)
+  return data
+}
+
+export async function listNodesForDocument(
+  client: FogMindClient,
+  documentId: string,
+): Promise<Node[]> {
+  const { data, error } = await client
+    .from('nodes')
+    .select('*')
+    .eq('document_id', documentId)
+    .order('created_at', { ascending: true })
+  if (error) throw new Error(`Could not load nodes: ${error.message}`)
+  return data
+}
+
+export async function countNodes(client: FogMindClient, documentId: string): Promise<number> {
+  const { count, error } = await client
+    .from('nodes')
+    .select('id', { count: 'exact', head: true })
+    .eq('document_id', documentId)
+  if (error) throw new Error(`Could not count nodes: ${error.message}`)
+  return count ?? 0
+}

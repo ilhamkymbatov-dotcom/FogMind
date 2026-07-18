@@ -8,6 +8,7 @@ const HomePage = lazy(() => import('./pages/HomePage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const SignupPage = lazy(() => import('./pages/SignupPage'))
 const DashboardPage = lazy(() => import('./pages/DashboardPage'))
+const DocumentDetailPage = lazy(() => import('./pages/DocumentDetailPage'))
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
               }
             >
               <Route index element={<DashboardPage />} />
+              <Route path="documents/:id" element={<DocumentDetailPage />} />
             </Route>
           </Routes>
         </Suspense>

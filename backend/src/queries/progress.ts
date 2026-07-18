@@ -1,11 +1,40 @@
 /**
- * Data access for the progress table.
- *
- * Will hold: loading a user's progress across a document to decide which nodes
- * are still fogged, upserting the row for a node on the unique (user_id,
- * node_id) pair, recording an attempt and its outcome, advancing state from
- * fogged to revealed to mastered, and aggregating counts for the progress
- * summary.
+ * Data access for the progress table: one row per user per node, unique on
+ * (user_id, node_id).
  */
+import type { FogMindClient } from '../supabaseClient'
+import type { Progress, ProgressInsert } from '../types/database'
 
-export {}
+export interface InitialProgressInput {
+  user_id: string
+  node_id: string
+}
+
+/**
+ * Seeds a fogged progress row for each freshly created node. State, counts and
+ * timestamps fall back to their column defaults.
+ */
+export async function createInitialProgressForNodes(
+  client: FogMindClient,
+  entries: InitialProgressInput[],
+): Promise<Progress[]> {
+  if (entries.length === 0) return []
+  const rows: ProgressInsert[] = entries.map((entry) => ({
+    user_id: entry.user_id,
+    node_id: entry.node_id,
+    state: 'fogged',
+  }))
+  const { data, error } = await client.from('progress').insert(rows).select()
+  if (error) throw new Error(`Could not save progress: ${error.message}`)
+  return data
+}
+
+export async function listProgressForNodes(
+  client: FogMindClient,
+  nodeIds: string[],
+): Promise<Progress[]> {
+  if (nodeIds.length === 0) return []
+  const { data, error } = await client.from('progress').select('*').in('node_id', nodeIds)
+  if (error) throw new Error(`Could not load progress: ${error.message}`)
+  return data
+}
