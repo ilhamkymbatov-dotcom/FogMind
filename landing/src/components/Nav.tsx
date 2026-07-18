@@ -71,6 +71,7 @@ export function Nav() {
             aria-expanded={open}
             aria-controls={panelId}
             onClick={() => setOpen((v) => !v)}
+            data-fog-clear
           >
             {open ? <X size={22} aria-hidden="true" /> : <Menu size={22} aria-hidden="true" />}
           </button>

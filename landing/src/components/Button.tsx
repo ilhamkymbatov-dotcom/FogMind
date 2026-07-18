@@ -28,10 +28,12 @@ function classes(variant: ButtonVariant, size: ButtonSize, className?: string): 
 export function Button(props: ButtonProps) {
   const { variant = 'primary', size = 'md', className } = props
 
+  // The data-fog-clear marker lets the site wide fog layer carve a hole so it
+  // never veils a control the user is meant to click.
   if (props.to !== undefined) {
     const { to, variant: _v, size: _s, className: _c, children, ...rest } = props
     return (
-      <Link to={to} className={classes(variant, size, className)} {...rest}>
+      <Link to={to} className={classes(variant, size, className)} data-fog-clear {...rest}>
         {children}
       </Link>
     )
@@ -39,7 +41,7 @@ export function Button(props: ButtonProps) {
 
   const { variant: _v, size: _s, className: _c, children, type = 'button', ...rest } = props
   return (
-    <button type={type} className={classes(variant, size, className)} {...rest}>
+    <button type={type} className={classes(variant, size, className)} data-fog-clear {...rest}>
       {children}
     </button>
   )

@@ -8,21 +8,23 @@ import styles from './GlobalFog.module.css'
  * everything, and the pointer wipes it clear as it moves, like mist on glass;
  * the wiped trail slowly heals behind you.
  *
- * How it renders: three low resolution buffers.
- *   fog buffer   the base haze, painted once per resize
- *   mask buffer  the wiped areas, white feathered blobs stamped at the
- *                pointer; every frame it fades a little (destination-out),
- *                which is what makes the fog creep back
- *   main canvas  fog buffer minus mask buffer (destination-out), upscaled by
- *                CSS. Rendering at half resolution keeps the per frame cost
- *                tiny, and the upscale blurs the fog for free.
+ * How it renders: three low resolution buffers, composited into the visible
+ * canvas as fog minus mask minus holes.
+ *   fog buffer    the base haze, painted once per resize. Denser toward the
+ *                 edges, thinned over the center where text sits.
+ *   mask buffer   the cursor wipe: white feathered blobs stamped at the
+ *                 pointer that fade a little every frame, so fog creeps back.
+ *   holes buffer  button shaped cutouts, so the fog never veils a control the
+ *                 user is meant to click. Recomputed on scroll, resize and
+ *                 navigation from the live positions of [data-fog-clear] nodes.
  *
- * The loop only runs while there is something to animate: it stops a couple of
- * seconds after the last pointer movement, once the trail has healed, and a
- * new movement starts it again. Hidden tab stops it too.
+ * Rendering at half resolution keeps the per frame cost tiny, and the CSS
+ * upscale blurs the fog for free. The wipe loop only runs while there is
+ * something to animate and stops once the trail heals; scroll and layout
+ * changes recompose on demand without it.
  *
  * Readability is the hard constraint: base alpha stays low enough that text
- * under the fog is always legible, the wipe just makes it crystal clear.
+ * under the fog is always legible, and buttons are cut out entirely.
  */
 
 const SCALE = 0.5
@@ -43,25 +45,25 @@ function paintBaseFog(
   ctx.clearRect(0, 0, width, height)
   ctx.globalCompositeOperation = 'source-over'
 
-  ctx.fillStyle = `rgba(234, 234, 234, ${0.11 * strength})`
+  ctx.fillStyle = `rgba(232, 232, 232, ${0.125 * strength})`
   ctx.fillRect(0, 0, width, height)
 
   // Denser wisps toward the edges keep the center, where text lives, lightest.
-  for (let i = 0; i < 14; i++) {
+  for (let i = 0; i < 18; i++) {
     let x = Math.random() * width
     let y = Math.random() * height
-    if (i < 9) {
+    if (i < 12) {
       if (Math.random() < 0.5) {
-        x = Math.random() < 0.5 ? Math.random() * width * 0.22 : width - Math.random() * width * 0.22
+        x = Math.random() < 0.5 ? Math.random() * width * 0.24 : width - Math.random() * width * 0.24
       } else {
         y =
-          Math.random() < 0.5 ? Math.random() * height * 0.22 : height - Math.random() * height * 0.22
+          Math.random() < 0.5 ? Math.random() * height * 0.24 : height - Math.random() * height * 0.24
       }
     }
     const radius = (110 + Math.random() * 190) * SCALE * 2
     const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius)
-    gradient.addColorStop(0, `rgba(226, 226, 226, ${0.12 * strength})`)
-    gradient.addColorStop(1, 'rgba(226, 226, 226, 0)')
+    gradient.addColorStop(0, `rgba(224, 224, 224, ${0.15 * strength})`)
+    gradient.addColorStop(1, 'rgba(224, 224, 224, 0)')
     ctx.fillStyle = gradient
     ctx.beginPath()
     ctx.arc(x, y, radius, 0, Math.PI * 2)
@@ -70,8 +72,9 @@ function paintBaseFog(
 
   // Readability guarantee: however the random wisps landed, thin the reading
   // zone in the middle of the viewport so body text always sits under the
-  // lightest fog.
-  const clearRadius = Math.min(width, height) * 0.55
+  // lightest fog. Cut deep here so the denser periphery never reaches the
+  // central text column.
+  const clearRadius = Math.min(width, height) * 0.62
   const center = ctx.createRadialGradient(
     width / 2,
     height / 2,
@@ -80,7 +83,7 @@ function paintBaseFog(
     height / 2,
     clearRadius,
   )
-  center.addColorStop(0, 'rgba(0, 0, 0, 0.5)')
+  center.addColorStop(0, 'rgba(0, 0, 0, 0.68)')
   center.addColorStop(1, 'rgba(0, 0, 0, 0)')
   ctx.globalCompositeOperation = 'destination-out'
   ctx.fillStyle = center
@@ -88,6 +91,57 @@ function paintBaseFog(
   ctx.arc(width / 2, height / 2, clearRadius, 0, Math.PI * 2)
   ctx.fill()
   ctx.globalCompositeOperation = 'source-over'
+}
+
+function roundedRectPath(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  r: number,
+) {
+  const radius = Math.min(r, w / 2, h / 2)
+  ctx.beginPath()
+  ctx.moveTo(x + radius, y)
+  ctx.arcTo(x + w, y, x + w, y + h, radius)
+  ctx.arcTo(x + w, y + h, x, y + h, radius)
+  ctx.arcTo(x, y + h, x, y, radius)
+  ctx.arcTo(x, y, x + w, y, radius)
+  ctx.closePath()
+}
+
+/**
+ * Paints the button cutouts into the holes buffer from the live positions of
+ * every [data-fog-clear] node. White fill plus a white shadow gives a soft
+ * feathered edge, so the fog fades out around each control rather than ending
+ * on a hard line.
+ */
+function paintHoles(ctx: CanvasRenderingContext2D, width: number, height: number) {
+  ctx.clearRect(0, 0, width, height)
+  ctx.globalCompositeOperation = 'source-over'
+  ctx.fillStyle = '#ffffff'
+  ctx.shadowColor = 'rgba(255, 255, 255, 1)'
+  ctx.shadowBlur = 26 * SCALE
+
+  const pad = 6
+  const nodes = document.querySelectorAll<HTMLElement>('[data-fog-clear]')
+  nodes.forEach((node) => {
+    const rect = node.getBoundingClientRect()
+    if (rect.width < 1 || rect.height < 1) return
+    if (rect.bottom < -30 || rect.top > window.innerHeight + 30) return
+    roundedRectPath(
+      ctx,
+      (rect.left - pad) * SCALE,
+      (rect.top - pad) * SCALE,
+      (rect.width + pad * 2) * SCALE,
+      (rect.height + pad * 2) * SCALE,
+      6 * SCALE,
+    )
+    ctx.fill()
+  })
+
+  ctx.shadowBlur = 0
 }
 
 export function GlobalFog() {
@@ -101,57 +155,91 @@ export function GlobalFog() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    // Reduced motion: a faint static haze, painted once. No loop, no wipe, no
-    // listeners, and light enough that nothing is ever trapped underneath.
-    if (reduced) {
-      const resizeStatic = () => {
-        canvas.width = Math.round(window.innerWidth * SCALE)
-        canvas.height = Math.round(window.innerHeight * SCALE)
-        paintBaseFog(ctx, canvas.width, canvas.height, 0.5)
-      }
-      resizeStatic()
-      window.addEventListener('resize', resizeStatic)
-      return () => window.removeEventListener('resize', resizeStatic)
-    }
-
     const fogBuffer = document.createElement('canvas')
-    const maskBuffer = document.createElement('canvas')
+    const holesBuffer = document.createElement('canvas')
+    const maskBuffer = reduced ? null : document.createElement('canvas')
     const fogCtx = fogBuffer.getContext('2d')
-    const maskCtx = maskBuffer.getContext('2d')
-    if (!fogCtx || !maskCtx) return
+    const holesCtx = holesBuffer.getContext('2d')
+    const maskCtx = maskBuffer?.getContext('2d') ?? null
+    if (!fogCtx || !holesCtx) return
 
-    // Touch screens get a lighter haze and a wider wipe: there is no hovering
-    // cursor, so the fog must never make anyone work to read.
-    const strength = coarse ? 0.6 : 1
+    // Reduced motion gets the faintest haze and no wipe. Touch screens get a
+    // lighter haze and a wider wipe, since there is no hovering cursor.
+    const strength = reduced ? 0.5 : coarse ? 0.6 : 1
     const wipeRadius = (coarse ? 140 : 110) * SCALE
 
     let rafId = 0
     let running = false
     let lastActivity = 0
+    let lastHoles = 0
+    let trackRaf = 0
+    let trackUntil = 0
+    let tracking = false
+    const settleTimers: number[] = []
     const pointer = { x: -1, y: -1, fresh: false }
-
-    const resize = () => {
-      const width = Math.round(window.innerWidth * SCALE)
-      const height = Math.round(window.innerHeight * SCALE)
-      canvas.width = width
-      canvas.height = height
-      fogBuffer.width = width
-      fogBuffer.height = height
-      maskBuffer.width = width
-      maskBuffer.height = height
-      paintBaseFog(fogCtx, width, height, strength)
-      compose()
-    }
 
     const compose = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       ctx.globalCompositeOperation = 'source-over'
       ctx.drawImage(fogBuffer, 0, 0)
       ctx.globalCompositeOperation = 'destination-out'
-      ctx.drawImage(maskBuffer, 0, 0)
+      if (maskBuffer) ctx.drawImage(maskBuffer, 0, 0)
+      ctx.drawImage(holesBuffer, 0, 0)
+      ctx.globalCompositeOperation = 'source-over'
+    }
+
+    // Recompute the button cutouts and recomposite, synchronously. Paint is
+    // cheap for a handful of controls at half resolution, and keeping it off
+    // requestAnimationFrame means the holes stay correct even when the tab is
+    // throttled. A short time throttle keeps a burst of scroll events in check.
+    const paintHolesNow = () => {
+      lastHoles = performance.now()
+      paintHoles(holesCtx, holesBuffer.width, holesBuffer.height)
+      compose()
+    }
+    const refreshHoles = () => {
+      if (performance.now() - lastHoles < 12) return
+      paintHolesNow()
+    }
+
+    // Page entrance and route transitions move the buttons through a framer
+    // animation with no scroll to hook. rAF tracks them smoothly while it runs,
+    // and timers settle the final positions even if rAF is throttled.
+    const trackTick = () => {
+      paintHolesNow()
+      if (performance.now() < trackUntil) {
+        trackRaf = requestAnimationFrame(trackTick)
+      } else {
+        tracking = false
+      }
+    }
+    const trackFor = (ms: number) => {
+      trackUntil = Math.max(trackUntil, performance.now() + ms)
+      if (!tracking) {
+        tracking = true
+        trackRaf = requestAnimationFrame(trackTick)
+      }
+      for (const delay of [120, 360, 650, ms]) {
+        settleTimers.push(window.setTimeout(paintHolesNow, delay))
+      }
+    }
+
+    const resize = () => {
+      const width = Math.round(window.innerWidth * SCALE)
+      const height = Math.round(window.innerHeight * SCALE)
+      for (const buffer of [canvas, fogBuffer, holesBuffer, maskBuffer]) {
+        if (!buffer) continue
+        buffer.width = width
+        buffer.height = height
+      }
+      paintBaseFog(fogCtx, width, height, strength)
+      paintHoles(holesCtx, width, height)
+      compose()
     }
 
     const frame = (now: number) => {
+      if (!maskCtx || !maskBuffer) return
+
       // The trail heals: the mask fades a little every frame.
       maskCtx.globalCompositeOperation = 'destination-out'
       maskCtx.fillStyle = `rgba(0, 0, 0, ${HEAL_ALPHA})`
@@ -193,7 +281,7 @@ export function GlobalFog() {
     }
 
     const start = () => {
-      if (running) return
+      if (running || !maskBuffer) return
       running = true
       lastActivity = performance.now()
       rafId = requestAnimationFrame(frame)
@@ -215,14 +303,29 @@ export function GlobalFog() {
       if (document.hidden) stop()
     }
 
+    // A click usually navigates or opens the menu, moving the buttons through
+    // the route transition with no scroll. Follow them until it settles.
+    const onClick = () => trackFor(900)
+
     resize()
+    // Cover the initial page entrance and any web font reflow.
+    trackFor(1200)
+
     window.addEventListener('resize', resize)
-    window.addEventListener('pointermove', onPointerMove, { passive: true })
-    document.addEventListener('visibilitychange', onVisibility)
+    window.addEventListener('scroll', refreshHoles, { passive: true })
+    window.addEventListener('click', onClick, { passive: true, capture: true })
+    if (!reduced) {
+      window.addEventListener('pointermove', onPointerMove, { passive: true })
+      document.addEventListener('visibilitychange', onVisibility)
+    }
 
     return () => {
       stop()
+      cancelAnimationFrame(trackRaf)
+      settleTimers.forEach(window.clearTimeout)
       window.removeEventListener('resize', resize)
+      window.removeEventListener('scroll', refreshHoles)
+      window.removeEventListener('click', onClick, { capture: true })
       window.removeEventListener('pointermove', onPointerMove)
       document.removeEventListener('visibilitychange', onVisibility)
     }
