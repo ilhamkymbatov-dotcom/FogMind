@@ -39,15 +39,32 @@ const KEYWORDS_PER_NODE = 8
 const KEYWORD_EDGE_OVERLAP = 3
 const MAX_QUESTIONS_PER_NODE = 3
 
-const STOPWORDS = new Set(
-  (
-    'the a an and or but if then than that this these those of to in on at for with without ' +
-    'from by as is are was were be been being it its it s they them their he she his her you your ' +
-    'we our i me my not no nor so such can could should would may might must will just also into ' +
-    'over under about above below between out up down off again more most some any each other which ' +
-    'who whom what when where why how all both few many much one two three'
-  ).split(' '),
-)
+// Stopwords across the three supported languages. Keyword extraction removes
+// these so significant terms surface regardless of the script.
+const EN_STOPWORDS =
+  'the a an and or but if then than that this these those of to in on at for with without ' +
+  'from by as is are was were be been being it its it s they them their he she his her you your ' +
+  'we our i me my not no nor so such can could should would may might must will just also into ' +
+  'over under about above below between out up down off again more most some any each other which ' +
+  'who whom what when where why how all both few many much one two three'
+
+const RU_STOPWORDS =
+  'и в во не что он на я с со как а то все она так его но да ты к у же вы за бы по только ее мне ' +
+  'было вот от меня еще нет о из ему теперь когда даже ну вдруг ли если уже или ни быть был него ' +
+  'до вас нибудь опять уж вам ведь там потом себя ничего ей может они тут где есть надо ней для мы ' +
+  'тебя их чем была сам чтоб без будто чего раз тоже себе под будет ж тогда кто этот того потому ' +
+  'этого какой совсем ним здесь этом один почти мой тем чтобы нее сейчас были куда зачем всех ' +
+  'никогда можно при наконец два об другой хоть после над больше тот через эти нас про всего них ' +
+  'какая много разве три эту моя впрочем свою этой перед иногда лучше чуть том нельзя такой им ' +
+  'более всегда конечно всю между это его ее их для от при так как также этих своих является были'
+
+const KK_STOPWORDS =
+  'бұл және де да мен пен бен үшін болып ол бір бар жоқ емес деп сол осы ма ме ба бе па пе ғой ' +
+  'не кім қай қалай неге себебі сондықтан бірақ немесе әрі тағы сияқты ретінде дейін кейін ' +
+  'арасында туралы менің сенің оның біздің сіздің оларды маған саған оған бізге сіз мынау анау ' +
+  'ал әрбір әр барлық кейбір қандай мұнда сонда енді тек қана ғана болатын болды екен'
+
+const STOPWORDS = new Set(`${EN_STOPWORDS} ${RU_STOPWORDS} ${KK_STOPWORDS}`.split(/\s+/))
 
 interface Section {
   title: string
@@ -128,14 +145,38 @@ function toSections(text: string): Section[] {
     }
   }
 
+  // Fallback for prose with no headings and few or no blank lines: a page that
+  // collapsed into one or two blocks is re chunked by sentence groups, so a
+  // normal document still yields several nodes. Genuinely tiny input (a
+  // sentence or two) is left as a single node.
+  let result = merged
+  if (result.length < 3) {
+    const sentences = splitSentences(text)
+    if (sentences.length >= 6 && text.trim().length >= 400) {
+      const targetNodes = Math.min(8, Math.max(3, Math.round(sentences.length / 4)))
+      result = chunkSentences(sentences, targetNodes)
+    }
+  }
+
   // Cap the node count by folding the tail into the last kept section.
-  if (merged.length > MAX_NODES) {
-    const head = merged.slice(0, MAX_NODES)
-    const tail = merged.slice(MAX_NODES)
+  if (result.length > MAX_NODES) {
+    const head = result.slice(0, MAX_NODES)
+    const tail = result.slice(MAX_NODES)
     head[MAX_NODES - 1].body += '\n' + tail.map((s) => s.body).join('\n')
     return head
   }
-  return merged
+  return result
+}
+
+/** Groups sentences into roughly equal chunks, one section each. */
+function chunkSentences(sentences: string[], targetNodes: number): Section[] {
+  const perChunk = Math.ceil(sentences.length / targetNodes)
+  const sections: Section[] = []
+  for (let i = 0; i < sentences.length; i += perChunk) {
+    const body = sentences.slice(i, i + perChunk).join(' ').trim()
+    if (body) sections.push({ title: '', body })
+  }
+  return sections
 }
 
 function tokenize(text: string): string[] {
@@ -167,9 +208,38 @@ function difficultyFor(sentenceWords: number, keyword: string): QuestionDifficul
   return 1
 }
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+/**
+ * A Unicode aware whole word match. JS `\b` is ASCII only, so it never fires on
+ * Cyrillic; lookarounds on \p{L} give a real word boundary in any script.
+ */
+function wordPattern(word: string): RegExp {
+  return new RegExp(`(?<!\\p{L})${escapeRegExp(word)}(?!\\p{L})`, 'iu')
+}
+
 function blankOut(sentence: string, keyword: string): string {
-  const pattern = new RegExp(`\\b${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i')
-  return sentence.replace(pattern, '_____')
+  return sentence.replace(wordPattern(keyword), '_____')
+}
+
+/** Picks up to three distractors, preferring other nodes, then same node. */
+function pickDistractors(
+  distractorPool: string[],
+  nodeKeywords: string[],
+  answer: string,
+  rotation: number,
+): string[] {
+  const pool = distractorPool.filter((d) => d !== answer)
+  const chosen = pool.slice(rotation % Math.max(1, pool.length)).concat(pool)
+  const distractors: string[] = []
+  for (const candidate of [...chosen, ...nodeKeywords]) {
+    if (candidate === answer || distractors.includes(candidate)) continue
+    distractors.push(candidate)
+    if (distractors.length >= 3) break
+  }
+  return distractors
 }
 
 function buildQuestions(
@@ -181,23 +251,25 @@ function buildQuestions(
 ): AnalyzedQuestion[] {
   const questions: AnalyzedQuestion[] = []
   const usedKeywords = new Set<string>()
-  const sentences = splitSentences(body).filter((s) => {
-    const words = s.split(/\s+/).length
-    return words >= 5 && words <= 30
-  })
+  if (nodeKeywords.length === 0) return questions
 
-  for (const sentence of sentences) {
+  // Prefer well sized sentences, but fall back to any sentence so a node with a
+  // usable keyword always yields at least one question.
+  const allSentences = splitSentences(body)
+  const sized = allSentences.filter((s) => {
+    const words = s.split(/\s+/).length
+    return words >= 4 && words <= 40
+  })
+  const candidates = sized.length > 0 ? sized : allSentences
+
+  for (const sentence of candidates) {
     if (questions.length >= MAX_QUESTIONS_PER_NODE) break
     const lower = sentence.toLowerCase()
-    const keyword = nodeKeywords.find((k) => !usedKeywords.has(k) && new RegExp(`\\b${k}\\b`).test(lower))
+    const keyword = nodeKeywords.find((k) => !usedKeywords.has(k) && wordPattern(k).test(lower))
     if (!keyword) continue
     usedKeywords.add(keyword)
 
-    const distractors = distractorPool
-      .filter((d) => d !== keyword)
-      .slice(rotation + questions.length, rotation + questions.length + 3)
-    if (distractors.length < 2) continue
-
+    const distractors = pickDistractors(distractorPool, nodeKeywords, keyword, rotation + questions.length)
     const options = [keyword, ...distractors].sort((a, b) => a.localeCompare(b))
     const words = sentence.split(/\s+/).length
     questions.push({
