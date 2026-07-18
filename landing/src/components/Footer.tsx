@@ -10,7 +10,8 @@ export function Footer() {
   return (
     <footer className={styles.footer}>
       <Container>
-        <div className={styles.inner}>
+        {/* The footer sits in the dense bottom edge, so carve the row clear. */}
+        <div className={styles.inner} data-fog-clear>
           <div className={styles.brand}>
             <Link to="/" className={styles.wordmark}>
               FogMind

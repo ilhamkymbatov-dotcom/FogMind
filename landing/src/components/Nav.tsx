@@ -40,7 +40,8 @@ export function Nav() {
   return (
     <header className={styles.nav}>
       <Container>
-        <div className={styles.inner}>
+        {/* The bar sits in the dense top edge, so carve the whole row clear. */}
+        <div className={styles.inner} data-fog-clear>
           <Link to="/" className={styles.wordmark}>
             FogMind
           </Link>
@@ -81,7 +82,7 @@ export function Nav() {
       {open ? (
         <div className={styles.panel} id={panelId}>
           <Container>
-            <nav className={styles.panelInner} aria-label="Mobile">
+            <nav className={styles.panelInner} aria-label="Mobile" data-fog-clear>
               <NavLink to="/" end className={panelLinkClass}>
                 {t('nav.home')}
               </NavLink>
