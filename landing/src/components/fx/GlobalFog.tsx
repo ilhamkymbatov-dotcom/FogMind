@@ -28,24 +28,20 @@ import styles from './GlobalFog.module.css'
  */
 
 const SCALE = 0.5
-const HEAL_ALPHA = 0.014
+// Slow heal so the wiped trail lingers before the fog rolls back.
+const HEAL_ALPHA = 0.008
 /*
- * Must outlast a full heal. At 0.014 per frame the mask decays as
- * (1 - 0.014)^n, reaching ~2% after roughly 4.6s of frames; stopping earlier
+ * Must outlast a full heal. At 0.008 per frame the mask decays as
+ * (1 - 0.008)^n, reaching ~2% after roughly 8s of frames; stopping earlier
  * would freeze half healed wipe marks on screen until the next movement.
  */
-const IDLE_STOP_MS = 6000
+const IDLE_STOP_MS = 9000
 
-// The uniform base is the fog over the central reading band. It is set to the
-// densest gray that still holds muted text (#6b6b6b) at WCAG AA against white:
-// the veil lightens the text to about #767676, which measures ~4.5:1. Do not
-// raise this without re-checking the contrast; the edges carry the density.
+// Uniform, seamless base fog. Set to the densest gray that still holds muted
+// text (#6b6b6b) at WCAG AA against white: the veil lightens it to about
+// #767676, which measures ~4.5:1. Present everywhere at the same density, so
+// text is readable anywhere; the cursor wipe reveals full clarity on top.
 const BASE_ALPHA = 0.093
-// Added on top toward the four edges, where no scrolling body text sits (the
-// nav and footer chrome that live there are carved out). This is what makes
-// the atmosphere read heavy.
-const EDGE_ALPHA = 0.34
-const WISP_ALPHA = 0.16
 const FOG_GRAY = 226
 
 function paintBaseFog(
@@ -56,59 +52,8 @@ function paintBaseFog(
 ) {
   ctx.clearRect(0, 0, width, height)
   ctx.globalCompositeOperation = 'source-over'
-  const gray = (a: number) => `rgba(${FOG_GRAY}, ${FOG_GRAY}, ${FOG_GRAY}, ${a * strength})`
-
-  // Uniform base: the reading band level, present everywhere.
-  ctx.fillStyle = gray(BASE_ALPHA)
+  ctx.fillStyle = `rgba(${FOG_GRAY}, ${FOG_GRAY}, ${FOG_GRAY}, ${BASE_ALPHA * strength})`
   ctx.fillRect(0, 0, width, height)
-
-  // Edge gradients build thickness toward the four sides while leaving a clear
-  // full width band across the vertical middle where content is read. Top and
-  // bottom get generous bands; left and right thicken the outer margins.
-  const paintEdge = (x0: number, y0: number, x1: number, y1: number, w: number, h: number) => {
-    const grad = ctx.createLinearGradient(x0, y0, x1, y1)
-    grad.addColorStop(0, gray(EDGE_ALPHA))
-    grad.addColorStop(1, gray(0))
-    ctx.fillStyle = grad
-    ctx.fillRect(Math.min(x0, x1), Math.min(y0, y1), w, h)
-  }
-  const topH = height * 0.3
-  const botH = height * 0.3
-  const sideW = width * 0.14
-  paintEdge(0, 0, 0, topH, width, topH)
-  paintEdge(0, height, 0, height - botH, width, botH)
-  paintEdge(0, 0, sideW, 0, sideW, height)
-  paintEdge(width, 0, width - sideW, 0, sideW, height)
-
-  // Organic wisps. Their large radii would otherwise bleed into the middle, so
-  // clip them out of the central reading band entirely: the band keeps exactly
-  // BASE. The clip seam falls under the top and bottom gradients, so it never
-  // shows. The band matches the reading protection used elsewhere.
-  ctx.save()
-  const bandTop = height * 0.28
-  const bandBottom = height * 0.72
-  ctx.beginPath()
-  ctx.rect(0, 0, width, height)
-  ctx.rect(0, bandTop, width, bandBottom - bandTop)
-  ctx.clip('evenodd')
-  for (let i = 0; i < 20; i++) {
-    let x = Math.random() * width
-    let y = Math.random() * height
-    if (Math.random() < 0.5) {
-      x = Math.random() < 0.5 ? Math.random() * width * 0.2 : width - Math.random() * width * 0.2
-    } else {
-      y = Math.random() < 0.5 ? Math.random() * height * 0.22 : height - Math.random() * height * 0.22
-    }
-    const radius = (110 + Math.random() * 200) * SCALE * 2
-    const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius)
-    gradient.addColorStop(0, gray(WISP_ALPHA))
-    gradient.addColorStop(1, gray(0))
-    ctx.fillStyle = gradient
-    ctx.beginPath()
-    ctx.arc(x, y, radius, 0, Math.PI * 2)
-    ctx.fill()
-  }
-  ctx.restore()
 }
 
 function roundedRectPath(
@@ -186,7 +131,7 @@ export function GlobalFog() {
     // Touch and reduced motion pull it back a little, since there is no wipe to
     // clear the text: still dense and atmospheric, but with more reading margin.
     const strength = reduced ? 0.82 : coarse ? 0.72 : 1
-    const wipeRadius = (coarse ? 140 : 110) * SCALE
+    const wipeRadius = (coarse ? 240 : 200) * SCALE
 
     let rafId = 0
     let running = false
@@ -276,8 +221,8 @@ export function GlobalFog() {
           pointer.y,
           wipeRadius,
         )
-        gradient.addColorStop(0, 'rgba(255, 255, 255, 0.95)')
-        gradient.addColorStop(0.6, 'rgba(255, 255, 255, 0.55)')
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 1)')
+        gradient.addColorStop(0.55, 'rgba(255, 255, 255, 0.9)')
         gradient.addColorStop(1, 'rgba(255, 255, 255, 0)')
         maskCtx.fillStyle = gradient
         maskCtx.beginPath()
