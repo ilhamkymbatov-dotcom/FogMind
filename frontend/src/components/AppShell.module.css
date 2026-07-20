@@ -26,6 +26,12 @@
   color: var(--color-fg);
   text-decoration: none;
   flex-shrink: 0;
+  cursor: pointer;
+  transition: opacity 120ms ease;
+}
+
+.wordmark:hover {
+  opacity: 0.65;
 }
 
 .right {

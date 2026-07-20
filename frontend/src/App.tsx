@@ -2,9 +2,8 @@ import { lazy, Suspense } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { AppShell } from './components/AppShell'
-import { ProtectedRoute, PublicOnlyRoute } from './components/RouteGuards'
+import { ProtectedRoute, PublicOnlyRoute, RootRedirect } from './components/RouteGuards'
 
-const HomePage = lazy(() => import('./pages/HomePage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const SignupPage = lazy(() => import('./pages/SignupPage'))
 const DashboardPage = lazy(() => import('./pages/DashboardPage'))
@@ -16,7 +15,7 @@ function App() {
       <BrowserRouter>
         <Suspense fallback={null}>
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<RootRedirect />} />
             <Route
               path="/login"
               element={
