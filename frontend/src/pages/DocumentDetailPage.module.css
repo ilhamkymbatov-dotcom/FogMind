@@ -19,6 +19,35 @@
   min-width: 0;
 }
 
+.headRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+/* Prominent but on brand: accent filled call to action for the review round. */
+.reviewButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 40px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius);
+  background-color: var(--color-accent);
+  color: var(--color-bg);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.reviewButton:hover {
+  background-color: var(--color-accent-hover);
+}
+
 .back {
   display: inline-flex;
   align-items: center;

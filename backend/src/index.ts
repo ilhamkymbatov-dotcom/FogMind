@@ -31,6 +31,9 @@ export type {
   Progress,
   ProgressInsert,
   ProgressUpdate,
+  QuestionAnswer,
+  QuestionAnswerInsert,
+  QuestionAnswerUpdate,
   Database,
 } from './types/database'
 
@@ -55,3 +58,4 @@ export {
   updateProgress,
   type InitialProgressInput,
 } from './queries/progress'
+export { upsertQuestionAnswer, listAnswersForQuestions } from './queries/questionAnswers'

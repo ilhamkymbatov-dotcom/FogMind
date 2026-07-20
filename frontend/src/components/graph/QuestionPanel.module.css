@@ -93,6 +93,10 @@
 }
 
 .option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
   min-height: 44px;
   padding: var(--space-3) var(--space-4);
   border: 1px solid var(--color-border);
@@ -121,7 +125,8 @@
   cursor: default;
 }
 
-.optionRight {
+/* The correct option, always highlighted in the accent after answering. */
+.optionCorrect {
   border-color: var(--color-accent);
   color: var(--color-accent);
   font-weight: var(--weight-medium);
@@ -132,18 +137,19 @@
   0% {
     background-color: var(--color-accent);
     color: var(--color-bg);
-    transform: scale(1.015);
   }
   100% {
     background-color: var(--color-bg);
     color: var(--color-accent);
-    transform: scale(1);
   }
 }
 
+/* The user's pick when it was wrong: monochrome, struck through, no new color. */
 .optionWrong {
   border-color: var(--color-fg);
   background-color: var(--color-surface);
+  color: var(--color-muted);
+  text-decoration: line-through;
   animation: shake 320ms ease;
 }
 
@@ -153,10 +159,10 @@
     transform: translateX(0);
   }
   25% {
-    transform: translateX(-5px);
+    transform: translateX(-4px);
   }
   55% {
-    transform: translateX(4px);
+    transform: translateX(3px);
   }
   80% {
     transform: translateX(-2px);
@@ -177,7 +183,13 @@
 }
 
 .feedbackWrong {
-  color: var(--color-fg);
+  color: var(--color-muted);
+}
+
+/* The correct word inserted into the blank after answering. */
+.filled {
+  color: var(--color-accent);
+  font-weight: var(--weight-bold);
 }
 
 .actions {

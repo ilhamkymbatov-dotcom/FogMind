@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { CircleCheck, CloudFog, Lock, Minus, Plus, Sparkles } from 'lucide-react'
+import { Check, CircleCheck, CloudFog, Lock, Minus, Plus } from 'lucide-react'
 import type { Edge, Node } from '@fogmind/backend'
 import { fitPoints, type NodeStatus, type Point, type Transform } from '../../lib/graphModel'
 import { GraphFog, type FogBranch, type FogNode } from './GraphFog'
@@ -10,7 +10,7 @@ interface KnowledgeGraphProps {
   edges: Edge[]
   positions: Map<string, Point>
   statusOf: (nodeId: string) => NodeStatus
-  hintOf: (nodeId: string) => { correct: number; total: number }
+  hintOf: (nodeId: string) => { answered: number; total: number }
   onOpen: (node: Node) => void
 }
 
@@ -26,7 +26,7 @@ function clampK(k: number): number {
 const STATUS_ICON: Record<NodeStatus, typeof Lock> = {
   locked: Lock,
   available: CloudFog,
-  revealed: Sparkles,
+  completed: Check,
   mastered: CircleCheck,
 }
 
@@ -152,12 +152,13 @@ export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOp
 
   const branches: FogBranch[] = useMemo(() => {
     const out: FogBranch[] = []
+    const clears = (s: NodeStatus) => s === 'completed' || s === 'mastered'
     for (const edge of edges) {
       const sa = statusOf(edge.source_node_id)
       const sb = statusOf(edge.target_node_id)
-      if (sa === 'mastered' && sb === 'available') {
+      if (clears(sa) && sb === 'available') {
         out.push({ key: `${edge.source_node_id}-${edge.target_node_id}`, from: pos(edge.source_node_id), to: pos(edge.target_node_id) })
-      } else if (sb === 'mastered' && sa === 'available') {
+      } else if (clears(sb) && sa === 'available') {
         out.push({ key: `${edge.target_node_id}-${edge.source_node_id}`, from: pos(edge.target_node_id), to: pos(edge.source_node_id) })
       }
     }
@@ -196,7 +197,7 @@ export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOp
       <div className={styles.cardLayer} style={{ transform: layerTransform }}>
         {nodes.map((node) => {
           const status = statusOf(node.id)
-          const clickable = status === 'available' || status === 'revealed'
+          const clickable = status === 'available'
           const hint = hintOf(node.id)
           const Icon = STATUS_ICON[status]
           const p = pos(node.id)
@@ -230,7 +231,7 @@ export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOp
                 <span className={styles.cardTitle}>{node.title}</span>
                 {status !== 'locked' && hint.total > 0 ? (
                   <span className={styles.cardHint}>
-                    {Math.min(hint.correct, hint.total)} of {hint.total} answered
+                    {Math.min(hint.answered, hint.total)} of {hint.total} answered
                   </span>
                 ) : null}
               </div>

@@ -117,25 +117,26 @@
   transform: scale(0.99);
 }
 
-.card_revealed {
-  cursor: pointer;
-  border-color: var(--color-fg);
+/* Completed with mistakes: fog cleared, a quiet muted check, no accent. */
+.card_completed {
+  border-color: var(--color-border);
 }
 
-.card_revealed .cardIcon {
-  color: var(--color-fg);
+.card_completed .cardIcon {
+  color: var(--color-muted);
 }
 
-.card_revealed:hover {
-  transform: translateY(-1px);
-}
-
+/* Mastered: all correct. The accent state, a left accent bar and accent icon. */
 .card_mastered {
   border-color: var(--color-border);
   border-left: 2px solid var(--color-accent);
 }
 
 .card_mastered .cardIcon {
+  color: var(--color-accent);
+}
+
+.card_mastered .cardTitle {
   color: var(--color-accent);
 }
 

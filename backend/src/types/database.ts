@@ -100,6 +100,15 @@ export type Progress = {
   created_at: string
 }
 
+/** One row per user per question, the outcome of answering it. */
+export type QuestionAnswer = {
+  id: string
+  user_id: string
+  question_id: string
+  is_correct: boolean
+  answered_at: string
+}
+
 // ---------------------------------------------------------------------------
 // Insert and update shapes
 // ---------------------------------------------------------------------------
@@ -129,6 +138,9 @@ export type ProgressInsert = Optional<
 >
 export type ProgressUpdate = Partial<Progress>
 
+export type QuestionAnswerInsert = Optional<QuestionAnswer, 'id' | 'answered_at'>
+export type QuestionAnswerUpdate = Partial<QuestionAnswer>
+
 // ---------------------------------------------------------------------------
 // Schema shape consumed by createClient
 // ---------------------------------------------------------------------------
@@ -157,6 +169,12 @@ export type Database = {
       edges: { Row: Edge; Insert: EdgeInsert; Update: EdgeUpdate; Relationships: [] }
       questions: { Row: Question; Insert: QuestionInsert; Update: QuestionUpdate; Relationships: [] }
       progress: { Row: Progress; Insert: ProgressInsert; Update: ProgressUpdate; Relationships: [] }
+      question_answers: {
+        Row: QuestionAnswer
+        Insert: QuestionAnswerInsert
+        Update: QuestionAnswerUpdate
+        Relationships: []
+      }
     }
     // These must be written as `{ [_ in never]: never }` rather than
     // `Record<string, never>`. from() has a view overload keyed on

@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   getDocument,
+  listAnswersForQuestions,
   listEdgesForDocument,
   listNodesForDocument,
   listProgressForNodes,
   listQuestionsForNodes,
   updateProgress,
+  upsertQuestionAnswer,
   type Document,
   type Edge,
   type Node,
   type Progress,
-  type ProgressState,
   type Question,
 } from '@fogmind/backend'
 import { supabase } from './supabase'
@@ -23,6 +24,12 @@ import {
   type ProgressSummary,
 } from './graphModel'
 
+export interface NodeStats {
+  answered: number
+  correct: number
+  total: number
+}
+
 export interface GraphGame {
   loading: boolean
   error: string | null
@@ -31,10 +38,16 @@ export interface GraphGame {
   edges: Edge[]
   questionsByNode: Map<string, Question[]>
   statusOf: (nodeId: string) => NodeStatus
-  progressOf: (nodeId: string) => Progress | undefined
+  statsOf: (nodeId: string) => NodeStats
+  /** Questions of a node not yet answered, in order, for the main pass. */
+  pendingQuestions: (nodeId: string) => Question[]
+  /** Every question answered incorrectly, for the review round. */
+  reviewQuestions: Question[]
+  allCompleted: boolean
   summary: ProgressSummary
-  /** Records one answer, persists counts and any state change, updates live. */
-  recordAnswer: (nodeId: string, correct: boolean, nextState?: ProgressState) => Promise<void>
+  userId: string | null
+  /** Records one answer, upserts it, updates node progress, returns correctness. */
+  recordAnswer: (question: Question, chosenOption: string) => Promise<boolean>
 }
 
 export function useGraphGame(documentId: string | undefined): GraphGame {
@@ -43,6 +56,8 @@ export function useGraphGame(documentId: string | undefined): GraphGame {
   const [edges, setEdges] = useState<Edge[]>([])
   const [questionsByNode, setQuestionsByNode] = useState<Map<string, Question[]>>(new Map())
   const [progressByNode, setProgressByNode] = useState<Map<string, Progress>>(new Map())
+  const [answers, setAnswers] = useState<Map<string, boolean>>(new Map())
+  const [userId, setUserId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -53,6 +68,7 @@ export function useGraphGame(documentId: string | undefined): GraphGame {
       setLoading(true)
       setError(null)
       try {
+        const { data: sessionData } = await supabase.auth.getSession()
         const doc = await getDocument(supabase, documentId)
         if (!doc) throw new Error('That document was not found.')
         const [nodeRows, edgeRows] = await Promise.all([
@@ -64,6 +80,17 @@ export function useGraphGame(documentId: string | undefined): GraphGame {
           listQuestionsForNodes(supabase, nodeIds),
           listProgressForNodes(supabase, nodeIds),
         ])
+        // Tolerate the answers table not existing yet (before migration 002 is
+        // applied): treat as a fresh start rather than breaking the whole map.
+        let answerRows: Awaited<ReturnType<typeof listAnswersForQuestions>> = []
+        try {
+          answerRows = await listAnswersForQuestions(
+            supabase,
+            questionRows.map((q) => q.id),
+          )
+        } catch {
+          answerRows = []
+        }
         if (!active) return
         const qMap = new Map<string, Question[]>()
         for (const q of questionRows) {
@@ -71,11 +98,13 @@ export function useGraphGame(documentId: string | undefined): GraphGame {
           list.push(q)
           qMap.set(q.node_id, list)
         }
+        setUserId(sessionData.session?.user.id ?? null)
         setDocument(doc)
         setNodes(nodeRows)
         setEdges(edgeRows)
         setQuestionsByNode(qMap)
         setProgressByNode(new Map(progressRows.map((p) => [p.node_id, p])))
+        setAnswers(new Map(answerRows.map((a) => [a.question_id, a.is_correct])))
       } catch (err) {
         if (active) setError(err instanceof Error ? err.message : 'Could not load this map.')
       } finally {
@@ -90,51 +119,136 @@ export function useGraphGame(documentId: string | undefined): GraphGame {
 
   const starting = useMemo(() => startingNodeIds(nodes, edges), [nodes, edges])
   const adjacency = useMemo(() => buildAdjacency(edges), [edges])
-  const masteredSet = useMemo(() => {
-    const set = new Set<string>()
-    for (const p of progressByNode.values()) if (p.state === 'mastered') set.add(p.node_id)
-    return set
-  }, [progressByNode])
 
-  const statusOf = useCallback(
-    (nodeId: string): NodeStatus => {
-      const state = progressByNode.get(nodeId)?.state ?? 'fogged'
-      return deriveStatus(nodeId, state, starting, masteredSet, adjacency)
+  const statsOf = useCallback(
+    (nodeId: string): NodeStats => {
+      const qs = questionsByNode.get(nodeId) ?? []
+      let answered = 0
+      let correct = 0
+      for (const q of qs) {
+        if (answers.has(q.id)) {
+          answered += 1
+          if (answers.get(q.id)) correct += 1
+        }
+      }
+      return { answered, correct, total: qs.length }
     },
-    [progressByNode, starting, masteredSet, adjacency],
+    [questionsByNode, answers],
   )
 
-  const progressOf = useCallback((nodeId: string) => progressByNode.get(nodeId), [progressByNode])
+  const { completedSet, masteredSet } = useMemo(() => {
+    const completed = new Set<string>()
+    const mastered = new Set<string>()
+    for (const node of nodes) {
+      const qs = questionsByNode.get(node.id) ?? []
+      if (qs.length === 0) continue
+      let answered = 0
+      let correct = 0
+      for (const q of qs) {
+        if (answers.has(q.id)) {
+          answered += 1
+          if (answers.get(q.id)) correct += 1
+        }
+      }
+      if (answered === qs.length) {
+        completed.add(node.id)
+        if (correct === qs.length) mastered.add(node.id)
+      }
+    }
+    return { completedSet: completed, masteredSet: mastered }
+  }, [nodes, questionsByNode, answers])
 
-  const summary = useMemo(() => summarize(progressByNode, nodes.length), [progressByNode, nodes])
+  const statusOf = useCallback(
+    (nodeId: string): NodeStatus => deriveStatus(nodeId, completedSet, masteredSet, starting, adjacency),
+    [completedSet, masteredSet, starting, adjacency],
+  )
+
+  const pendingQuestions = useCallback(
+    (nodeId: string): Question[] => (questionsByNode.get(nodeId) ?? []).filter((q) => !answers.has(q.id)),
+    [questionsByNode, answers],
+  )
+
+  const reviewQuestions = useMemo(() => {
+    const out: Question[] = []
+    for (const node of nodes) {
+      for (const q of questionsByNode.get(node.id) ?? []) {
+        if (answers.get(q.id) === false) out.push(q)
+      }
+    }
+    return out
+  }, [nodes, questionsByNode, answers])
+
+  const allCompleted = useMemo(
+    () => nodes.length > 0 && nodes.every((n) => completedSet.has(n.id)),
+    [nodes, completedSet],
+  )
+
+  const summary = useMemo(
+    () => summarize(masteredSet.size, completedSet.size, nodes.length),
+    [masteredSet, completedSet, nodes],
+  )
 
   const recordAnswer = useCallback(
-    async (nodeId: string, correct: boolean, nextState?: ProgressState) => {
-      const current = progressByNode.get(nodeId)
-      if (!current) return
-      const updated: Progress = {
-        ...current,
-        attempt_count: current.attempt_count + 1,
-        correct_count: current.correct_count + (correct ? 1 : 0),
-        state: nextState ?? current.state,
-        last_reviewed_at: new Date().toISOString(),
-      }
-      // Optimistic: update the graph and fog immediately.
-      setProgressByNode((prev) => new Map(prev).set(nodeId, updated))
+    async (question: Question, chosenOption: string): Promise<boolean> => {
+      const isCorrect = chosenOption === question.correct_answer
+      if (!userId) throw new Error('Your session expired. Please sign in again.')
+
+      // Optimistic: update the answer map so the graph reacts immediately.
+      const prevValue = answers.get(question.id)
+      setAnswers((prev) => new Map(prev).set(question.id, isCorrect))
+
       try {
-        await updateProgress(supabase, current.id, {
-          attempt_count: updated.attempt_count,
-          correct_count: updated.correct_count,
-          state: updated.state,
-          last_reviewed_at: updated.last_reviewed_at,
+        await upsertQuestionAnswer(supabase, {
+          user_id: userId,
+          question_id: question.id,
+          is_correct: isCorrect,
         })
+
+        // Mirror the node level outcome onto its progress row so it persists in
+        // the shape the rest of the app expects.
+        const nodeId = question.node_id
+        const qs = questionsByNode.get(nodeId) ?? []
+        const nextAnswers = new Map(answers).set(question.id, isCorrect)
+        let answered = 0
+        let correct = 0
+        for (const q of qs) {
+          if (nextAnswers.has(q.id)) {
+            answered += 1
+            if (nextAnswers.get(q.id)) correct += 1
+          }
+        }
+        const progress = progressByNode.get(nodeId)
+        if (progress) {
+          const nextState =
+            answered === qs.length ? (correct === qs.length ? 'mastered' : 'revealed') : 'fogged'
+          const updated: Progress = {
+            ...progress,
+            state: nextState,
+            correct_count: correct,
+            attempt_count: progress.attempt_count + 1,
+            last_reviewed_at: new Date().toISOString(),
+          }
+          setProgressByNode((prev) => new Map(prev).set(nodeId, updated))
+          await updateProgress(supabase, progress.id, {
+            state: updated.state,
+            correct_count: updated.correct_count,
+            attempt_count: updated.attempt_count,
+            last_reviewed_at: updated.last_reviewed_at,
+          })
+        }
+        return isCorrect
       } catch (err) {
-        // Roll back the optimistic change so the UI matches the database.
-        setProgressByNode((prev) => new Map(prev).set(nodeId, current))
-        throw err instanceof Error ? err : new Error('Could not save your progress.')
+        // Roll back the optimistic answer so the UI matches the database.
+        setAnswers((prev) => {
+          const next = new Map(prev)
+          if (prevValue === undefined) next.delete(question.id)
+          else next.set(question.id, prevValue)
+          return next
+        })
+        throw err instanceof Error ? err : new Error('Could not save your answer.')
       }
     },
-    [progressByNode],
+    [answers, progressByNode, questionsByNode, userId],
   )
 
   return {
@@ -145,8 +259,12 @@ export function useGraphGame(documentId: string | undefined): GraphGame {
     edges,
     questionsByNode,
     statusOf,
-    progressOf,
+    statsOf,
+    pendingQuestions,
+    reviewQuestions,
+    allCompleted,
     summary,
+    userId,
     recordAnswer,
   }
 }

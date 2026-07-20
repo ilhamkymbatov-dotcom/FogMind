@@ -27,7 +27,7 @@ interface GraphFogProps {
 const CLEAR_RADIUS: Record<NodeStatus, number> = {
   locked: 0,
   available: 104,
-  revealed: 144,
+  completed: 148,
   mastered: 182,
 }
 const BRANCH_WIDTH = 86

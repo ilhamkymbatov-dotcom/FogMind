@@ -1,11 +1,13 @@
-import type { Edge, Node, Progress, ProgressState } from '@fogmind/backend'
+import type { Edge, Node } from '@fogmind/backend'
 
 /**
- * The visual and interactive state of a node, derived from its persisted
- * progress state plus the chain unlock rule. Only the four persisted states
- * live in the database; `locked` and `available` are computed client side.
+ * The visual and interactive state of a node, derived from its answered
+ * questions. A node is `completed` once every question has been answered at
+ * least once (right or wrong), which clears its fog and unlocks neighbors, and
+ * `mastered` only when every answer is correct. `locked` and `available` are
+ * the not yet reachable and reachable but unfinished states.
  */
-export type NodeStatus = 'locked' | 'available' | 'revealed' | 'mastered'
+export type NodeStatus = 'locked' | 'available' | 'completed' | 'mastered'
 
 /** Node ids with no incoming edge, or the first node if every node has one. */
 export function startingNodeIds(nodes: Node[], edges: Edge[]): Set<string> {
@@ -32,31 +34,30 @@ export function buildAdjacency(edges: Edge[]): Map<string, Set<string>> {
 
 export function deriveStatus(
   nodeId: string,
-  state: ProgressState,
-  starting: Set<string>,
+  completed: Set<string>,
   mastered: Set<string>,
+  starting: Set<string>,
   adjacency: Map<string, Set<string>>,
 ): NodeStatus {
-  if (state === 'mastered') return 'mastered'
-  if (state === 'revealed') return 'revealed'
-  // state is fogged: available if it is a start or borders a mastered node.
+  if (mastered.has(nodeId)) return 'mastered'
+  if (completed.has(nodeId)) return 'completed'
+  // Reachable if it is a start or borders a completed node.
   if (starting.has(nodeId)) return 'available'
   for (const neighbor of adjacency.get(nodeId) ?? []) {
-    if (mastered.has(neighbor)) return 'available'
+    if (completed.has(neighbor)) return 'available'
   }
   return 'locked'
 }
 
 export interface ProgressSummary {
   mastered: number
+  completed: number
   total: number
   percent: number
 }
 
-export function summarize(progress: Map<string, Progress>, total: number): ProgressSummary {
-  let mastered = 0
-  for (const p of progress.values()) if (p.state === 'mastered') mastered += 1
-  return { mastered, total, percent: total === 0 ? 0 : Math.round((mastered / total) * 100) }
+export function summarize(mastered: number, completed: number, total: number): ProgressSummary {
+  return { mastered, completed, total, percent: total === 0 ? 0 : Math.round((mastered / total) * 100) }
 }
 
 export interface Point {

@@ -1,20 +1,36 @@
 import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ChevronLeft } from 'lucide-react'
-import type { Node } from '@fogmind/backend'
+import { ChevronLeft, Sparkles } from 'lucide-react'
+import type { Node, Question } from '@fogmind/backend'
 import { KnowledgeGraph } from '../components/graph/KnowledgeGraph'
 import { QuestionPanel } from '../components/graph/QuestionPanel'
 import { treeLayout } from '../lib/graphModel'
 import { useGraphGame } from '../lib/useGraphGame'
 import styles from './DocumentDetailPage.module.css'
 
+type PanelState =
+  | { kind: 'node'; node: Node; questions: Question[] }
+  | { kind: 'review'; questions: Question[] }
+  | null
+
 function DocumentDetailPage() {
   const { id } = useParams<{ id: string }>()
   const game = useGraphGame(id)
-  const [openNode, setOpenNode] = useState<Node | null>(null)
+  const [panel, setPanel] = useState<PanelState>(null)
 
-  const { loading, error, document, nodes, edges, statusOf, summary } = game
+  const { loading, error, document, nodes, edges, statusOf, statsOf, summary } = game
   const positions = useMemo(() => treeLayout(nodes, edges), [nodes, edges])
+
+  const reviewAvailable = game.allCompleted && game.reviewQuestions.length > 0
+
+  function openNode(node: Node) {
+    const questions = game.pendingQuestions(node.id)
+    if (questions.length > 0) setPanel({ kind: 'node', node, questions })
+  }
+
+  function openReview() {
+    if (game.reviewQuestions.length > 0) setPanel({ kind: 'review', questions: game.reviewQuestions })
+  }
 
   return (
     <div className={styles.page}>
@@ -27,12 +43,21 @@ function DocumentDetailPage() {
           <h1 className={styles.title}>{document?.title ?? 'Map'}</h1>
         </div>
         {!loading && !error ? (
-          <div className={styles.progress}>
-            <span className={styles.progressText}>
-              {summary.mastered} of {summary.total} mastered · {summary.percent}%
-            </span>
-            <div className={styles.bar} aria-hidden="true">
-              <div className={styles.barFill} style={{ width: `${summary.percent}%` }} />
+          <div className={styles.headRight}>
+            {reviewAvailable ? (
+              <button type="button" className={styles.reviewButton} onClick={openReview}>
+                <Sparkles size={16} aria-hidden="true" />
+                Review {game.reviewQuestions.length}{' '}
+                {game.reviewQuestions.length === 1 ? 'question' : 'questions'}
+              </button>
+            ) : null}
+            <div className={styles.progress}>
+              <span className={styles.progressText}>
+                {summary.mastered} of {summary.total} mastered · {summary.percent}%
+              </span>
+              <div className={styles.bar} aria-hidden="true">
+                <div className={styles.barFill} style={{ width: `${summary.percent}%` }} />
+              </div>
             </div>
           </div>
         ) : null}
@@ -53,21 +78,32 @@ function DocumentDetailPage() {
             edges={edges}
             positions={positions}
             statusOf={statusOf}
-            hintOf={(nodeId) => ({
-              correct: game.progressOf(nodeId)?.correct_count ?? 0,
-              total: game.questionsByNode.get(nodeId)?.length ?? 0,
-            })}
-            onOpen={setOpenNode}
+            hintOf={(nodeId) => {
+              const s = statsOf(nodeId)
+              return { answered: s.answered, total: s.total }
+            }}
+            onOpen={openNode}
           />
         </div>
       )}
 
-      {openNode ? (
+      {panel?.kind === 'node' ? (
         <QuestionPanel
-          node={openNode}
-          questions={game.questionsByNode.get(openNode.id) ?? []}
-          onAnswer={(correct, nextState) => game.recordAnswer(openNode.id, correct, nextState)}
-          onClose={() => setOpenNode(null)}
+          title={panel.node.title}
+          questions={panel.questions}
+          onAnswer={game.recordAnswer}
+          onClose={() => setPanel(null)}
+          doneTitle="Section complete"
+          doneBody="The fog has cleared here and connected nodes are ready. Answer every question correctly to master it."
+        />
+      ) : panel?.kind === 'review' ? (
+        <QuestionPanel
+          title="Review round"
+          questions={panel.questions}
+          onAnswer={game.recordAnswer}
+          onClose={() => setPanel(null)}
+          doneTitle="Review complete"
+          doneBody="Every question you get right here masters its node and clears more fog."
         />
       ) : null}
     </div>
