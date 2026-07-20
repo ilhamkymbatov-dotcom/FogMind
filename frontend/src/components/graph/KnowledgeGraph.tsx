@@ -102,7 +102,11 @@ export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOp
   )
 
   const onPointerDown = useCallback((e: React.PointerEvent) => {
-    ;(e.target as Element).setPointerCapture?.(e.pointerId)
+    // A press on a node card must reach its click handler. Capturing the
+    // pointer here (especially on the card element) suppresses the click, so
+    // pan only starts from the background, and capture goes to the svg.
+    if ((e.target as Element).closest('[data-fog-card]')) return
+    ;(e.currentTarget as Element).setPointerCapture?.(e.pointerId)
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
     if (pointers.current.size === 2) {
       const [a, b] = [...pointers.current.values()]
@@ -210,6 +214,7 @@ export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOp
               >
                 <div
                   className={cardCls}
+                  data-fog-card=""
                   role={clickable ? 'button' : undefined}
                   tabIndex={clickable ? 0 : undefined}
                   aria-label={clickable ? `Open ${node.title}` : undefined}
