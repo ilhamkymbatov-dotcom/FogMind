@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ChevronLeft } from 'lucide-react'
 import type { Node } from '@fogmind/backend'
 import { KnowledgeGraph } from '../components/graph/KnowledgeGraph'
 import { QuestionPanel } from '../components/graph/QuestionPanel'
+import { treeLayout } from '../lib/graphModel'
 import { useGraphGame } from '../lib/useGraphGame'
 import styles from './DocumentDetailPage.module.css'
 
@@ -13,6 +14,7 @@ function DocumentDetailPage() {
   const [openNode, setOpenNode] = useState<Node | null>(null)
 
   const { loading, error, document, nodes, edges, statusOf, summary } = game
+  const positions = useMemo(() => treeLayout(nodes, edges), [nodes, edges])
 
   return (
     <div className={styles.page}>
@@ -46,7 +48,17 @@ function DocumentDetailPage() {
         <p className={styles.state}>This document has no map yet.</p>
       ) : (
         <div className={styles.canvas}>
-          <KnowledgeGraph nodes={nodes} edges={edges} statusOf={statusOf} onOpen={setOpenNode} />
+          <KnowledgeGraph
+            nodes={nodes}
+            edges={edges}
+            positions={positions}
+            statusOf={statusOf}
+            hintOf={(nodeId) => ({
+              correct: game.progressOf(nodeId)?.correct_count ?? 0,
+              total: game.questionsByNode.get(nodeId)?.length ?? 0,
+            })}
+            onOpen={setOpenNode}
+          />
         </div>
       )}
 

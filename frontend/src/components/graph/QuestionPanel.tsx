@@ -17,6 +17,20 @@ function optionsOf(question: Question): string[] {
   return Array.isArray(question.options) ? question.options.map((o) => String(o)) : []
 }
 
+/**
+ * Fisher-Yates. The stored options are alphabetized, which parked the correct
+ * answer in the same slot across questions; shuffling on display fixes that.
+ * Memoized per question id, so the order is stable while a question is open.
+ */
+function shuffled(values: string[]): string[] {
+  const out = [...values]
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[out[i], out[j]] = [out[j], out[i]]
+  }
+  return out
+}
+
 export function QuestionPanel({ node, questions, onAnswer, onClose }: QuestionPanelProps) {
   const [correctIds, setCorrectIds] = useState<Set<string>>(new Set())
   const [picked, setPicked] = useState<string | null>(null)
@@ -39,6 +53,14 @@ export function QuestionPanel({ node, questions, onAnswer, onClose }: QuestionPa
   )
   const done = questions.length > 0 && !current
   const isLast = current ? correctIds.size === questions.length - 1 : false
+
+  // Shuffled once per question view; keyed by id so it never reshuffles while
+  // the question is on screen.
+  const displayOptions = useMemo(
+    () => (current ? shuffled(optionsOf(current)) : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [current?.id],
+  )
 
   async function choose(option: string) {
     if (!current || result === 'right') return
@@ -104,29 +126,32 @@ export function QuestionPanel({ node, questions, onAnswer, onClose }: QuestionPa
               </span>
               <span>{DIFFICULTY_LABEL[current.difficulty]}</span>
             </div>
-            <p className={styles.prompt}>{current.prompt}</p>
-            <div className={styles.options}>
-              {optionsOf(current).map((option) => {
-                const isPicked = picked === option
-                const cls = [
-                  styles.option,
-                  isPicked && result === 'right' ? styles.optionRight : '',
-                  isPicked && result === 'wrong' ? styles.optionWrong : '',
-                ]
-                  .filter(Boolean)
-                  .join(' ')
-                return (
-                  <button
-                    key={option}
-                    type="button"
-                    className={cls}
-                    onClick={() => choose(option)}
-                    disabled={result === 'right'}
-                  >
-                    {option}
-                  </button>
-                )
-              })}
+            {/* Keyed by question id so each question slides in fresh. */}
+            <div key={current.id} className={styles.questionBlock}>
+              <p className={styles.prompt}>{current.prompt}</p>
+              <div className={styles.options}>
+                {displayOptions.map((option) => {
+                  const isPicked = picked === option
+                  const cls = [
+                    styles.option,
+                    isPicked && result === 'right' ? styles.optionRight : '',
+                    isPicked && result === 'wrong' ? styles.optionWrong : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')
+                  return (
+                    <button
+                      key={option}
+                      type="button"
+                      className={cls}
+                      onClick={() => choose(option)}
+                      disabled={result === 'right'}
+                    >
+                      {option}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
 
             {result === 'right' ? (
