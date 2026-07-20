@@ -16,8 +16,8 @@ interface KnowledgeGraphProps {
 
 const MIN_K = 0.2
 const MAX_K = 4
-export const CARD_W = 150
-export const CARD_H = 54
+export const CARD_W = 160
+export const CARD_H = 60
 
 function clampK(k: number): number {
   return Math.min(MAX_K, Math.max(MIN_K, k))
@@ -43,6 +43,7 @@ export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOp
   const [settling, setSettling] = useState<Set<string>>(new Set())
   const pointers = useRef(new Map<number, { x: number; y: number }>())
   const pinchDist = useRef(0)
+  const panning = useRef(false)
   const prevStatuses = useRef(new Map<string, NodeStatus>())
 
   const pos = useCallback((id: string): Point => positions.get(id) ?? { x: 0, y: 0 }, [positions])
@@ -58,7 +59,7 @@ export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOp
 
   useEffect(() => {
     if (transform || size.w === 0 || positions.size === 0) return
-    setTransform(fitPoints([...positions.values()], size.w, size.h, 56, CARD_W, CARD_H))
+    setTransform(fitPoints([...positions.values()], size.w, size.h))
   }, [transform, size, positions])
 
   useEffect(() => {
@@ -101,11 +102,11 @@ export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOp
     [zoomAround],
   )
 
+  // Pan is handled on the wrap. A press that lands on a card is left alone so
+  // the card receives its click; no pointer capture is ever put on a card.
   const onPointerDown = useCallback((e: React.PointerEvent) => {
-    // A press on a node card must reach its click handler. Capturing the
-    // pointer here (especially on the card element) suppresses the click, so
-    // pan only starts from the background, and capture goes to the svg.
     if ((e.target as Element).closest('[data-fog-card]')) return
+    panning.current = true
     ;(e.currentTarget as Element).setPointerCapture?.(e.pointerId)
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
     if (pointers.current.size === 2) {
@@ -138,16 +139,17 @@ export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOp
   const onPointerUp = useCallback((e: React.PointerEvent) => {
     pointers.current.delete(e.pointerId)
     if (pointers.current.size < 2) pinchDist.current = 0
+    if (pointers.current.size === 0) panning.current = false
   }, [])
 
   const t = transform ?? { x: 0, y: 0, k: 1 }
+  const layerTransform = `translate3d(${t.x}px, ${t.y}px, 0) scale(${t.k})`
 
   const fogNodes: FogNode[] = useMemo(
     () => nodes.map((n) => ({ id: n.id, point: pos(n.id), status: statusOf(n.id) })),
     [nodes, pos, statusOf],
   )
 
-  // A cleared branch for every mastered node bordering an available neighbor.
   const branches: FogBranch[] = useMemo(() => {
     const out: FogBranch[] = []
     for (const edge of edges) {
@@ -163,85 +165,82 @@ export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOp
   }, [edges, statusOf, pos])
 
   return (
-    <div className={styles.wrap} ref={wrapRef}>
-      <svg
-        className={styles.svg}
-        onWheel={onWheel}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
-        role="application"
-        aria-label="Knowledge map"
-      >
-        <rect className={styles.background} x={0} y={0} width="100%" height="100%" fill="transparent" />
+    <div
+      className={styles.wrap}
+      ref={wrapRef}
+      onWheel={onWheel}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
+    >
+      {/* Layer 1: branches only, pure SVG. Decorative, no input. */}
+      <svg className={styles.edges} aria-hidden="true">
         <g transform={`translate(${t.x} ${t.y}) scale(${t.k})`}>
           {edges.map((edge) => {
             const a = pos(edge.source_node_id)
             const b = pos(edge.target_node_id)
             const sa = statusOf(edge.source_node_id)
             const sb = statusOf(edge.target_node_id)
-            const cls = [
-              styles.edge,
-              sa === 'mastered' && sb === 'mastered' ? styles.edgeMastered : '',
-            ]
+            const cls = [styles.edge, sa === 'mastered' && sb === 'mastered' ? styles.edgeMastered : '']
               .filter(Boolean)
               .join(' ')
             return <path key={edge.id} className={cls} d={branchPath(a, b)} fill="none" />
           })}
-
-          {nodes.map((node) => {
-            const status = statusOf(node.id)
-            const clickable = status === 'available' || status === 'revealed'
-            const hint = hintOf(node.id)
-            const Icon = STATUS_ICON[status]
-            const p = pos(node.id)
-            const cardCls = [
-              styles.card,
-              styles[`card_${status}`],
-              settling.has(node.id) ? styles.cardSettle : '',
-            ]
-              .filter(Boolean)
-              .join(' ')
-            return (
-              <foreignObject
-                key={node.id}
-                x={p.x - CARD_W / 2}
-                y={p.y - CARD_H / 2}
-                width={CARD_W}
-                height={CARD_H}
-                className={styles.cardWrap}
-              >
-                <div
-                  className={cardCls}
-                  data-fog-card=""
-                  role={clickable ? 'button' : undefined}
-                  tabIndex={clickable ? 0 : undefined}
-                  aria-label={clickable ? `Open ${node.title}` : undefined}
-                  onClick={() => clickable && onOpen(node)}
-                  onKeyDown={(e) => {
-                    if (clickable && (e.key === 'Enter' || e.key === ' ')) {
-                      e.preventDefault()
-                      onOpen(node)
-                    }
-                  }}
-                >
-                  <Icon className={styles.cardIcon} size={14} aria-hidden="true" />
-                  <div className={styles.cardBody}>
-                    <span className={styles.cardTitle}>{node.title}</span>
-                    {status !== 'locked' && hint.total > 0 ? (
-                      <span className={styles.cardHint}>
-                        {Math.min(hint.correct, hint.total)} of {hint.total} answered
-                      </span>
-                    ) : null}
-                  </div>
-                </div>
-              </foreignObject>
-            )
-          })}
         </g>
       </svg>
 
+      {/* Layer 2: node cards as plain HTML, positioned in the same transformed
+          space. This avoids SVG foreignObject entirely, which Safari mishandles
+          (flicker and unreliable hit testing). */}
+      <div className={styles.cardLayer} style={{ transform: layerTransform }}>
+        {nodes.map((node) => {
+          const status = statusOf(node.id)
+          const clickable = status === 'available' || status === 'revealed'
+          const hint = hintOf(node.id)
+          const Icon = STATUS_ICON[status]
+          const p = pos(node.id)
+          const cardCls = [
+            styles.card,
+            styles[`card_${status}`],
+            settling.has(node.id) ? styles.cardSettle : '',
+          ]
+            .filter(Boolean)
+            .join(' ')
+          return (
+            <div
+              key={node.id}
+              className={cardCls}
+              data-fog-card=""
+              style={{ left: p.x, top: p.y, width: CARD_W, height: CARD_H, marginLeft: -CARD_W / 2, marginTop: -CARD_H / 2 }}
+              role={clickable ? 'button' : undefined}
+              tabIndex={clickable ? 0 : undefined}
+              aria-label={clickable ? `Open ${node.title}` : undefined}
+              aria-hidden={clickable ? undefined : true}
+              onClick={() => clickable && onOpen(node)}
+              onKeyDown={(e) => {
+                if (clickable && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault()
+                  onOpen(node)
+                }
+              }}
+            >
+              <Icon className={styles.cardIcon} size={14} aria-hidden="true" />
+              <div className={styles.cardBody}>
+                <span className={styles.cardTitle}>{node.title}</span>
+                {status !== 'locked' && hint.total > 0 ? (
+                  <span className={styles.cardHint}>
+                    {Math.min(hint.correct, hint.total)} of {hint.total} answered
+                  </span>
+                ) : null}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Layer 3: fog, decorative and click through, painted above the cards so
+          it visibly shrouds them while local pockets clear. */}
       <GraphFog width={size.w} height={size.h} transform={t} nodes={fogNodes} branches={branches} />
 
       <div className={styles.controls}>

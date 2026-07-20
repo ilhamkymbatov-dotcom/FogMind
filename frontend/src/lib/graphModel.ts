@@ -155,14 +155,16 @@ export interface Transform {
   k: number
 }
 
-/** Fits an arbitrary set of points (the tree layout) into the viewport. */
+/** Fits an arbitrary set of points (the tree layout) into the viewport, leaving
+ *  room for the card footprint and generous padding so the root at the bottom
+ *  is never pressed against the edge. */
 export function fitPoints(
   points: Point[],
   width: number,
   height: number,
-  padding = 56,
-  cardW = 150,
-  cardH = 56,
+  padding = 96,
+  cardW = 160,
+  cardH = 80,
 ): Transform {
   if (points.length === 0 || width === 0 || height === 0) return { x: 0, y: 0, k: 1 }
   const xs = points.map((p) => p.x)
@@ -171,9 +173,11 @@ export function fitPoints(
   const maxX = Math.max(...xs)
   const minY = Math.min(...ys)
   const maxY = Math.max(...ys)
+  // The card is centred on its point, so half a card sticks out past the
+  // extreme points on every side; count a whole card in the span for margin.
   const spanX = Math.max(maxX - minX, 1) + cardW
   const spanY = Math.max(maxY - minY, 1) + cardH
-  const k = Math.min((width - padding * 2) / spanX, (height - padding * 2) / spanY, 1.4)
+  const k = Math.min((width - padding * 2) / spanX, (height - padding * 2) / spanY, 1.3)
   const cx = (minX + maxX) / 2
   const cy = (minY + maxY) / 2
   return { x: width / 2 - cx * k, y: height / 2 - cy * k, k }
