@@ -15,7 +15,7 @@
   height: 64px;
   padding-inline: var(--space-5);
   border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-bg);
+  background-color: var(--color-surface);
 }
 
 .wordmark {

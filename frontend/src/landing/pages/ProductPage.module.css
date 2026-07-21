@@ -1,0 +1,212 @@
+/* Shared type -------------------------------------------------------------- */
+
+.title {
+  max-width: 20ch;
+  font-size: clamp(26px, 3.2vw, var(--text-2xl));
+  line-height: 1.14;
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.022em;
+  text-wrap: balance;
+}
+
+.prose {
+  max-width: var(--measure-tight);
+  font-size: var(--text-base);
+  line-height: 1.68;
+  color: var(--color-muted);
+}
+
+.sectionHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+/* Features ----------------------------------------------------------------- */
+
+.feature {
+  padding-block: var(--space-8);
+}
+
+/* Deliberately uneven columns, and the mirrored variant swaps sides only on
+   wide screens so the copy always leads when stacked. */
+.featureGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.mirrored .featureCopy {
+  order: 2;
+}
+
+.featureCopy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.featureVisual {
+  max-width: 460px;
+  width: 100%;
+  margin-inline: auto;
+}
+
+/* A raised white card for the map demo, so it reads as the top surface. */
+.raised {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-3);
+}
+
+/* Band --------------------------------------------------------------------- */
+
+.band {
+  margin-block: var(--space-6);
+  padding-block: var(--space-8);
+  background-color: var(--color-warm-tint);
+  border-block: 1px solid var(--color-border);
+}
+
+.bandGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.bandVisual {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-4);
+}
+
+/* Three card row ------------------------------------------------------------ */
+
+.more {
+  padding-block: var(--space-8);
+}
+
+.moreGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  height: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-5);
+  transition: box-shadow 240ms ease, transform 240ms ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.cardIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-warm-tint);
+  color: var(--color-warm);
+}
+
+.cardTitle {
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.012em;
+}
+
+.cardBody {
+  font-size: var(--text-base);
+  line-height: 1.62;
+  color: var(--color-muted);
+}
+
+/* Format chips -------------------------------------------------------------- */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: auto;
+  padding-top: var(--space-2);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  background-color: var(--color-sunken);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-fg);
+}
+
+.chip svg {
+  color: var(--color-warm);
+}
+
+/* Responsive ---------------------------------------------------------------- */
+
+@media (max-width: 980px) {
+  .featureGrid,
+  .bandGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-6);
+  }
+
+  /* Stacked, the copy always leads. */
+  .mirrored .featureCopy {
+    order: 0;
+  }
+
+  .moreGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .moreGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .feature,
+  .band,
+  .more {
+    padding-block: var(--space-7);
+  }
+}
+
+@media (max-width: 420px) {
+  .card {
+    padding: var(--space-4);
+  }
+
+  .raised {
+    padding: var(--space-2);
+  }
+}

@@ -63,18 +63,39 @@ select {
 :root {
   color-scheme: light;
 
-  /* Color. Monochrome base plus exactly one accent. Never add a second accent
-     and never introduce a gradient. */
-  --color-bg: #ffffff;
-  --color-fg: #000000;
-  --color-muted: #6b6b6b;
-  --color-border: #e5e5e5;
-  --color-surface: #fafafa;
+  /* Color.
+     The page is warm off white paper; cards and panels are true white laid on
+     top, so surfaces read as stacked sheets rather than one flat field.
+     #0055FF stays the one action color. A single warm accent (terracotta)
+     carries highlights and small details only, never a large fill. Soft tints
+     of either are allowed as quiet section washes. No rainbow gradients. */
+  --color-bg: #faf9f7;
+  --color-fg: #16130f;
+  --color-muted: #6b6560;
+  --color-border: #e8e4de;
+  --color-border-strong: #d8d2ca;
+  --color-surface: #ffffff;
+  --color-sunken: #f4f1ec;
   --color-accent: #0055ff;
   --color-accent-hover: #0044cc;
+  --color-accent-tint: #eef2ff;
+  /* The warm supporting accent. Small details and highlights only. */
+  --color-warm: #c0663a;
+  --color-warm-tint: #fbf1ea;
 
-  /* Corners stay sharp. This is the maximum, never raise it. */
-  --radius: 2px;
+  /* Corners. Comfortable rounding on cards and panels, tighter on controls.
+     Nothing pill shaped. */
+  --radius: 12px;
+  --radius-lg: 16px;
+  --radius-sm: 8px;
+  --radius-xs: 6px;
+  /* The knowledge graph map keeps its original sharp corners. */
+  --radius-graph: 2px;
+
+  /* Depth. Restrained, warm tinted shadows so surfaces feel tactile. */
+  --shadow-sm: 0 1px 2px rgba(28, 22, 16, 0.04), 0 1px 3px rgba(28, 22, 16, 0.03);
+  --shadow-md: 0 2px 4px rgba(28, 22, 16, 0.04), 0 8px 20px rgba(28, 22, 16, 0.06);
+  --shadow-lg: 0 4px 10px rgba(28, 22, 16, 0.05), 0 18px 40px rgba(28, 22, 16, 0.08);
 
   /* Two families, one chain, because Space Grotesk ships no Cyrillic glyphs.
      The browser falls back per glyph, so Latin renders in Space Grotesk and
@@ -105,10 +126,20 @@ select {
   --leading-xl: 36px;
   --text-2xl: 40px;
   --leading-2xl: 48px;
-  /* Display size. Tight leading, since a heading this large reads as a shape
+  /* Display sizes. Tight leading, since a heading this large reads as a shape
      before it reads as text. */
   --text-3xl: 56px;
   --leading-3xl: 62px;
+  --text-4xl: 68px;
+  --leading-4xl: 72px;
+
+  /* Eyebrow: the small label that sits above a heading. */
+  --text-eyebrow: 12px;
+  --tracking-eyebrow: 0.09em;
+
+  /* Comfortable measures, so copy never runs to an unreadable line length. */
+  --measure: 62ch;
+  --measure-tight: 46ch;
 
   /* Weights. Headings and emphasis take bold, body text takes regular. */
   --weight-regular: 400;

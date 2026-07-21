@@ -4,7 +4,10 @@ import { CircleCheck, CloudFog, MessageCircleQuestion } from 'lucide-react'
 import { useTranslation, type TranslationKey } from '../../i18n'
 import { Container } from '../components/Container'
 import { CtaBand } from '../components/CtaBand'
+import { Eyebrow } from '../components/Eyebrow'
 import { PageHero } from '../components/PageHero'
+import { MiniProgressDemo } from '../components/demos/MiniProgressDemo'
+import { MiniUploadDemo } from '../components/demos/MiniUploadDemo'
 import { ScrollReveal } from '../components/motion/ScrollReveal'
 import { useMediaQuery, usePrefersReducedMotion } from '../components/motion/useMediaQuery'
 import styles from './HowItWorksPage.module.css'
@@ -14,12 +17,16 @@ interface StepSpec {
   bodyKey: TranslationKey
 }
 
+/*
+ * The four steps that the scrubbed graph illustrates. Saving progress is not
+ * one of them: it gets its own closing section with a live progress demo, so
+ * the page ends on the payoff rather than on another step row.
+ */
 const STEPS: readonly StepSpec[] = [
   { titleKey: 'hiw.upload.title', bodyKey: 'hiw.upload.body' },
   { titleKey: 'hiw.reads.title', bodyKey: 'hiw.reads.body' },
   { titleKey: 'hiw.map.title', bodyKey: 'hiw.map.body' },
   { titleKey: 'hiw.fog.title', bodyKey: 'hiw.fog.body' },
-  { titleKey: 'hiw.adaptive.title', bodyKey: 'hiw.adaptive.body' },
 ]
 
 /*
@@ -56,12 +63,12 @@ const EDGES: readonly [number, number][] = [
 ]
 
 const ACCENT = '#0055ff'
-const NODE_STROKE = '#111111'
-const EDGE_STROKE = '#d4d4d4'
-const FOG_FILL = '#cfcfcf'
+const NODE_STROKE = '#16130f'
+const EDGE_STROKE = '#d8d2ca'
+const FOG_FILL = '#c9c6c1'
 
 interface JourneyGraphProps {
-  /** 0 upload, 1 structure, 2 map, 3 fog clears, 4 progress. */
+  /** 0 upload, 1 structure, 2 map, 3 fog clears. */
   step: number
   /** When false, everything renders in its final state with no transitions. */
   animated: boolean
@@ -106,7 +113,6 @@ function JourneyGraph({ step, animated }: JourneyGraphProps) {
         {NODES.map((node, index) => {
           const visible = index === 0 ? step >= 0 : step >= 1
           const cleared = step >= 3 && node.accent
-          const mastered = step >= 4
           return (
             <circle
               key={index}
@@ -114,8 +120,8 @@ function JourneyGraph({ step, animated }: JourneyGraphProps) {
               cy={node.y}
               r={node.r}
               fill={cleared ? ACCENT : '#ffffff'}
-              stroke={mastered ? ACCENT : NODE_STROKE}
-              strokeWidth={mastered ? 2 : 1.5}
+              stroke={cleared ? ACCENT : NODE_STROKE}
+              strokeWidth={1.5}
               opacity={visible ? 1 : 0}
               style={transition('opacity 500ms ease, fill 400ms ease, stroke 400ms ease', index * 70)}
             />
@@ -166,11 +172,12 @@ function StackedJourney() {
     <Container>
       <div className={styles.stacked}>
         <ScrollReveal>
-          <JourneyGraph step={4} animated={false} />
+          <JourneyGraph step={3} animated={false} />
         </ScrollReveal>
         {STEPS.map(({ titleKey, bodyKey }, index) => (
           <ScrollReveal key={titleKey} delay={index * 0.04}>
             <div className={styles.stackedStep}>
+              <span className={styles.stackedIndex}>{index + 1}</span>
               <h2 className={styles.stackedTitle}>{t(titleKey)}</h2>
               <p className={styles.stackedBody}>{t(bodyKey)}</p>
             </div>
@@ -183,7 +190,7 @@ function StackedJourney() {
 
 /**
  * The pinned sequence: the graph panel stays fixed on the right while
- * scrolling advances through the five steps, each one adding to the graph.
+ * scrolling advances through the steps, each one adding to the graph.
  */
 function PinnedJourney() {
   const { t } = useTranslation()
@@ -234,11 +241,69 @@ function PinnedJourney() {
   )
 }
 
+/** Step one, shown rather than described: a page of notes becoming a map. */
+function Intake() {
+  const { t } = useTranslation()
+
+  return (
+    <section className={styles.intake}>
+      <Container>
+        <div className={styles.intakeGrid}>
+          <ScrollReveal>
+            <div className={styles.copy}>
+              <Eyebrow labelKey="hiw.intake.eyebrow" />
+              <h2 className={styles.sectionTitle}>{t('hiw.intake.title')}</h2>
+              <p className={styles.prose}>{t('hiw.intake.body')}</p>
+            </div>
+          </ScrollReveal>
+          <ScrollReveal delay={0.08}>
+            <div className={styles.intakeVisual}>
+              <MiniUploadDemo />
+            </div>
+          </ScrollReveal>
+        </div>
+      </Container>
+    </section>
+  )
+}
+
+/** The payoff: progress that persists, with mastery spreading live. */
+function Saved() {
+  const { t } = useTranslation()
+
+  return (
+    <section className={styles.band}>
+      <Container>
+        <div className={styles.bandGrid}>
+          <ScrollReveal>
+            <div className={styles.copy}>
+              <Eyebrow labelKey="hiw.saved.eyebrow" />
+              <h2 className={styles.sectionTitle}>{t('hiw.adaptive.title')}</h2>
+              <p className={styles.prose}>{t('hiw.adaptive.body')}</p>
+            </div>
+          </ScrollReveal>
+          <ScrollReveal delay={0.08}>
+            <div className={styles.bandVisual}>
+              <MiniProgressDemo />
+            </div>
+          </ScrollReveal>
+        </div>
+      </Container>
+    </section>
+  )
+}
+
 function HowItWorksPage() {
   return (
     <>
-      <PageHero titleKey="hiw.hero.title" subtitleKey="hiw.hero.subtitle" />
+      <PageHero
+        eyebrowKey="hiw.hero.eyebrow"
+        titleKey="hiw.hero.title"
+        subtitleKey="hiw.hero.subtitle"
+      />
+      <Intake />
       <PinnedJourney />
+      <Saved />
       <CtaBand />
     </>
   )

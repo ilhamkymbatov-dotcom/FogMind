@@ -15,6 +15,10 @@
 }
 
 .wordmark {
+  /* Full height row so the brand is a comfortable tap target. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   font-size: var(--text-lg);
   line-height: var(--leading-lg);
   font-weight: var(--weight-bold);

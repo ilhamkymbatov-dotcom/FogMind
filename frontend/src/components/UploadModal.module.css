@@ -15,8 +15,9 @@
   max-height: 90vh;
   overflow-y: auto;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background-color: var(--color-bg);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-lg);
   padding: var(--space-6);
 }
 
@@ -62,7 +63,7 @@
   min-height: 44px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  background-color: var(--color-bg);
+  background-color: var(--color-surface);
   color: var(--color-muted);
   font-family: var(--font-sans);
   font-size: var(--text-sm);
@@ -122,7 +123,7 @@
 .textarea {
   min-height: 160px;
   padding: var(--space-3);
-  background-color: var(--color-bg);
+  background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   color: var(--color-fg);

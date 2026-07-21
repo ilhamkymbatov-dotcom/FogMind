@@ -1,10 +1,58 @@
+/* Shared type -------------------------------------------------------------- */
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.sectionTitle {
+  max-width: 20ch;
+  font-size: clamp(26px, 3.2vw, var(--text-2xl));
+  line-height: 1.14;
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.022em;
+  text-wrap: balance;
+}
+
+.prose {
+  max-width: var(--measure-tight);
+  font-size: var(--text-base);
+  line-height: 1.68;
+  color: var(--color-muted);
+}
+
+/* Intake ------------------------------------------------------------------- */
+
+.intake {
+  padding-block: var(--space-8);
+}
+
+.intakeGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.intakeVisual {
+  max-width: 460px;
+  width: 100%;
+  margin-inline: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-3);
+}
+
 /* Pinned journey ---------------------------------------------------------- */
 
 /* The tall outer track gives the scroll room; the inner block pins while the
    user moves through it and the graph assembles step by step. */
 .journey {
   position: relative;
-  height: 340vh;
+  height: 280vh;
 }
 
 .sticky {
@@ -31,19 +79,25 @@
 
 .stepRow {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space-3);
   min-height: 44px;
-  align-items: center;
 }
 
 .stepIndex {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: var(--radius-xs);
+  background-color: var(--color-sunken);
   font-size: var(--text-xs);
-  line-height: var(--leading-xs);
+  line-height: 1;
   font-weight: var(--weight-medium);
   color: var(--color-muted);
-  min-width: 20px;
-  transition: color 200ms ease;
+  transition: color 200ms ease, background-color 200ms ease;
 }
 
 .stepTitle {
@@ -52,11 +106,12 @@
   font-weight: var(--weight-bold);
   color: var(--color-muted);
   transition: color 200ms ease, opacity 200ms ease;
-  opacity: 0.55;
+  opacity: 0.5;
 }
 
 .stepRowActive .stepIndex {
-  color: var(--color-accent);
+  background-color: var(--color-warm-tint);
+  color: var(--color-warm);
 }
 
 .stepRowActive .stepTitle {
@@ -70,7 +125,7 @@
   min-height: calc(var(--leading-base) * 4);
   max-width: 44ch;
   font-size: var(--text-base);
-  line-height: var(--leading-base);
+  line-height: 1.68;
   color: var(--color-muted);
 }
 
@@ -78,8 +133,10 @@
 
 .graphPanel {
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(120% 90% at 50% 0%, #ffffff 0%, var(--color-sunken) 100%);
+  box-shadow: var(--shadow-md);
   padding: var(--space-5);
 }
 
@@ -91,6 +148,7 @@
 
 .legend {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: var(--space-4);
   padding-top: var(--space-4);
@@ -107,31 +165,106 @@
   color: var(--color-muted);
 }
 
+/* Closing band ------------------------------------------------------------- */
+
+.band {
+  margin-block: var(--space-6);
+  padding-block: var(--space-8);
+  background-color: var(--color-warm-tint);
+  border-block: 1px solid var(--color-border);
+}
+
+.bandGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.bandVisual {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-4);
+}
+
 /* Stacked fallback: narrow screens and reduced motion ---------------------- */
 
 .stacked {
   padding-block: var(--space-7);
   display: flex;
   flex-direction: column;
-  gap: var(--space-7);
+  gap: var(--space-6);
 }
 
 .stackedStep {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-5);
+}
+
+.stackedIndex {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-xs);
+  background-color: var(--color-warm-tint);
+  color: var(--color-warm);
+  font-size: var(--text-xs);
+  line-height: 1;
+  font-weight: var(--weight-medium);
 }
 
 .stackedTitle {
-  font-size: var(--text-xl);
-  line-height: var(--leading-xl);
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
   font-weight: var(--weight-bold);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.014em;
 }
 
 .stackedBody {
   font-size: var(--text-base);
-  line-height: var(--leading-base);
+  line-height: 1.65;
   color: var(--color-muted);
   max-width: 46ch;
+}
+
+/* Responsive ---------------------------------------------------------------- */
+
+@media (max-width: 980px) {
+  .intakeGrid,
+  .bandGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-6);
+  }
+}
+
+@media (max-width: 720px) {
+  .intake,
+  .band {
+    padding-block: var(--space-7);
+  }
+}
+
+@media (max-width: 420px) {
+  .intakeVisual {
+    padding: var(--space-2);
+  }
+
+  .stackedStep {
+    padding: var(--space-4);
+  }
+
+  .graphPanel {
+    padding: var(--space-4);
+  }
 }

@@ -14,6 +14,7 @@ export function CtaBand() {
         <ScrollReveal>
           <div className={styles.inner}>
             <h2 className={styles.title}>{t('cta.title')}</h2>
+            <p className={styles.body}>{t('cta.body')}</p>
             <Button to="/signup" variant="primary" size="lg">
               {t('cta.button')}
             </Button>

@@ -37,12 +37,13 @@ const HEAL_ALPHA = 0.008
  */
 const IDLE_STOP_MS = 9000
 
-// Uniform, seamless base fog. Set to the densest gray that still holds muted
-// text (#6b6b6b) at WCAG AA against white: the veil lightens it to about
-// #767676, which measures ~4.5:1. Present everywhere at the same density, so
-// text is readable anywhere; the cursor wipe reveals full clarity on top.
-const BASE_ALPHA = 0.093
-const FOG_GRAY = 226
+// Uniform, seamless base fog. Kept light enough that muted text (#6b6560) stays
+// at WCAG AA underneath, and tinted to the warm paper the page sits on: a
+// neutral gray veil over warm paper reads as a cool cast, so every button
+// cutout would show up as a warmer patch. Matching the hue keeps the holes
+// invisible and leaves only the density difference the fog is meant to have.
+const BASE_ALPHA = 0.078
+const FOG_RGB = '234, 229, 222'
 
 function paintBaseFog(
   ctx: CanvasRenderingContext2D,
@@ -52,7 +53,7 @@ function paintBaseFog(
 ) {
   ctx.clearRect(0, 0, width, height)
   ctx.globalCompositeOperation = 'source-over'
-  ctx.fillStyle = `rgba(${FOG_GRAY}, ${FOG_GRAY}, ${FOG_GRAY}, ${BASE_ALPHA * strength})`
+  ctx.fillStyle = `rgba(${FOG_RGB}, ${BASE_ALPHA * strength})`
   ctx.fillRect(0, 0, width, height)
 }
 

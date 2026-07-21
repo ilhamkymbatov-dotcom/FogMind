@@ -203,6 +203,57 @@ export const en = {
   'product.formats.body':
     'Bring files as they are. FogMind takes PDF, DOCX, Markdown and plain text with no conversion dance.',
   'product.formats.plain': 'Plain text',
+
+  // Landing: eyebrow labels and the warmer supporting copy ---------------------
+  'hero.eyebrow': 'Your material, mapped',
+  'hero.demoCaption': 'Answer a question and the fog lifts around what you just learned',
+
+  'home.cards.eyebrow': 'Why it works',
+  'home.cards.title': 'Studying that feels like progress',
+  'home.card1.title': 'See the whole subject',
+  'home.card1.body':
+    'Every topic and the links between them, laid out as one map you can take in at a glance.',
+  'home.card2.title': 'Questions from your own pages',
+  'home.card2.body':
+    'Nothing generic. Every question comes from the material you brought, so revision always feels relevant.',
+  'home.card3.title': 'Progress you can watch',
+  'home.card3.body':
+    'The fog thins where you are confident, so you always know what to study next.',
+
+  'home.answer.eyebrow': 'Answer and reveal',
+  'home.answer.title': 'One question at a time, no pressure',
+  'home.answer.body':
+    'Each node asks a few questions drawn from your material. Answer them and the topic opens up, along with everything it connects to. Miss one and it simply waits for you in the review round.',
+
+  'home.progress.eyebrow': 'Watch it spread',
+  'home.progress.title': 'Mastery you can actually see',
+  'home.progress.body':
+    'Every correct answer masters a node and clears a little more of the map. Come back tomorrow and it is exactly where you left it.',
+
+  'home.explore.eyebrow': 'Look closer',
+  'cta.body': 'Bring a chapter, a lecture or a pile of notes. Your first map takes a couple of minutes.',
+
+  'hiw.hero.eyebrow': 'How it works',
+  'hiw.intake.eyebrow': 'Step one',
+  'hiw.intake.title': 'Bring what you already have',
+  'hiw.intake.body':
+    'Drop in a PDF, a DOCX, some Markdown or a block of pasted notes. FogMind reads it, finds the topics inside and lays them out as a map you can start clearing straight away.',
+  'hiw.saved.eyebrow': 'It keeps up with you',
+
+  'product.hero.eyebrow': 'The product',
+  'product.graph.eyebrow': 'The map',
+  'product.questions.eyebrow': 'The questions',
+  'product.progress.eyebrow': 'The progress',
+  'product.more.eyebrow': 'And the rest',
+  'product.more.title': 'Details that keep you going',
+
+  // Landing: the looping product demos ----------------------------------------
+  'demo.q.prompt': 'Photosynthesis happens inside the _____ of a leaf cell.',
+  'demo.q.a1': 'Ribosome',
+  'demo.q.a2': 'Chloroplast',
+  'demo.q.a3': 'Nucleus',
+  'demo.q.answer': 'chloroplast',
+  'demo.upload.file': 'Lecture notes.pdf',
 } as const
 
 export type TranslationKey = keyof typeof en
