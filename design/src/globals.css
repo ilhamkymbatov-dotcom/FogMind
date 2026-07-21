@@ -91,19 +91,30 @@ select {
      is the same hue darkened until it clears 4.5:1 on every wash here. */
   --color-warm: #c0663a;
   --color-warm-ink: #a85228;
-  --color-warm-tint: #fbf1ea;
 
-  /* Supporting hues: ink for text and icons, wash for section backgrounds. */
+  /* Supporting hues, each in three strengths.
+
+     --color-*  the saturated ink. Text, icons and small accents, where the
+                contrast is needed. Unchanged.
+     --tint-*   a light tinted surface for cards and icon tiles, small enough
+                areas to carry a little more colour.
+     --wash-*   the section background. Pulled most of the way back to paper on
+                purpose: across a full width band the hue should be felt as a
+                change of mood, not seen as a coloured block. */
   --color-ink: #2a3a55;
-  --wash-ink: #e9edf4;
+  --tint-ink: #edf0f5;
+  --wash-ink: #f4f5f6;
   --color-moss: #4a5c3d;
-  --wash-moss: #e9efe3;
+  --tint-moss: #edf1e7;
+  --wash-moss: #f4f6f0;
   --color-plum: #6a4257;
-  --wash-plum: #f2eaef;
+  --tint-plum: #f4edf1;
+  --wash-plum: #f7f4f4;
   --color-sand: #7d5f33;
-  --wash-sand: #f4ebdd;
-  /* A deeper warm wash for the pages that want more weight than paper. */
-  --wash-warm: #f8ece2;
+  --tint-sand: #f5eee3;
+  --wash-sand: #f8f4ee;
+  --tint-warm: #f8efe7;
+  --wash-warm: #f9f4f0;
 
   /* Corners. Comfortable rounding on cards and panels, tighter on controls.
      Nothing pill shaped. */

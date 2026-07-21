@@ -4,8 +4,13 @@
 
 .gallery {
   padding-block: var(--space-8);
-  background-color: var(--wash-ink);
-  border-block: 1px solid rgba(42, 58, 85, 0.16);
+  background-image: linear-gradient(
+    180deg,
+    var(--color-bg) 0%,
+    var(--wash-ink) 6%,
+    var(--wash-ink) 94%,
+    var(--color-bg) 100%
+  );
 }
 
 .galleryHead {
@@ -78,7 +83,7 @@
   height: 36px;
   flex-shrink: 0;
   border-radius: var(--radius-sm);
-  background-color: var(--wash-ink);
+  background-color: var(--tint-ink);
   color: var(--color-ink);
   transition: background-color 200ms ease;
 }
@@ -179,7 +184,7 @@
 /* Each card sits in its own hue, so the grid reads as a set of related but
    distinct capabilities. */
 .plum {
-  background-color: var(--wash-plum);
+  background-color: var(--tint-plum);
   border-color: rgba(106, 66, 87, 0.2);
 }
 
@@ -189,7 +194,7 @@
 }
 
 .moss {
-  background-color: var(--wash-moss);
+  background-color: var(--tint-moss);
   border-color: rgba(74, 92, 61, 0.2);
 }
 
@@ -199,7 +204,7 @@
 }
 
 .sand {
-  background-color: var(--wash-sand);
+  background-color: var(--tint-sand);
   border-color: rgba(125, 95, 51, 0.2);
 }
 
