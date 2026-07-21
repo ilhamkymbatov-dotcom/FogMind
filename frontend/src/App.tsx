@@ -10,6 +10,10 @@ import { I18nProvider } from './i18n'
 const HomePage = lazy(() => import('./landing/pages/HomePage'))
 const HowItWorksPage = lazy(() => import('./landing/pages/HowItWorksPage'))
 const ProductPage = lazy(() => import('./landing/pages/ProductPage'))
+const WhoItsForPage = lazy(() => import('./landing/pages/WhoItsForPage'))
+const WhyItWorksPage = lazy(() => import('./landing/pages/WhyItWorksPage'))
+const AboutPage = lazy(() => import('./landing/pages/AboutPage'))
+const FaqPage = lazy(() => import('./landing/pages/FaqPage'))
 
 // Auth and the signed in app
 const LoginPage = lazy(() => import('./pages/LoginPage'))
@@ -29,6 +33,10 @@ function App() {
                 <Route path="/" element={<HomePage />} />
                 <Route path="/how-it-works" element={<HowItWorksPage />} />
                 <Route path="/product" element={<ProductPage />} />
+                <Route path="/who-its-for" element={<WhoItsForPage />} />
+                <Route path="/why-it-works" element={<WhyItWorksPage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/faq" element={<FaqPage />} />
               </Route>
 
               {/* Auth: bare centered cards, no landing chrome. */}

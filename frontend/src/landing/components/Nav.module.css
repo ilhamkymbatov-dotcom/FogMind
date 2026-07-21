@@ -83,9 +83,14 @@
 }
 
 /* Dropdown panel under the bar on small screens. */
+/* The panel now holds the whole sitemap, which can outgrow a short phone in
+   landscape. Cap it to the space under the bar and let it scroll. */
 .panel {
   border-bottom: 1px solid var(--color-border);
   background-color: var(--color-bg);
+  max-height: calc(100dvh - 64px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .panelInner {

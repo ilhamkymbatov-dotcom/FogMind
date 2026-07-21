@@ -1,11 +1,25 @@
 import { useEffect, useId, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
-import { useTranslation } from '../../i18n'
+import { useTranslation, type TranslationKey } from '../../i18n'
 import { Button } from './Button'
 import { Container } from './Container'
 import { LanguageSwitcher } from '../../components/LanguageSwitcher'
 import styles from './Nav.module.css'
+
+/** The primary journey, shown in the top bar and first in the mobile panel. */
+const PRIMARY = [
+  { to: '/how-it-works', labelKey: 'nav.howItWorks' },
+  { to: '/product', labelKey: 'nav.product' },
+  { to: '/who-its-for', labelKey: 'nav.who' },
+  { to: '/why-it-works', labelKey: 'nav.why' },
+] as const satisfies readonly { to: string; labelKey: TranslationKey }[]
+
+/** The rest of the sitemap: footer on wide screens, mobile panel on narrow. */
+const SECONDARY = [
+  { to: '/about', labelKey: 'nav.about' },
+  { to: '/faq', labelKey: 'nav.faq' },
+] as const satisfies readonly { to: string; labelKey: TranslationKey }[]
 
 function navLinkClass({ isActive }: { isActive: boolean }): string {
   return [styles.link, isActive ? styles.linkActive : ''].filter(Boolean).join(' ')
@@ -46,16 +60,14 @@ export function Nav() {
             FogMind
           </Link>
 
+          {/* The primary journey only. About and the questions live in the
+              footer sitemap, so the bar stays readable at seven pages. */}
           <nav className={styles.links} aria-label="Main">
-            <NavLink to="/" end className={navLinkClass}>
-              {t('nav.home')}
-            </NavLink>
-            <NavLink to="/how-it-works" className={navLinkClass}>
-              {t('nav.howItWorks')}
-            </NavLink>
-            <NavLink to="/product" className={navLinkClass}>
-              {t('nav.product')}
-            </NavLink>
+            {PRIMARY.map(({ to, labelKey }) => (
+              <NavLink key={to} to={to} className={navLinkClass}>
+                {t(labelKey)}
+              </NavLink>
+            ))}
           </nav>
 
           <div className={styles.actions}>
@@ -82,16 +94,25 @@ export function Nav() {
       {open ? (
         <div className={styles.panel} id={panelId}>
           <Container>
+            {/* The panel carries the whole sitemap, since there is no footer in
+                view while it is open. */}
             <nav className={styles.panelInner} aria-label="Mobile" data-fog-clear>
               <NavLink to="/" end className={panelLinkClass}>
                 {t('nav.home')}
               </NavLink>
-              <NavLink to="/how-it-works" className={panelLinkClass}>
-                {t('nav.howItWorks')}
-              </NavLink>
-              <NavLink to="/product" className={panelLinkClass}>
-                {t('nav.product')}
-              </NavLink>
+              {PRIMARY.map(({ to, labelKey }) => (
+                <NavLink key={to} to={to} className={panelLinkClass}>
+                  {t(labelKey)}
+                </NavLink>
+              ))}
+
+              <div className={styles.panelDivider} />
+
+              {SECONDARY.map(({ to, labelKey }) => (
+                <NavLink key={to} to={to} className={panelLinkClass}>
+                  {t(labelKey)}
+                </NavLink>
+              ))}
 
               <div className={styles.panelDivider} />
 

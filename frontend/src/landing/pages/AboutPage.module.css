@@ -1,0 +1,147 @@
+/* A manifesto. Rooms: paper, warm, paper for the line, warm, moss. */
+
+.manifesto {
+  padding-block: var(--space-8) var(--space-7);
+  background-image: linear-gradient(
+    180deg,
+    var(--color-bg) 0%,
+    var(--wash-warm) 8%,
+    var(--wash-warm) 100%
+  );
+}
+
+.manifestoLower {
+  padding-block: var(--space-7) var(--space-8);
+  background-image: linear-gradient(
+    180deg,
+    var(--wash-warm) 0%,
+    var(--wash-warm) 92%,
+    var(--color-bg) 100%
+  );
+}
+
+/* Stanzas: a hanging label in the margin, one narrow column of prose. The
+   measure is deliberately tight, so this reads as a letter rather than a page
+   of marketing copy. */
+.stanza {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--space-6);
+  padding-block: var(--space-6);
+}
+
+.label {
+  font-size: var(--text-eyebrow);
+  line-height: 16px;
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-warm-ink);
+}
+
+.body {
+  max-width: 54ch;
+  font-size: clamp(17px, 1.7vw, 20px);
+  line-height: 1.72;
+  color: var(--color-fg);
+}
+
+/* The one line that gets the full width -------------------------------------- */
+
+.pullBand {
+  padding-block: var(--space-8);
+  background-color: var(--wash-warm);
+}
+
+.pull {
+  max-width: 26ch;
+  font-size: clamp(26px, 3.8vw, 46px);
+  line-height: 1.16;
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.028em;
+  text-wrap: balance;
+  border-left: 3px solid var(--color-warm);
+  padding-left: var(--space-6);
+}
+
+/* The closing note, set in the prose column like a signature ------------------ */
+
+.sign {
+  max-width: 54ch;
+  padding-top: var(--space-5);
+  border-top: 1px solid rgba(168, 82, 40, 0.24);
+}
+
+.signTitle {
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.014em;
+}
+
+.signBody {
+  margin-top: var(--space-2);
+  font-size: var(--text-base);
+  line-height: 1.62;
+  color: var(--color-muted);
+}
+
+.signLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  margin-top: var(--space-2);
+  color: var(--color-accent);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+}
+
+.signLink:hover,
+.signLink:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.signLink svg {
+  transition: transform 200ms ease;
+}
+
+.signLink:hover svg {
+  transform: translateX(3px);
+}
+
+/* Responsive ------------------------------------------------------------------ */
+
+@media (max-width: 860px) {
+  .stanza {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+    padding-block: var(--space-5);
+  }
+
+  /* The empty label cell that aligns the signature disappears when stacked. */
+  .stanza > .label:empty {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .manifesto {
+    padding-block: var(--space-7) var(--space-6);
+  }
+
+  .manifestoLower {
+    padding-block: var(--space-6) var(--space-7);
+  }
+
+  .pullBand {
+    padding-block: var(--space-7);
+  }
+
+  .pull {
+    padding-left: var(--space-4);
+  }
+}

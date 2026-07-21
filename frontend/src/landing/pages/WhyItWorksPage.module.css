@@ -1,0 +1,316 @@
+/* An essay. Rooms: paper, paper, ink for the quote, paper, sand. */
+
+.essay {
+  padding-block: var(--space-8) var(--space-7);
+  background-color: var(--color-bg);
+}
+
+.essayLower {
+  padding-block: var(--space-7) var(--space-8);
+  background-color: var(--color-bg);
+}
+
+/* The opening paragraph sets the reading measure for the whole page. */
+.lead {
+  max-width: 34ch;
+  margin-bottom: var(--space-8);
+  font-size: clamp(22px, 2.6vw, 30px);
+  line-height: 1.42;
+  letter-spacing: -0.014em;
+  color: var(--color-fg);
+}
+
+/* Principles ----------------------------------------------------------------- */
+
+/* A hanging numeral in the margin, the argument in a single narrow column. This
+   is the page's whole layout logic: one column of prose with numbers outside
+   it. */
+.principle {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-5);
+  padding-block: var(--space-7);
+}
+
+.numeral {
+  font-size: clamp(48px, 6vw, 76px);
+  line-height: 0.82;
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.04em;
+  color: var(--color-ink);
+  opacity: 0.16;
+  font-variant-numeric: tabular-nums;
+}
+
+.principleBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 60ch;
+}
+
+.principleTitle {
+  font-size: clamp(24px, 2.8vw, 34px);
+  line-height: 1.14;
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.024em;
+  text-wrap: balance;
+}
+
+.para {
+  font-size: var(--text-base);
+  line-height: 1.72;
+  color: var(--color-muted);
+}
+
+/* The one line about how this is honoured, held apart from the argument. */
+.commitment {
+  padding-left: var(--space-5);
+  border-left: 2px solid var(--color-ink);
+  font-size: var(--text-base);
+  line-height: 1.62;
+  font-weight: var(--weight-medium);
+  color: var(--color-fg);
+}
+
+/* Diagrams ------------------------------------------------------------------- */
+
+.diagram {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-4) var(--space-5);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 12ch) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.rowLabel {
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--color-muted);
+}
+
+.rowStrong .rowLabel {
+  font-weight: var(--weight-medium);
+  color: var(--color-fg);
+}
+
+.rowShape {
+  display: block;
+  min-height: 16px;
+}
+
+/* bars: length stands for how much is retained. */
+.bar {
+  display: block;
+  height: 10px;
+  border-radius: 5px;
+  background-color: var(--color-border-strong);
+}
+
+.rowStrong .bar {
+  background-color: var(--color-accent);
+}
+
+/* spacing: one solid block against four separated returns. */
+.block {
+  display: block;
+  width: 34%;
+  height: 10px;
+  border-radius: 5px;
+  background-color: var(--color-border-strong);
+}
+
+.spread {
+  display: flex;
+  gap: 14%;
+}
+
+.tick {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: var(--color-accent);
+}
+
+/* structure: the same four ideas, loose then joined. */
+.cluster {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 18%;
+  width: 100%;
+}
+
+.dot {
+  display: block;
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-border-strong);
+  background-color: var(--color-surface);
+}
+
+.clusterLinked::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  right: 5px;
+  top: 50%;
+  height: 1.5px;
+  background-color: var(--color-accent);
+  opacity: 0.45;
+}
+
+.clusterLinked .dot {
+  border-color: var(--color-accent);
+  position: relative;
+}
+
+/* signal: an empty track against one that visibly fills. */
+.track {
+  display: block;
+  width: 100%;
+  height: 10px;
+  border-radius: 5px;
+  background-color: var(--color-sunken);
+  overflow: hidden;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  border-radius: 5px;
+  background-color: var(--color-accent);
+}
+
+/* The quote band -------------------------------------------------------------- */
+
+.quoteBand {
+  padding-block: var(--space-8);
+  background-image: linear-gradient(
+    180deg,
+    var(--color-bg) 0%,
+    var(--wash-ink) 8%,
+    var(--wash-ink) 92%,
+    var(--color-bg) 100%
+  );
+}
+
+.quote {
+  max-width: 24ch;
+  margin-inline: auto;
+  text-align: center;
+  font-size: clamp(26px, 3.6vw, 44px);
+  line-height: 1.18;
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.026em;
+  text-wrap: balance;
+}
+
+/* Endnote --------------------------------------------------------------------- */
+
+/* Set as a footnote to the essay rather than a banner, so it belongs to this
+   page's voice. */
+.endnote {
+  max-width: 60ch;
+  margin-left: calc(96px + var(--space-5));
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+}
+
+.endnoteTitle {
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.014em;
+}
+
+.endnoteBody {
+  margin-top: var(--space-2);
+  font-size: var(--text-base);
+  line-height: 1.62;
+  color: var(--color-muted);
+}
+
+.endnoteLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  margin-top: var(--space-2);
+  color: var(--color-accent);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+}
+
+.endnoteLink:hover,
+.endnoteLink:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.endnoteLink svg {
+  transition: transform 200ms ease;
+}
+
+.endnoteLink:hover svg {
+  transform: translateX(3px);
+}
+
+/* Responsive ------------------------------------------------------------------ */
+
+@media (max-width: 720px) {
+  .essay {
+    padding-block: var(--space-7) var(--space-6);
+  }
+
+  .essayLower {
+    padding-block: var(--space-6) var(--space-7);
+  }
+
+  .lead {
+    max-width: none;
+    margin-bottom: var(--space-6);
+  }
+
+  .principle {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+    padding-block: var(--space-6);
+  }
+
+  .numeral {
+    line-height: 1;
+  }
+
+  .endnote {
+    margin-left: 0;
+  }
+
+  .quoteBand {
+    padding-block: var(--space-7);
+  }
+
+  .row {
+    grid-template-columns: minmax(0, 10ch) minmax(0, 1fr);
+    gap: var(--space-3);
+  }
+
+  .diagram {
+    padding: var(--space-4);
+  }
+}

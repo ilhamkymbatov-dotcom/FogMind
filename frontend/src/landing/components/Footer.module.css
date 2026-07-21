@@ -36,10 +36,27 @@
   color: var(--color-muted);
 }
 
-.links {
+/* Two columns of links, so seven pages stay scannable. */
+.sitemap {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, auto));
+  gap: var(--space-5) var(--space-8);
+}
+
+.column {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+}
+
+.columnTitle {
+  margin-bottom: var(--space-1);
+  font-size: var(--text-eyebrow);
+  line-height: 16px;
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-fg);
 }
 
 .link {

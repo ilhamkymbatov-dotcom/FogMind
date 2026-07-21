@@ -208,27 +208,11 @@ export const en = {
   'hero.eyebrow': 'Your material, mapped',
   'hero.demoCaption': 'Answer a question and the fog lifts around what you just learned',
 
-  'home.cards.eyebrow': 'Why it works',
-  'home.cards.title': 'Studying that feels like progress',
   'home.card1.title': 'See the whole subject',
-  'home.card1.body':
-    'Every topic and the links between them, laid out as one map you can take in at a glance.',
   'home.card2.title': 'Questions from your own pages',
-  'home.card2.body':
-    'Nothing generic. Every question comes from the material you brought, so revision always feels relevant.',
   'home.card3.title': 'Progress you can watch',
-  'home.card3.body':
-    'The fog thins where you are confident, so you always know what to study next.',
 
-  'home.answer.eyebrow': 'Answer and reveal',
-  'home.answer.title': 'One question at a time, no pressure',
-  'home.answer.body':
-    'Each node asks a few questions drawn from your material. Answer them and the topic opens up, along with everything it connects to. Miss one and it simply waits for you in the review round.',
 
-  'home.progress.eyebrow': 'Watch it spread',
-  'home.progress.title': 'Mastery you can actually see',
-  'home.progress.body':
-    'Every correct answer masters a node and clears a little more of the map. Come back tomorrow and it is exactly where you left it.',
 
   'home.explore.eyebrow': 'Look closer',
   'cta.body': 'Bring a chapter, a lecture or a pile of notes. Your first map takes a couple of minutes.',
@@ -238,12 +222,8 @@ export const en = {
   'hiw.intake.title': 'Bring what you already have',
   'hiw.intake.body':
     'Drop in a PDF, a DOCX, some Markdown or a block of pasted notes. FogMind reads it, finds the topics inside and lays them out as a map you can start clearing straight away.',
-  'hiw.saved.eyebrow': 'It keeps up with you',
 
   'product.hero.eyebrow': 'The product',
-  'product.graph.eyebrow': 'The map',
-  'product.questions.eyebrow': 'The questions',
-  'product.progress.eyebrow': 'The progress',
   'product.more.eyebrow': 'And the rest',
   'product.more.title': 'Details that keep you going',
 
@@ -265,6 +245,183 @@ export const en = {
   'product.gallery.title': 'Pick a capability and watch it run',
 
   'hiw.stepN': 'Step {n}',
+
+  // Navigation for seven pages -------------------------------------------------
+  'nav.who': 'Who it is for',
+  'nav.why': 'Why it works',
+  'nav.about': 'About',
+  'nav.faq': 'Questions',
+  'footer.colExplore': 'Explore',
+  'footer.colMore': 'More',
+
+  // Who it is for: audiences and situations only -------------------------------
+  'who.hero.eyebrow': 'Who it is for',
+  'who.hero.title': 'Different lives, the same wall',
+  'who.hero.subtitle':
+    'Studying looks nothing alike at sixteen and at thirty. These are the situations FogMind was shaped around.',
+
+  'who.p1.role': 'School student',
+  'who.p1.when': 'The chapter is due tomorrow',
+  'who.p1.situation':
+    'It is late, there are thirty pages of biology, and reading them twice has not made any of it stay. The panic is not about effort. It is about not knowing which parts actually matter.',
+  'who.p1.outcome':
+    'The night stops being one wall of text and becomes a short list of things to clear, in an order that makes sense.',
+
+  'who.p2.role': 'University student',
+  'who.p2.when': 'A semester of lecture notes',
+  'who.p2.situation':
+    'Twelve weeks of slides and scribbles, none of it joined up, and an exam that will ask how the pieces relate rather than what week four happened to say.',
+  'who.p2.outcome':
+    'The term stops being a folder and becomes one structure, so revision starts from the shape of the subject instead of page one again.',
+
+  'who.p3.role': 'Exam candidate',
+  'who.p3.when': 'Months out from the big one',
+  'who.p3.situation':
+    'The date is far enough away that nothing feels urgent and close enough to sit in the back of your mind. The hard part is knowing what to do on an ordinary Tuesday.',
+  'who.p3.outcome':
+    'Every session has an obvious next move, and the months accumulate into something you can point at rather than blurring together.',
+
+  'who.p4.role': 'Self learner',
+  'who.p4.when': 'A hard book and nobody to ask',
+  'who.p4.situation':
+    'Working through something difficult alone, with no lecturer, no seminar, and no one to tell you whether any of it actually landed.',
+  'who.p4.outcome':
+    'The material starts asking you the questions, so understanding gets checked instead of assumed.',
+
+  'who.p5.role': 'Working professional',
+  'who.p5.when': 'A certification around a full job',
+  'who.p5.situation':
+    'Studying happens in the gaps: a commute, half a lunch break, an hour once the house is quiet. The thing that keeps breaking is momentum.',
+  'who.p5.outcome':
+    'Twenty minutes is worth spending, because every session picks up exactly where the last one stopped.',
+
+  'who.next.title': 'See what you would actually be using',
+  'who.next.body': 'Every capability behind these situations is shown, running, on the product page.',
+  'who.next.link': 'Explore the product',
+
+  // Why it works: the learning science, no interface ---------------------------
+  'why.hero.eyebrow': 'Why it works',
+  'why.hero.title': 'The thinking behind the method',
+  'why.hero.subtitle':
+    'FogMind rests on a few findings about memory that have held up for a long time. Here they are plainly, with no product talk.',
+
+  'why.lead':
+    'Studying tends to fail in a predictable way. It feels productive while it is happening and leaves almost nothing behind a week later. The reason is uncomfortable: comfort and learning pull in opposite directions, and the methods that feel smoothest are usually the ones doing the least work.',
+
+  'why.p1.title': 'Retrieving beats reviewing',
+  'why.p1.fails':
+    'Rereading a page makes it familiar, and familiarity feels exactly like knowledge from the inside. That is the trap. Recognising a sentence when it is in front of you is a different skill from producing the idea when it is not.',
+  'why.p1.holds':
+    'Pulling something out of memory strengthens it far more than putting it in again. The effort of retrieval is the part doing the work, which is why it feels harder and returns more.',
+  'why.p1.us': 'Nothing here can be finished by reading. Progress only comes from producing an answer.',
+  'why.p1.a': 'Reading again',
+  'why.p1.b': 'Recalling',
+
+  'why.p2.title': 'Spacing beats cramming',
+  'why.p2.fails':
+    'One long session can carry you to an exam the next morning and very little further. Everything packed in together also decays together.',
+  'why.p2.holds':
+    'The same total hours, spread out and revisited as memory begins to fade, produce something durable. Forgetting a little before you return is not wasted time. It is what makes the return count.',
+  'why.p2.us':
+    'The design assumes you will forget, and plans for the return rather than treating it as a failure.',
+  'why.p2.a': 'One long block',
+  'why.p2.b': 'Spread out',
+
+  'why.p3.title': 'Structure beats a list',
+  'why.p3.fails':
+    'Facts held as a flat list have nothing holding them up. Recall one and nothing else arrives with it, so the whole subject has to be carried by effort alone.',
+  'why.p3.holds':
+    'Connected knowledge behaves differently. Each idea is reachable from several directions, and understanding one part makes its neighbours easier to place and much harder to lose.',
+  'why.p3.us': 'Material is never presented as a flat list. It arrives with its relationships intact.',
+  'why.p3.a': 'Loose facts',
+  'why.p3.b': 'Connected',
+
+  'why.p4.title': 'Seeing progress is what keeps you going',
+  'why.p4.fails':
+    'The honest problem with studying alone is not knowing whether it is working. Effort with no visible result is the fastest route to stopping.',
+  'why.p4.holds':
+    'Progress you can see changes the arithmetic of starting. A session that visibly moves something is worth beginning, and the one after it is easier to begin than the last.',
+  'why.p4.us': 'Effort is always tied to something you can watch change.',
+  'why.p4.a': 'No signal',
+  'why.p4.b': 'Visible',
+
+  'why.quote': 'If studying feels easy, that is usually the sound of nothing being learned.',
+
+  'why.next.title': 'How this becomes a study session',
+  'why.next.body': 'The mechanics, step by step, are on the how it works page.',
+  'why.next.link': 'See how it works',
+
+  // About: the story and the philosophy ----------------------------------------
+  'about.hero.eyebrow': 'About',
+  'about.hero.title': 'Why this exists',
+  'about.hero.subtitle': 'A short note on what FogMind is for, and the belief sitting underneath it.',
+
+  'about.s1.label': 'The start',
+  'about.s1.body':
+    'I built FogMind because I kept watching people work hard and get very little back. Hours with a highlighter, a chapter read three times, then a blank page when it counted. The effort was never the problem. The effort was going somewhere that could not hold it.',
+
+  'about.s2.label': 'The belief',
+  'about.s2.body':
+    'Understanding is not a pile of facts you accumulate. It is a shape you build, and it is strongest where the pieces touch. If that is true, the job of a study tool is not to store more on your behalf. It is to help you build the shape, and to be straight with you about where it is still thin.',
+
+  'about.s3.label': 'Why fog',
+  'about.s3.body':
+    'The metaphor arrived before the product did. Fog is simply the most honest description of a new subject: you can tell something is there, you just cannot make out the edges yet. What decided it was that fog does not flatter you. It does not lift because you looked at it, and it does not pretend a place is clear when you have never been there. It clears where you have actually walked. That is the fairest picture of your own understanding I could find.',
+
+  'about.s4.label': 'What it is not',
+  'about.s4.body':
+    'It is not a place to keep notes, and it is not trying to make studying effortless. Effortless studying does not work, and anything promising it is selling comfort instead of learning. This is meant to make the effort land somewhere.',
+
+  'about.s5.label': 'Where it is going',
+  'about.s5.body':
+    'It is early, and I would rather say so. The map, the questions and the progress all work today. The next stretch is about the material itself: richer kinds of question, better handling of long and messy sources, and shared maps so a class or a study group can clear one together. It will keep being built by someone who studies, for people who do.',
+
+  'about.pull': 'Fog clears where you have actually walked, and stays where you have not.',
+
+  'about.next.title': 'The reasoning, in more detail',
+  'about.next.body': 'The findings this is built on are set out on the why it works page.',
+  'about.next.link': 'Read why it works',
+
+  // Questions: practical answers only ------------------------------------------
+  'faq.hero.eyebrow': 'Questions',
+  'faq.hero.title': 'The practical answers',
+  'faq.hero.subtitle':
+    'What FogMind does today, in plain terms. If anything here reads as unclear, that is worth fixing.',
+
+  'faq.g1': 'Getting started',
+  'faq.g2': 'Your material',
+  'faq.g3': 'Practical matters',
+
+  'faq.q1': 'How do I start?',
+  'faq.a1':
+    'Create an account, add one piece of material, and your first map is a couple of minutes away. There is nothing to install and nothing to set up first.',
+  'faq.q2': 'Which formats can I bring?',
+  'faq.a2':
+    'PDF, DOCX, Markdown and plain text files, or you can paste text straight in. Notes sitting in a document somewhere are already enough to start.',
+  'faq.q3': 'How long does processing take?',
+  'faq.a3':
+    'Seconds for most material. The reading and the mapping both happen in your own browser, so there is no queue to wait in. A long PDF takes a little longer, because pulling the text out of it is the slow part.',
+
+  'faq.q4': 'What happens to the material I add?',
+  'faq.a4':
+    'The file itself never leaves your browser. It is read and mapped on your own machine, and what gets saved to your account is the result: the topics, the links between them, the questions and your progress. The original document is never uploaded or stored.',
+  'faq.q5': 'Is my material private?',
+  'faq.a5':
+    'Yes. Everything saved belongs to your account and the database enforces that row by row, so no other account can reach your documents, maps or answers. Nothing you bring is used to train anything, and nothing is shared.',
+  'faq.q6': 'Does it work in languages other than English?',
+  'faq.a6':
+    'The interface is in English, Russian and Kazakh, and material in those three is handled properly. Text in other languages will still be mapped, because the analysis works from the text itself, and questions come back in the language you brought.',
+
+  'faq.q7': 'Is my progress saved?',
+  'faq.a7':
+    'Yes. Every answer is recorded against your account, so you can close the tab and return to a map exactly as you left it, the cleared parts and the fog alike.',
+  'faq.q8': 'What does it cost?',
+  'faq.a8':
+    'Nothing at the moment. FogMind is early and free to use while it is being built, with no card required. If that ever changes, it will not change quietly.',
+
+  'faq.next.title': 'Still curious how it actually works',
+  'faq.next.body': 'The whole process, from a file to a cleared map, is on the how it works page.',
+  'faq.next.link': 'See how it works',
 } as const
 
 export type TranslationKey = keyof typeof en
