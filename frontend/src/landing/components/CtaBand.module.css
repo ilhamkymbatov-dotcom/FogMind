@@ -1,5 +1,32 @@
 .cta {
   padding-block: var(--space-8);
+  background-color: var(--wash, var(--color-bg));
+  border-block: 1px solid var(--wash-edge, transparent);
+}
+
+.warm {
+  --wash: var(--wash-warm);
+  --wash-edge: rgba(192, 102, 58, 0.16);
+}
+
+.ink {
+  --wash: var(--wash-ink);
+  --wash-edge: rgba(42, 58, 85, 0.16);
+}
+
+.moss {
+  --wash: var(--wash-moss);
+  --wash-edge: rgba(74, 92, 61, 0.16);
+}
+
+.plum {
+  --wash: var(--wash-plum);
+  --wash-edge: rgba(106, 66, 87, 0.16);
+}
+
+.sand {
+  --wash: var(--wash-sand);
+  --wash-edge: rgba(125, 95, 51, 0.16);
 }
 
 .inner {

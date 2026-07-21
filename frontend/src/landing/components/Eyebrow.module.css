@@ -7,7 +7,8 @@
   font-weight: var(--weight-medium);
   letter-spacing: var(--tracking-eyebrow);
   text-transform: uppercase;
-  color: var(--color-warm);
+  /* Set per tone below; the darker ink variants keep small caps readable. */
+  color: var(--tone, var(--color-warm-ink));
 }
 
 .rule {
@@ -15,6 +16,26 @@
   width: 18px;
   height: 2px;
   border-radius: 1px;
-  background-color: var(--color-warm);
-  opacity: 0.55;
+  background-color: currentColor;
+  opacity: 0.6;
+}
+
+.warm {
+  --tone: var(--color-warm-ink);
+}
+
+.ink {
+  --tone: var(--color-ink);
+}
+
+.moss {
+  --tone: var(--color-moss);
+}
+
+.plum {
+  --tone: var(--color-plum);
+}
+
+.sand {
+  --tone: var(--color-sand);
 }

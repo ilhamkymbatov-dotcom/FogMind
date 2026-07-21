@@ -241,4 +241,15 @@ export const ru: Dictionary = {
   'demo.q.a3': 'Ядро',
   'demo.q.answer': 'хлоропласте',
   'demo.upload.file': 'Конспект лекции.pdf',
+
+  // Landing: page specific structure ------------------------------------------
+  'home.mood.eyebrow': 'Идея',
+  'home.mood.title': 'Все начинается в тумане',
+  'home.mood.body':
+    'Новый предмет это белый лист, который вы пока не умеете читать. FogMind придает ему форму и показывает путь: отвечайте на то, что знаете, и туман отступает, открывая, что дальше.',
+
+  'product.gallery.eyebrow': 'Исследуйте',
+  'product.gallery.title': 'Выберите возможность и посмотрите ее в действии',
+
+  'hiw.stepN': 'Шаг {n}',
 }

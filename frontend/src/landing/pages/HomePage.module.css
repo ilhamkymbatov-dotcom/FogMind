@@ -1,39 +1,54 @@
+/* Home moves through four rooms: paper, sand, paper, plum. */
+
 /* Hero --------------------------------------------------------------------- */
 
 .hero {
   position: relative;
   overflow: hidden;
   padding-block: var(--space-8) var(--space-8);
+  background-color: var(--color-bg);
 }
 
 .heroBackdrop {
   position: absolute;
-  inset: -10% 0 0;
+  inset: -12% 0 0;
   pointer-events: none;
 }
 
-/* Two very soft washes give the paper a warm centre and a cool edge without
-   reading as a gradient panel. */
-.washWarm {
+/* Three overlapping washes rather than one flat tint, so the opening has
+   atmosphere without becoming a gradient panel. */
+.washA,
+.washB,
+.washC {
   position: absolute;
-  top: -12%;
-  left: 50%;
-  width: min(1100px, 130%);
-  aspect-ratio: 2 / 1;
-  translate: -50% 0;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(192, 102, 58, 0.09), rgba(192, 102, 58, 0));
 }
 
-.washCool {
-  position: absolute;
-  top: 8%;
-  left: 18%;
+.washA {
+  top: -14%;
+  left: 50%;
+  width: min(1200px, 135%);
+  aspect-ratio: 2 / 1;
+  translate: -50% 0;
+  background: radial-gradient(closest-side, rgba(192, 102, 58, 0.13), rgba(192, 102, 58, 0));
+}
+
+.washB {
+  top: 6%;
+  left: 14%;
+  width: min(820px, 95%);
+  aspect-ratio: 2 / 1;
+  translate: -50% 0;
+  background: radial-gradient(closest-side, rgba(42, 58, 85, 0.11), rgba(42, 58, 85, 0));
+}
+
+.washC {
+  top: 26%;
+  left: 88%;
   width: min(760px, 90%);
   aspect-ratio: 2 / 1;
   translate: -50% 0;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(0, 85, 255, 0.06), rgba(0, 85, 255, 0));
+  background: radial-gradient(closest-side, rgba(106, 66, 87, 0.1), rgba(106, 66, 87, 0));
 }
 
 .heroContent {
@@ -41,37 +56,27 @@
   z-index: 2;
 }
 
-.heroScene {
-  transform-style: preserve-3d;
-  will-change: transform;
-}
-
-.heroGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
-  align-items: center;
-  gap: var(--space-8);
-  padding-block: var(--space-7);
-}
-
+/* Centred title card, not a two column split. */
 .heroCopy {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  text-align: center;
   gap: var(--space-4);
+  padding-block: var(--space-7) var(--space-6);
 }
 
 .heroTitle {
-  max-width: 17ch;
-  font-size: clamp(34px, 4.6vw, var(--text-4xl));
-  line-height: 1.06;
+  max-width: 16ch;
+  font-size: clamp(38px, 6.2vw, 76px);
+  line-height: 1.02;
   font-weight: var(--weight-bold);
-  letter-spacing: -0.028em;
+  letter-spacing: -0.032em;
   text-wrap: balance;
 }
 
 .heroSubtitle {
-  max-width: 46ch;
+  max-width: 52ch;
   font-size: var(--text-lg);
   line-height: 1.6;
   color: var(--color-muted);
@@ -80,244 +85,211 @@
 .heroActions {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: var(--space-3);
   margin-top: var(--space-2);
 }
 
-/* The demo sits on a raised white card, the foreground layer of the hero. */
-.heroVisual {
+/* The map as a wide stage under the title. */
+.stage {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--space-3);
-  will-change: transform;
+  transform-style: preserve-3d;
 }
 
-.heroCard {
+.stageCard {
+  width: 100%;
+  max-width: 760px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background-color: var(--color-surface);
   box-shadow: var(--shadow-lg);
   padding: var(--space-3);
+  will-change: transform;
 }
 
-.heroCaption {
-  max-width: 42ch;
+.stageCaption {
+  max-width: 46ch;
+  text-align: center;
   font-size: var(--text-sm);
   line-height: var(--leading-sm);
   color: var(--color-muted);
 }
 
-/* Shared section furniture -------------------------------------------------- */
+/* The idea, on sand ---------------------------------------------------------- */
 
-.sectionHead {
+.idea {
+  padding-block: var(--space-8);
+  background-color: var(--wash-sand);
+  border-block: 1px solid rgba(125, 95, 51, 0.16);
+}
+
+/* An editorial split: the statement holds the left, the reading copy the
+   right, so the room fills its width instead of trailing off. */
+.ideaInner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-6) var(--space-8);
+}
+
+.ideaLead {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  margin-bottom: var(--space-6);
-}
-
-.sectionTitle {
-  max-width: 20ch;
-  font-size: clamp(26px, 3.2vw, var(--text-2xl));
-  line-height: 1.14;
-  font-weight: var(--weight-bold);
-  letter-spacing: -0.022em;
-  text-wrap: balance;
-}
-
-.prose {
-  max-width: var(--measure-tight);
-  font-size: var(--text-base);
-  line-height: 1.68;
-  color: var(--color-muted);
-}
-
-/* Reasons ------------------------------------------------------------------ */
-
-.reasons {
-  padding-block: var(--space-8);
-}
-
-.reasonGrid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-4);
 }
 
-.reasonCard {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-3);
-  height: 100%;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background-color: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-  padding: var(--space-5);
-  transition: box-shadow 240ms ease, transform 240ms ease;
-}
-
-.reasonCard:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
-}
-
-.reasonIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-sm);
-  background-color: var(--color-warm-tint);
-  color: var(--color-warm);
-}
-
-.reasonTitle {
-  font-size: var(--text-lg);
-  line-height: var(--leading-lg);
+.ideaTitle {
+  font-size: clamp(28px, 3.6vw, 46px);
+  line-height: 1.1;
   font-weight: var(--weight-bold);
-  letter-spacing: -0.012em;
+  letter-spacing: -0.026em;
+  text-wrap: balance;
 }
 
-.reasonBody {
-  font-size: var(--text-base);
+.ideaBody {
+  max-width: var(--measure);
+  font-size: var(--text-lg);
   line-height: 1.62;
   color: var(--color-muted);
 }
 
-/* Answer ------------------------------------------------------------------- */
-
-.answer {
-  padding-block: var(--space-8);
-}
-
-/* Asymmetric on purpose: the copy takes the narrower column and the demo hangs
-   slightly lower, so the row never reads as a symmetrical two up. */
-.answerGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  align-items: center;
-  gap: var(--space-8);
-}
-
-.answerCopy {
+/* Three short notes, set as a rule separated row rather than cards. */
+.notes {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+  flex-wrap: wrap;
+  gap: var(--space-5) var(--space-7);
+  margin-top: var(--space-7);
+  padding-top: var(--space-5);
+  border-top: 1px solid rgba(125, 95, 51, 0.22);
 }
 
-.answerVisual {
-  max-width: 420px;
-  margin-left: auto;
-  transform: translateY(var(--space-5));
-}
-
-/* Progress band ------------------------------------------------------------ */
-
-.band {
-  margin-block: var(--space-7);
-  padding-block: var(--space-8);
-  background-color: var(--color-warm-tint);
-  border-block: 1px solid var(--color-border);
-}
-
-.bandGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
+.note {
+  display: inline-flex;
   align-items: center;
-  gap: var(--space-8);
+  gap: var(--space-3);
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  font-weight: var(--weight-medium);
+  color: var(--color-fg);
 }
 
-.bandCopy {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+.note svg {
+  color: var(--color-sand);
+  flex-shrink: 0;
 }
 
-.bandVisual {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background-color: var(--color-surface);
-  box-shadow: var(--shadow-md);
-  padding: var(--space-4);
-}
+/* The two chapters ----------------------------------------------------------- */
 
-/* Teasers ------------------------------------------------------------------ */
-
-.teasers {
+.chapters {
   padding-block: var(--space-8);
+  background-color: var(--color-bg);
 }
 
-.teaserGrid {
+.chapterRow {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-4);
+  align-items: start;
+  gap: var(--space-5);
+  margin-top: var(--space-5);
 }
 
-/* The whole card is the link, so the target is comfortably large. */
-.teaser {
+/* Staggered: the second chapter hangs lower, so the pair is not a tidy row. */
+.chapterCell:nth-child(2) {
+  margin-top: var(--space-7);
+}
+
+.chapter {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-3);
   height: 100%;
+  min-height: 300px;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  padding: var(--space-6);
+  padding: var(--space-7) var(--space-6);
   color: inherit;
   text-decoration: none;
   transition: box-shadow 240ms ease, transform 240ms ease, border-color 240ms ease;
 }
 
-.teaser:hover,
-.teaser:focus-visible {
-  border-color: var(--color-border-strong);
+.chapter:hover,
+.chapter:focus-visible {
   box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
 }
 
-.teaserHeading {
-  font-size: var(--text-xl);
-  line-height: 1.2;
+.moss {
+  background-color: var(--wash-moss);
+  border-color: rgba(74, 92, 61, 0.2);
+}
+
+.moss .chapterIndex,
+.moss .chapterLink {
+  color: var(--color-moss);
+}
+
+.ink {
+  background-color: var(--wash-ink);
+  border-color: rgba(42, 58, 85, 0.2);
+}
+
+.ink .chapterIndex,
+.ink .chapterLink {
+  color: var(--color-ink);
+}
+
+.chapterIndex {
+  font-size: var(--text-sm);
+  line-height: 1;
   font-weight: var(--weight-bold);
-  letter-spacing: -0.018em;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
 }
 
-.teaserLine {
-  max-width: 40ch;
+.chapterHeading {
+  font-size: clamp(24px, 2.6vw, 34px);
+  line-height: 1.12;
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.022em;
+}
+
+.chapterLine {
+  max-width: 38ch;
   font-size: var(--text-base);
   line-height: 1.62;
   color: var(--color-muted);
 }
 
-.teaserLink {
+.chapterLink {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
   min-height: 44px;
   margin-top: auto;
-  color: var(--color-accent);
   font-size: var(--text-base);
   font-weight: var(--weight-medium);
 }
 
-.teaser:hover .teaserLink svg,
-.teaser:focus-visible .teaserLink svg {
-  transform: translateX(3px);
-}
-
-.teaserLink svg {
+.chapterLink svg {
   transition: transform 200ms ease;
 }
 
-/* Closing call to action ---------------------------------------------------- */
+.chapter:hover .chapterLink svg,
+.chapter:focus-visible .chapterLink svg {
+  transform: translateX(3px);
+}
+
+/* Closing call to action, on plum -------------------------------------------- */
 
 .cta {
   padding-block: var(--space-8);
+  background-color: var(--wash-plum);
+  border-block: 1px solid rgba(106, 66, 87, 0.16);
 }
 
 .ctaInner {
@@ -338,6 +310,7 @@
   line-height: 1.15;
   font-weight: var(--weight-bold);
   letter-spacing: -0.022em;
+  text-wrap: balance;
 }
 
 .ctaBody {
@@ -347,48 +320,44 @@
   color: var(--color-muted);
 }
 
-/* Responsive ---------------------------------------------------------------- */
+/* Responsive ----------------------------------------------------------------- */
 
-@media (max-width: 980px) {
-  .heroGrid,
-  .answerGrid,
-  .bandGrid {
+@media (max-width: 860px) {
+  .chapterRow {
     grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-6);
+    gap: var(--space-4);
   }
 
-  .answerVisual {
-    max-width: 460px;
-    margin-inline: auto;
-    transform: none;
+  .chapterCell:nth-child(2) {
+    margin-top: 0;
   }
 
-  .reasonGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .chapter {
+    min-height: 0;
+    padding: var(--space-6) var(--space-5);
   }
 }
 
 @media (max-width: 720px) {
-  .reasonGrid,
-  .teaserGrid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
   .hero,
-  .reasons,
-  .answer,
-  .band,
-  .teasers,
+  .idea,
+  .chapters,
   .cta {
     padding-block: var(--space-7);
   }
 
-  .heroGrid {
-    padding-block: var(--space-5);
+  .heroCopy {
+    padding-block: var(--space-5) var(--space-5);
   }
 
-  .teaser {
-    padding: var(--space-5);
+  .ideaInner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+  }
+
+  .notes {
+    gap: var(--space-4);
+    margin-top: var(--space-6);
   }
 
   .ctaInner {
@@ -396,14 +365,8 @@
   }
 }
 
-/* The tilt is pointer only, but make sure nothing clips on the smallest
-   screens once the scene stacks. */
 @media (max-width: 420px) {
-  .heroCard {
+  .stageCard {
     padding: var(--space-2);
-  }
-
-  .reasonCard {
-    padding: var(--space-4);
   }
 }

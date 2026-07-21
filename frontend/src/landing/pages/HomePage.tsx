@@ -8,218 +8,166 @@ import { Container } from '../components/Container'
 import { Eyebrow } from '../components/Eyebrow'
 import { Constellation } from '../components/fx/Constellation'
 import { MiniGraphDemo } from '../components/demos/MiniGraphDemo'
-import { MiniProgressDemo } from '../components/demos/MiniProgressDemo'
-import { MiniQuestionDemo } from '../components/demos/MiniQuestionDemo'
 import { ScrollReveal } from '../components/motion/ScrollReveal'
-import { Stagger, StaggerItem } from '../components/motion/Stagger'
 import { usePointerTilt } from '../components/usePointerTilt'
 import { usePrefersReducedMotion } from '../components/motion/useMediaQuery'
 import styles from './HomePage.module.css'
 
+/*
+ * Home is the emotional pitch, and its shape is deliberately unlike the other
+ * two pages: one cinematic opening, one full bleed idea, and two doors out.
+ * No card grids and no step rails live here, those belong to Product and How
+ * it works respectively.
+ */
+
 /**
- * The hero. Three layers at different depths: a soft wash and the drifting
- * constellation behind, the copy in the mid ground, and the live map demo in
- * front. Scrolling separates them, and the pointer tilts the whole scene, so
- * the opening reads as space rather than a flat banner.
+ * The cinematic opening. The headline is centred and the live map sits below it
+ * as a wide stage rather than beside it, so the page opens like a title card.
  */
 function Hero() {
   const { t } = useTranslation()
   const ref = useRef<HTMLElement>(null)
   const reduced = usePrefersReducedMotion()
-  const tilt = usePointerTilt({ max: 4.5, shift: 14 })
+  const tilt = usePointerTilt({ max: 3.5, shift: 16 })
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] })
-  const backdropY = useTransform(scrollYProgress, [0, 1], [0, 70])
-  const contentY = useTransform(scrollYProgress, [0, 1], [0, -40])
-  const contentOpacity = useTransform(scrollYProgress, [0, 0.9], [1, 0])
+  const backdropY = useTransform(scrollYProgress, [0, 1], [0, 90])
+  const copyY = useTransform(scrollYProgress, [0, 1], [0, -50])
+  const copyOpacity = useTransform(scrollYProgress, [0, 0.92], [1, 0])
 
-  const inner = (
-    <div ref={tilt} className={styles.heroScene}>
-      <div className={styles.heroGrid}>
-        <div className={styles.heroCopy} data-tilt-depth="0.35">
-          <Eyebrow labelKey="hero.eyebrow" />
-          <h1 className={styles.heroTitle}>{t('hero.title')}</h1>
-          <p className={styles.heroSubtitle}>{t('hero.subtitle')}</p>
-          <div className={styles.heroActions}>
-            <Button to="/signup" variant="primary" size="lg">
-              {t('hero.primary')}
-            </Button>
-            <Button to="/how-it-works" variant="secondary" size="lg">
-              {t('hero.secondary')}
-            </Button>
-          </div>
-        </div>
-
-        <div className={styles.heroVisual} data-tilt-depth="1">
-          <div className={styles.heroCard}>
-            <MiniGraphDemo />
-          </div>
-          <p className={styles.heroCaption}>{t('hero.demoCaption')}</p>
-        </div>
+  const copy = (
+    <div className={styles.heroCopy}>
+      <Eyebrow labelKey="hero.eyebrow" tone="warm" />
+      <h1 className={styles.heroTitle}>{t('hero.title')}</h1>
+      <p className={styles.heroSubtitle}>{t('hero.subtitle')}</p>
+      <div className={styles.heroActions}>
+        <Button to="/signup" variant="primary" size="lg">
+          {t('hero.primary')}
+        </Button>
+        <Button to="/how-it-works" variant="secondary" size="lg">
+          {t('hero.secondary')}
+        </Button>
       </div>
+    </div>
+  )
+
+  const backdrop = (
+    <div className={styles.heroBackdrop} aria-hidden="true">
+      <span className={styles.washA} />
+      <span className={styles.washB} />
+      <span className={styles.washC} />
+      <Constellation />
     </div>
   )
 
   return (
     <section ref={ref} className={styles.hero}>
-      {reduced ? (
-        <div className={styles.heroBackdrop} aria-hidden="true">
-          <span className={styles.washWarm} />
-          <span className={styles.washCool} />
-          <Constellation />
-        </div>
-      ) : (
-        <motion.div className={styles.heroBackdrop} style={{ y: backdropY }} aria-hidden="true">
-          <span className={styles.washWarm} />
-          <span className={styles.washCool} />
-          <Constellation />
-        </motion.div>
-      )}
+      {reduced ? backdrop : <motion.div style={{ y: backdropY }}>{backdrop}</motion.div>}
 
       <Container className={styles.heroContent}>
-        {reduced ? inner : <motion.div style={{ y: contentY, opacity: contentOpacity }}>{inner}</motion.div>}
+        {reduced ? copy : <motion.div style={{ y: copyY, opacity: copyOpacity }}>{copy}</motion.div>}
+
+        <div ref={tilt} className={styles.stage}>
+          <div className={styles.stageCard} data-tilt-depth="1">
+            <MiniGraphDemo />
+          </div>
+          <p className={styles.stageCaption}>{t('hero.demoCaption')}</p>
+        </div>
       </Container>
     </section>
   )
 }
 
-/** Three reasons, as a row of cards rather than another wall of text. */
-interface ReasonSpec {
-  icon: typeof Waypoints
-  titleKey: TranslationKey
-  bodyKey: TranslationKey
-}
-
-const REASONS: readonly ReasonSpec[] = [
-  { icon: Waypoints, titleKey: 'home.card1.title', bodyKey: 'home.card1.body' },
-  { icon: MessageCircleQuestion, titleKey: 'home.card2.title', bodyKey: 'home.card2.body' },
-  { icon: TrendingUp, titleKey: 'home.card3.title', bodyKey: 'home.card3.body' },
+/** The idea, full bleed on a deep sand wash. One statement, three short notes. */
+const NOTES: readonly { icon: typeof Waypoints; key: TranslationKey }[] = [
+  { icon: Waypoints, key: 'home.card1.title' },
+  { icon: MessageCircleQuestion, key: 'home.card2.title' },
+  { icon: TrendingUp, key: 'home.card3.title' },
 ]
 
-function Reasons() {
+function Idea() {
   const { t } = useTranslation()
 
   return (
-    <section className={styles.reasons}>
+    <section className={styles.idea}>
       <Container>
         <ScrollReveal>
-          <div className={styles.sectionHead}>
-            <Eyebrow labelKey="home.cards.eyebrow" />
-            <h2 className={styles.sectionTitle}>{t('home.cards.title')}</h2>
+          <div className={styles.ideaInner}>
+            <div className={styles.ideaLead}>
+              <Eyebrow labelKey="home.mood.eyebrow" tone="sand" />
+              <h2 className={styles.ideaTitle}>{t('home.mood.title')}</h2>
+            </div>
+            <p className={styles.ideaBody}>{t('home.mood.body')}</p>
           </div>
         </ScrollReveal>
 
-        <Stagger className={styles.reasonGrid}>
-          {REASONS.map(({ icon: Icon, titleKey, bodyKey }) => (
-            <StaggerItem key={titleKey}>
-              <article className={styles.reasonCard}>
-                <span className={styles.reasonIcon}>
-                  <Icon size={20} aria-hidden="true" />
-                </span>
-                <h3 className={styles.reasonTitle}>{t(titleKey)}</h3>
-                <p className={styles.reasonBody}>{t(bodyKey)}</p>
-              </article>
-            </StaggerItem>
-          ))}
-        </Stagger>
+        <ScrollReveal delay={0.08}>
+          <ul className={styles.notes}>
+            {NOTES.map(({ icon: Icon, key }) => (
+              <li key={key} className={styles.note}>
+                <Icon size={17} aria-hidden="true" />
+                {t(key)}
+              </li>
+            ))}
+          </ul>
+        </ScrollReveal>
       </Container>
     </section>
   )
 }
 
-/** Asymmetric: the question demo sits slightly low and wide of the copy. */
-function AnswerSection() {
-  const { t } = useTranslation()
-
-  return (
-    <section className={styles.answer}>
-      <Container>
-        <div className={styles.answerGrid}>
-          <ScrollReveal>
-            <div className={styles.answerCopy}>
-              <Eyebrow labelKey="home.answer.eyebrow" />
-              <h2 className={styles.sectionTitle}>{t('home.answer.title')}</h2>
-              <p className={styles.prose}>{t('home.answer.body')}</p>
-            </div>
-          </ScrollReveal>
-          <ScrollReveal delay={0.08}>
-            <div className={styles.answerVisual}>
-              <MiniQuestionDemo />
-            </div>
-          </ScrollReveal>
-        </div>
-      </Container>
-    </section>
-  )
-}
-
-/** Full width warm band, so the rhythm breaks out of the two column grid. */
-function ProgressBand() {
-  const { t } = useTranslation()
-
-  return (
-    <section className={styles.band}>
-      <Container>
-        <div className={styles.bandGrid}>
-          <ScrollReveal>
-            <div className={styles.bandCopy}>
-              <Eyebrow labelKey="home.progress.eyebrow" />
-              <h2 className={styles.sectionTitle}>{t('home.progress.title')}</h2>
-              <p className={styles.prose}>{t('home.progress.body')}</p>
-            </div>
-          </ScrollReveal>
-          <ScrollReveal delay={0.08}>
-            <div className={styles.bandVisual}>
-              <MiniProgressDemo />
-            </div>
-          </ScrollReveal>
-        </div>
-      </Container>
-    </section>
-  )
-}
-
-interface TeaserSpec {
+/**
+ * The two doors out of Home. Staggered heights and two different washes, so
+ * this reads as a pair of chapter openings rather than a card grid.
+ */
+interface ChapterSpec {
   headingKey: TranslationKey
   lineKey: TranslationKey
   linkKey: TranslationKey
   to: string
+  tone: 'moss' | 'ink'
 }
 
-const TEASERS: readonly TeaserSpec[] = [
-  { headingKey: 'home.hiw.heading', lineKey: 'home.hiw.line', linkKey: 'home.hiw.link', to: '/how-it-works' },
+const CHAPTERS: readonly ChapterSpec[] = [
+  {
+    headingKey: 'home.hiw.heading',
+    lineKey: 'home.hiw.line',
+    linkKey: 'home.hiw.link',
+    to: '/how-it-works',
+    tone: 'moss',
+  },
   {
     headingKey: 'home.product.heading',
     lineKey: 'home.product.line',
     linkKey: 'home.product.link',
     to: '/product',
+    tone: 'ink',
   },
 ]
 
-function Teasers() {
+function Chapters() {
   const { t } = useTranslation()
 
   return (
-    <section className={styles.teasers}>
+    <section className={styles.chapters}>
       <Container>
         <ScrollReveal>
-          <div className={styles.sectionHead}>
-            <Eyebrow labelKey="home.explore.eyebrow" />
-          </div>
+          <Eyebrow labelKey="home.explore.eyebrow" tone="plum" />
         </ScrollReveal>
-        <Stagger className={styles.teaserGrid}>
-          {TEASERS.map(({ headingKey, lineKey, linkKey, to }) => (
-            <StaggerItem key={headingKey}>
-              <Link to={to} className={styles.teaser}>
-                <h2 className={styles.teaserHeading}>{t(headingKey)}</h2>
-                <p className={styles.teaserLine}>{t(lineKey)}</p>
-                <span className={styles.teaserLink}>
+        <div className={styles.chapterRow}>
+          {CHAPTERS.map(({ headingKey, lineKey, linkKey, to, tone }, index) => (
+            <ScrollReveal key={headingKey} delay={index * 0.1} className={styles.chapterCell}>
+              <Link to={to} className={[styles.chapter, styles[tone]].join(' ')}>
+                <span className={styles.chapterIndex}>{`0${index + 1}`}</span>
+                <h2 className={styles.chapterHeading}>{t(headingKey)}</h2>
+                <p className={styles.chapterLine}>{t(lineKey)}</p>
+                <span className={styles.chapterLink}>
                   {t(linkKey)}
                   <ArrowRight size={16} aria-hidden="true" />
                 </span>
               </Link>
-            </StaggerItem>
+            </ScrollReveal>
           ))}
-        </Stagger>
+        </div>
       </Container>
     </section>
   )
@@ -249,10 +197,8 @@ function HomePage() {
   return (
     <>
       <Hero />
-      <Reasons />
-      <AnswerSection />
-      <ProgressBand />
-      <Teasers />
+      <Idea />
+      <Chapters />
       <ClosingCta />
     </>
   )

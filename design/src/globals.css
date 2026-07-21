@@ -66,9 +66,15 @@ select {
   /* Color.
      The page is warm off white paper; cards and panels are true white laid on
      top, so surfaces read as stacked sheets rather than one flat field.
-     #0055FF stays the one action color. A single warm accent (terracotta)
-     carries highlights and small details only, never a large fill. Soft tints
-     of either are allowed as quiet section washes. No rainbow gradients. */
+     #0055FF stays the one action color and terracotta the warm accent.
+
+     Four supporting hues (ink, moss, plum, sand) round out the palette. They
+     exist so a long page can move through different rooms instead of one white
+     sheet. Each ships as a readable ink for text and icons, and a low
+     saturation wash for section backgrounds. Rules: washes and small details
+     only, never a large saturated fill, and never more than a couple of hues
+     in view at once. Every ink below clears 4.5:1 on its own wash and on
+     paper. No rainbow gradients. */
   --color-bg: #faf9f7;
   --color-fg: #16130f;
   --color-muted: #6b6560;
@@ -79,9 +85,25 @@ select {
   --color-accent: #0055ff;
   --color-accent-hover: #0044cc;
   --color-accent-tint: #eef2ff;
-  /* The warm supporting accent. Small details and highlights only. */
+  /* The warm supporting accent. Small details and highlights only.
+     --color-warm is the brand terracotta, used for decorative fills such as
+     icon tiles and rules. Text set in terracotta uses --color-warm-ink, which
+     is the same hue darkened until it clears 4.5:1 on every wash here. */
   --color-warm: #c0663a;
+  --color-warm-ink: #a85228;
   --color-warm-tint: #fbf1ea;
+
+  /* Supporting hues: ink for text and icons, wash for section backgrounds. */
+  --color-ink: #2a3a55;
+  --wash-ink: #e9edf4;
+  --color-moss: #4a5c3d;
+  --wash-moss: #e9efe3;
+  --color-plum: #6a4257;
+  --wash-plum: #f2eaef;
+  --color-sand: #7d5f33;
+  --wash-sand: #f4ebdd;
+  /* A deeper warm wash for the pages that want more weight than paper. */
+  --wash-warm: #f8ece2;
 
   /* Corners. Comfortable rounding on cards and panels, tighter on controls.
      Nothing pill shaped. */

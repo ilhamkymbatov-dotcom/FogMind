@@ -1,146 +1,158 @@
-/* Shared type -------------------------------------------------------------- */
+/* How it works is one long moss room with a rail running down it. */
 
-.copy {
+.journey {
+  padding-block: var(--space-8);
+  background-color: var(--wash-moss);
+  border-block: 1px solid rgba(74, 92, 61, 0.18);
+}
+
+.journeyHead {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-5) var(--space-8);
+  margin-bottom: var(--space-8);
+}
+
+.journeyLeadCol {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
 }
 
-.sectionTitle {
-  max-width: 20ch;
-  font-size: clamp(26px, 3.2vw, var(--text-2xl));
-  line-height: 1.14;
+.journeyTitle {
+  font-size: clamp(28px, 3.6vw, 46px);
+  line-height: 1.1;
   font-weight: var(--weight-bold);
-  letter-spacing: -0.022em;
+  letter-spacing: -0.026em;
   text-wrap: balance;
 }
 
-.prose {
-  max-width: var(--measure-tight);
-  font-size: var(--text-base);
-  line-height: 1.68;
+.journeyLead {
+  max-width: var(--measure);
+  font-size: var(--text-lg);
+  line-height: 1.62;
   color: var(--color-muted);
 }
 
-/* Intake ------------------------------------------------------------------- */
+/* The rail ------------------------------------------------------------------ */
 
-.intake {
-  padding-block: var(--space-8);
-}
-
-.intakeGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
-  align-items: center;
+.rail {
+  position: relative;
+  display: flex;
+  flex-direction: column;
   gap: var(--space-8);
 }
 
-.intakeVisual {
-  max-width: 460px;
-  width: 100%;
-  margin-inline: auto;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background-color: var(--color-surface);
-  box-shadow: var(--shadow-lg);
-  padding: var(--space-3);
+/* One continuous line behind every marker. It starts and ends at the first and
+   last dot rather than running the full height, so the path reads as finished
+   rather than cut off. */
+.rail::before {
+  content: '';
+  position: absolute;
+  left: 17px;
+  top: 18px;
+  bottom: 18px;
+  width: 2px;
+  border-radius: 1px;
+  background: linear-gradient(
+    180deg,
+    rgba(74, 92, 61, 0.1) 0%,
+    rgba(74, 92, 61, 0.34) 12%,
+    rgba(74, 92, 61, 0.34) 88%,
+    rgba(74, 92, 61, 0.1) 100%
+  );
 }
 
-/* Pinned journey ---------------------------------------------------------- */
-
-/* The tall outer track gives the scroll room; the inner block pins while the
-   user moves through it and the graph assembles step by step. */
-.journey {
-  position: relative;
-  height: 280vh;
-}
-
-.sticky {
-  position: sticky;
-  top: 64px;
-  height: calc(100vh - 64px);
-  display: flex;
-  align-items: center;
-}
-
-.grid {
+/* Marker, copy and visual are three columns of one wide row, so each stop
+   spans the page instead of hugging the rail. */
+.stop {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 36px minmax(0, 1fr) minmax(0, 0.95fr);
   align-items: center;
-  gap: var(--space-7);
-  width: 100%;
+  gap: var(--space-5) var(--space-6);
 }
 
-.steps {
+/* A stop with no visual lets its copy run across both content columns. */
+.stop > .stopBody:last-child {
+  grid-column: 2 / -1;
+}
+
+.marker {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+  justify-content: center;
 }
 
-.stepRow {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  min-height: 44px;
-}
-
-.stepIndex {
+.dot {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
-  flex-shrink: 0;
-  border-radius: var(--radius-xs);
-  background-color: var(--color-sunken);
-  font-size: var(--text-xs);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(74, 92, 61, 0.35);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  font-size: var(--text-sm);
   line-height: 1;
-  font-weight: var(--weight-medium);
-  color: var(--color-muted);
-  transition: color 200ms ease, background-color 200ms ease;
-}
-
-.stepTitle {
-  font-size: var(--text-lg);
-  line-height: var(--leading-lg);
   font-weight: var(--weight-bold);
-  color: var(--color-muted);
-  transition: color 200ms ease, opacity 200ms ease;
-  opacity: 0.5;
+  color: var(--color-moss);
+  font-variant-numeric: tabular-nums;
 }
 
-.stepRowActive .stepIndex {
-  background-color: var(--color-warm-tint);
-  color: var(--color-warm);
+.stopBody {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding-bottom: var(--space-2);
 }
 
-.stepRowActive .stepTitle {
-  color: var(--color-fg);
-  opacity: 1;
+.stopStep {
+  font-size: var(--text-eyebrow);
+  line-height: 16px;
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-moss);
 }
 
-/* Reserved height so the swapping body text never shifts the layout. */
-.stepBody {
-  margin-top: var(--space-4);
-  min-height: calc(var(--leading-base) * 4);
-  max-width: 44ch;
+.stopTitle {
+  font-size: clamp(22px, 2.4vw, 30px);
+  line-height: 1.16;
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.stopText {
+  max-width: 52ch;
   font-size: var(--text-base);
   line-height: 1.68;
   color: var(--color-muted);
 }
 
-/* Graph panel ------------------------------------------------------------- */
-
-.graphPanel {
+/* Visuals sit inside the stop, on white, so the rail stays the spine. */
+.stopVisual {
+  width: 100%;
+  max-width: 440px;
+  justify-self: end;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  background:
-    radial-gradient(120% 90% at 50% 0%, #ffffff 0%, var(--color-sunken) 100%);
+  background-color: var(--color-surface);
   box-shadow: var(--shadow-md);
-  padding: var(--space-5);
+  padding: var(--space-3);
 }
 
-.graphSvg {
+/* The cleared map that closes the journey ------------------------------------ */
+
+.mapPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.mapSvg {
   display: block;
   width: 100%;
   height: auto;
@@ -150,9 +162,7 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: var(--space-4);
-  padding-top: var(--space-4);
-  transition: opacity 400ms ease;
+  gap: var(--space-3) var(--space-4);
 }
 
 .legendItem {
@@ -165,106 +175,51 @@
   color: var(--color-muted);
 }
 
-/* Closing band ------------------------------------------------------------- */
-
-.band {
-  margin-block: var(--space-6);
-  padding-block: var(--space-8);
-  background-color: var(--color-warm-tint);
-  border-block: 1px solid var(--color-border);
-}
-
-.bandGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
-  align-items: center;
-  gap: var(--space-8);
-}
-
-.bandVisual {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background-color: var(--color-surface);
-  box-shadow: var(--shadow-md);
-  padding: var(--space-4);
-}
-
-/* Stacked fallback: narrow screens and reduced motion ---------------------- */
-
-.stacked {
-  padding-block: var(--space-7);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-}
-
-.stackedStep {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background-color: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-  padding: var(--space-5);
-}
-
-.stackedIndex {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-xs);
-  background-color: var(--color-warm-tint);
-  color: var(--color-warm);
-  font-size: var(--text-xs);
-  line-height: 1;
-  font-weight: var(--weight-medium);
-}
-
-.stackedTitle {
-  font-size: var(--text-lg);
-  line-height: var(--leading-lg);
-  font-weight: var(--weight-bold);
-  letter-spacing: -0.014em;
-}
-
-.stackedBody {
-  font-size: var(--text-base);
-  line-height: 1.65;
-  color: var(--color-muted);
-  max-width: 46ch;
-}
-
-/* Responsive ---------------------------------------------------------------- */
-
-@media (max-width: 980px) {
-  .intakeGrid,
-  .bandGrid {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-6);
-  }
-}
+/* Responsive ----------------------------------------------------------------- */
 
 @media (max-width: 720px) {
-  .intake,
-  .band {
+  .journey {
     padding-block: var(--space-7);
+  }
+
+  .journeyHead {
+    grid-template-columns: minmax(0, 1fr);
+    margin-bottom: var(--space-7);
+  }
+
+  .rail {
+    gap: var(--space-7);
+  }
+
+  .rail::before {
+    left: 14px;
+  }
+
+  .stop {
+    grid-template-columns: 30px minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-4);
+  }
+
+  .stop > .stopBody:last-child,
+  .stopVisual {
+    grid-column: 2;
+  }
+
+  .stopVisual {
+    justify-self: stretch;
+    margin-top: var(--space-2);
+  }
+
+  .dot {
+    width: 30px;
+    height: 30px;
+    font-size: var(--text-xs);
   }
 }
 
 @media (max-width: 420px) {
-  .intakeVisual {
+  .stopVisual {
     padding: var(--space-2);
-  }
-
-  .stackedStep {
-    padding: var(--space-4);
-  }
-
-  .graphPanel {
-    padding: var(--space-4);
   }
 }

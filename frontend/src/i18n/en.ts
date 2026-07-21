@@ -254,6 +254,17 @@ export const en = {
   'demo.q.a3': 'Nucleus',
   'demo.q.answer': 'chloroplast',
   'demo.upload.file': 'Lecture notes.pdf',
+
+  // Landing: page specific structure ------------------------------------------
+  'home.mood.eyebrow': 'The idea',
+  'home.mood.title': 'Everything starts in the fog',
+  'home.mood.body':
+    'A new subject is a white sheet you cannot read yet. FogMind gives it shape, then hands you the way through: answer what you know, and the mist pulls back to show what comes next.',
+
+  'product.gallery.eyebrow': 'Explore',
+  'product.gallery.title': 'Pick a capability and watch it run',
+
+  'hiw.stepN': 'Step {n}',
 } as const
 
 export type TranslationKey = keyof typeof en

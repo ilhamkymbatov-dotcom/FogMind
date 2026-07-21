@@ -241,4 +241,15 @@ export const kk: Dictionary = {
   'demo.q.a3': 'Ядро',
   'demo.q.answer': 'хлоропластында',
   'demo.upload.file': 'Дәріс конспектісі.pdf',
+
+  // Landing: page specific structure ------------------------------------------
+  'home.mood.eyebrow': 'Идея',
+  'home.mood.title': 'Бәрі тұманнан басталады',
+  'home.mood.body':
+    'Жаңа пән әзірге оқи алмайтын ақ парақ іспетті. FogMind оған пішін беріп, жолды көрсетеді: білетініңізге жауап беріңіз, тұман шегініп, келесі не екенін ашады.',
+
+  'product.gallery.eyebrow': 'Зерттеңіз',
+  'product.gallery.title': 'Мүмкіндікті таңдап, жұмысын көріңіз',
+
+  'hiw.stepN': '{n} қадам',
 }

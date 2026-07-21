@@ -2,7 +2,7 @@ import { motion, useScroll, useTransform } from 'framer-motion'
 import { useRef } from 'react'
 import { useTranslation, type TranslationKey } from '../../i18n'
 import { Container } from './Container'
-import { Eyebrow } from './Eyebrow'
+import { Eyebrow, type EyebrowTone } from './Eyebrow'
 import { ScrollReveal } from './motion/ScrollReveal'
 import { usePrefersReducedMotion } from './motion/useMediaQuery'
 import styles from './PageHero.module.css'
@@ -12,6 +12,8 @@ export interface PageHeroProps {
   subtitleKey: TranslationKey
   /** Small label above the title, announcing the section. */
   eyebrowKey?: TranslationKey
+  /** The hue this page runs on, tinting the eyebrow and the hero wash. */
+  tone?: EyebrowTone
 }
 
 /**
@@ -19,7 +21,7 @@ export interface PageHeroProps {
  * As the user scrolls past, the text gently lifts, shrinks and fades, which
  * gives the page depth without touching layout.
  */
-export function PageHero({ titleKey, subtitleKey, eyebrowKey }: PageHeroProps) {
+export function PageHero({ titleKey, subtitleKey, eyebrowKey, tone = 'warm' }: PageHeroProps) {
   const { t } = useTranslation()
   const ref = useRef<HTMLElement>(null)
   const reduced = usePrefersReducedMotion()
@@ -31,7 +33,7 @@ export function PageHero({ titleKey, subtitleKey, eyebrowKey }: PageHeroProps) {
   const inner = (
     <ScrollReveal>
       <div className={styles.inner}>
-        {eyebrowKey ? <Eyebrow labelKey={eyebrowKey} /> : null}
+        {eyebrowKey ? <Eyebrow labelKey={eyebrowKey} tone={tone} /> : null}
         <h1 className={styles.title}>{t(titleKey)}</h1>
         <p className={styles.subtitle}>{t(subtitleKey)}</p>
       </div>
@@ -39,7 +41,7 @@ export function PageHero({ titleKey, subtitleKey, eyebrowKey }: PageHeroProps) {
   )
 
   return (
-    <section ref={ref} className={styles.hero}>
+    <section ref={ref} className={[styles.hero, styles[tone]].join(' ')}>
       <Container>
         {reduced ? inner : <motion.div style={{ y, opacity, scale }}>{inner}</motion.div>}
       </Container>

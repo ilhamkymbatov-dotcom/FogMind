@@ -1,105 +1,164 @@
-/* Shared type -------------------------------------------------------------- */
+/* Product runs on ink for the gallery, then paper for the tinted grid. */
 
-.title {
-  max-width: 20ch;
-  font-size: clamp(26px, 3.2vw, var(--text-2xl));
-  line-height: 1.14;
-  font-weight: var(--weight-bold);
-  letter-spacing: -0.022em;
-  text-wrap: balance;
+/* Gallery -------------------------------------------------------------------- */
+
+.gallery {
+  padding-block: var(--space-8);
+  background-color: var(--wash-ink);
+  border-block: 1px solid rgba(42, 58, 85, 0.16);
 }
 
-.prose {
-  max-width: var(--measure-tight);
-  font-size: var(--text-base);
-  line-height: 1.68;
-  color: var(--color-muted);
-}
-
-.sectionHead {
+.galleryHead {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
   margin-bottom: var(--space-6);
 }
 
-/* Features ----------------------------------------------------------------- */
-
-.feature {
-  padding-block: var(--space-8);
+.galleryTitle {
+  max-width: 24ch;
+  font-size: clamp(26px, 3.2vw, 42px);
+  line-height: 1.12;
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.024em;
+  text-wrap: balance;
 }
 
-/* Deliberately uneven columns, and the mirrored variant swaps sides only on
-   wide screens so the copy always leads when stacked. */
-.featureGrid {
+/* A control rail beside a stage, the shape that makes this page a gallery. */
+.galleryGrid {
   display: grid;
-  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  grid-template-columns: minmax(0, 0.62fr) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-6);
+}
+
+.tabs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.tab {
+  display: flex;
   align-items: center;
-  gap: var(--space-8);
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 60px;
+  border: 1px solid rgba(42, 58, 85, 0.16);
+  border-radius: var(--radius);
+  background-color: rgba(255, 255, 255, 0.6);
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease,
+    box-shadow 200ms ease;
 }
 
-.mirrored .featureCopy {
-  order: 2;
+.tab:hover {
+  background-color: rgba(255, 255, 255, 0.85);
+  color: var(--color-fg);
 }
 
-.featureCopy {
+.tabActive {
+  background-color: var(--color-surface);
+  border-color: var(--color-ink);
+  box-shadow: var(--shadow-md);
+  color: var(--color-fg);
+}
+
+.tabIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  background-color: var(--wash-ink);
+  color: var(--color-ink);
+  transition: background-color 200ms ease;
+}
+
+.tabActive .tabIcon {
+  background-color: var(--color-ink);
+  color: var(--color-surface);
+}
+
+.tabLabel {
+  min-width: 0;
+  font-size: var(--text-base);
+  line-height: 1.3;
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.012em;
+}
+
+/* The stage --------------------------------------------------------------- */
+
+.stage {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-5);
+}
+
+.stageInner {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
 }
 
-.featureVisual {
-  max-width: 460px;
-  width: 100%;
-  margin-inline: auto;
-}
-
-/* A raised white card for the map demo, so it reads as the top surface. */
-.raised {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background-color: var(--color-surface);
-  box-shadow: var(--shadow-lg);
-  padding: var(--space-3);
-}
-
-/* Band --------------------------------------------------------------------- */
-
-.band {
-  margin-block: var(--space-6);
-  padding-block: var(--space-8);
-  background-color: var(--color-warm-tint);
-  border-block: 1px solid var(--color-border);
-}
-
-.bandGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
+/* Reserved height so swapping capability never jumps the layout. */
+.stageVisual {
+  min-height: 268px;
+  display: flex;
   align-items: center;
-  gap: var(--space-8);
 }
 
-.bandVisual {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background-color: var(--color-surface);
-  box-shadow: var(--shadow-md);
-  padding: var(--space-4);
+.stageVisual > * {
+  width: 100%;
 }
 
-/* Three card row ------------------------------------------------------------ */
+.stageBody {
+  max-width: 54ch;
+  font-size: var(--text-base);
+  line-height: 1.68;
+  color: var(--color-muted);
+}
 
-.more {
+/* Detail grid ---------------------------------------------------------------- */
+
+.details {
   padding-block: var(--space-8);
+  background-color: var(--color-bg);
 }
 
-.moreGrid {
+.detailsHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.detailsTitle {
+  max-width: 22ch;
+  font-size: clamp(26px, 3.2vw, var(--text-2xl));
+  line-height: 1.14;
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.022em;
+}
+
+.detailGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-4);
 }
 
-.card {
+.detail {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -107,106 +166,144 @@
   height: 100%;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  background-color: var(--color-surface);
   box-shadow: var(--shadow-sm);
   padding: var(--space-5);
   transition: box-shadow 240ms ease, transform 240ms ease;
 }
 
-.card:hover {
+.detail:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
 }
 
-.cardIcon {
+/* Each card sits in its own hue, so the grid reads as a set of related but
+   distinct capabilities. */
+.plum {
+  background-color: var(--wash-plum);
+  border-color: rgba(106, 66, 87, 0.2);
+}
+
+.plum .detailIcon {
+  background-color: rgba(106, 66, 87, 0.14);
+  color: var(--color-plum);
+}
+
+.moss {
+  background-color: var(--wash-moss);
+  border-color: rgba(74, 92, 61, 0.2);
+}
+
+.moss .detailIcon {
+  background-color: rgba(74, 92, 61, 0.14);
+  color: var(--color-moss);
+}
+
+.sand {
+  background-color: var(--wash-sand);
+  border-color: rgba(125, 95, 51, 0.2);
+}
+
+.sand .detailIcon {
+  background-color: rgba(125, 95, 51, 0.14);
+  color: var(--color-sand);
+}
+
+.detailIcon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 40px;
   height: 40px;
   border-radius: var(--radius-sm);
-  background-color: var(--color-warm-tint);
-  color: var(--color-warm);
 }
 
-.cardTitle {
+.detailTitle {
   font-size: var(--text-lg);
   line-height: var(--leading-lg);
   font-weight: var(--weight-bold);
   letter-spacing: -0.012em;
 }
 
-.cardBody {
+.detailBody {
   font-size: var(--text-base);
   line-height: 1.62;
   color: var(--color-muted);
 }
-
-/* Format chips -------------------------------------------------------------- */
 
 .chips {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
   margin-top: auto;
-  padding-top: var(--space-2);
+  padding-top: var(--space-3);
 }
 
 .chip {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  border: 1px solid var(--color-border);
+  border: 1px solid rgba(125, 95, 51, 0.28);
   border-radius: var(--radius-xs);
-  background-color: var(--color-sunken);
-  padding: var(--space-2) var(--space-3);
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: var(--space-1) var(--space-3);
   font-size: var(--text-sm);
   line-height: var(--leading-sm);
   font-weight: var(--weight-medium);
   color: var(--color-fg);
 }
 
-.chip svg {
-  color: var(--color-warm);
-}
-
-/* Responsive ---------------------------------------------------------------- */
+/* Responsive ----------------------------------------------------------------- */
 
 @media (max-width: 980px) {
-  .featureGrid,
-  .bandGrid {
+  .galleryGrid {
     grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-6);
+    gap: var(--space-5);
   }
 
-  /* Stacked, the copy always leads. */
-  .mirrored .featureCopy {
-    order: 0;
+  /* The rail becomes a horizontal strip above the stage. */
+  .tabs {
+    flex-direction: row;
+    flex-wrap: wrap;
   }
 
-  .moreGrid {
+  .tab {
+    flex: 1 1 200px;
+    min-height: 56px;
+  }
+
+  .detailGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 720px) {
-  .moreGrid {
+  .gallery,
+  .details {
+    padding-block: var(--space-7);
+  }
+
+  .detailGrid {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .feature,
-  .band,
-  .more {
-    padding-block: var(--space-7);
+  .tabLabel {
+    font-size: var(--text-sm);
+  }
+
+  .stageVisual {
+    min-height: 0;
   }
 }
 
 @media (max-width: 420px) {
-  .card {
+  .stage {
+    padding: var(--space-3);
+  }
+
+  .detail {
     padding: var(--space-4);
   }
 
-  .raised {
-    padding: var(--space-2);
+  .tab {
+    padding: var(--space-3);
   }
 }
