@@ -4,7 +4,8 @@ import { useTranslation, type TranslationKey } from '../../i18n'
 import { Container } from '../components/Container'
 import { CtaBand } from '../components/CtaBand'
 import { PageHero } from '../components/PageHero'
-import { ScrollReveal } from '../components/motion/ScrollReveal'
+import { Surface } from '../components/motion/Surface'
+import { InkBackdrop } from '../components/fx/SectionBackdrop'
 import styles from './AboutPage.module.css'
 
 /*
@@ -44,42 +45,51 @@ function AboutPage() {
       <section className={styles.manifesto}>
         <Container>
           {before.map(({ labelKey, bodyKey }) => (
-            <ScrollReveal key={labelKey} delay={0.03} className={styles.stanza}>
-              <span className={styles.label}>{t(labelKey)}</span>
-              <p className={styles.body}>{t(bodyKey)}</p>
-            </ScrollReveal>
+            <div key={labelKey} className={styles.stanza}>
+              <Surface from="left" distance={34} blur={0} duration={0.9}>
+                <span className={styles.label}>{t(labelKey)}</span>
+              </Surface>
+              <Surface from="below" distance={26} blur={3} delay={0.16} duration={1.05}>
+                <p className={styles.body}>{t(bodyKey)}</p>
+              </Surface>
+            </div>
           ))}
         </Container>
       </section>
 
       <section className={styles.pullBand}>
-        <Container>
-          <ScrollReveal>
+        <InkBackdrop tone="warm" />
+        <Container className={styles.layer}>
+          <Surface from="left" distance={64} blur={6} duration={1.15}>
             <p className={styles.pull}>{t('about.pull')}</p>
-          </ScrollReveal>
+          </Surface>
         </Container>
       </section>
 
       <section className={styles.manifestoLower}>
         <Container>
           {after.map(({ labelKey, bodyKey }) => (
-            <ScrollReveal key={labelKey} delay={0.03} className={styles.stanza}>
-              <span className={styles.label}>{t(labelKey)}</span>
-              <p className={styles.body}>{t(bodyKey)}</p>
-            </ScrollReveal>
+            <div key={labelKey} className={styles.stanza}>
+              <Surface from="left" distance={34} blur={0} duration={0.9}>
+                <span className={styles.label}>{t(labelKey)}</span>
+              </Surface>
+              <Surface from="below" distance={26} blur={3} delay={0.16} duration={1.05}>
+                <p className={styles.body}>{t(bodyKey)}</p>
+              </Surface>
+            </div>
           ))}
 
-          <ScrollReveal className={styles.stanza}>
+          <div className={styles.stanza}>
             <span className={styles.label} aria-hidden="true" />
-            <div className={styles.sign}>
+            <Surface from="below" distance={30} duration={1} className={styles.sign}>
               <p className={styles.signTitle}>{t('about.next.title')}</p>
               <p className={styles.signBody}>{t('about.next.body')}</p>
               <Link to="/why-it-works" className={styles.signLink}>
                 {t('about.next.link')}
                 <ArrowRight size={16} aria-hidden="true" />
               </Link>
-            </div>
-          </ScrollReveal>
+            </Surface>
+          </div>
         </Container>
       </section>
 

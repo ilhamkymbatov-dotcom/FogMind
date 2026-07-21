@@ -1,10 +1,14 @@
+import { useId, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowRight, Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useTranslation, type TranslationKey } from '../../i18n'
 import { Container } from '../components/Container'
 import { CtaBand } from '../components/CtaBand'
 import { PageHero } from '../components/PageHero'
-import { ScrollReveal } from '../components/motion/ScrollReveal'
+import { Surface, SurfaceGroup, SurfaceItem } from '../components/motion/Surface'
+import { ConstellationBackdrop } from '../components/fx/SectionBackdrop'
+import { usePrefersReducedMotion } from '../components/motion/useMediaQuery'
 import styles from './FaqPage.module.css'
 
 /*
@@ -13,10 +17,54 @@ import styles from './FaqPage.module.css'
  * the material goes, what is stored and what it costs. The reasoning lives on
  * Why it works and the process lives on How it works.
  *
- * The shape is a grouped list of native disclosures. Using details and summary
- * means the open and close behaviour, the keyboard handling and find in page
- * all come from the browser rather than from bespoke state.
+ * The shape is a grouped list of disclosures. They are controlled rather than
+ * native, because a details element cannot animate its own height, and this
+ * page's signature is the calm open and close. The accessible contract is kept
+ * by hand: a real button with aria expanded and aria controls, and a labelled
+ * region holding the answer.
  */
+
+/** One disclosure. Opens and closes by animating its own measured height. */
+function Item({ qKey, aKey }: { qKey: TranslationKey; aKey: TranslationKey }) {
+  const { t } = useTranslation()
+  const reduced = usePrefersReducedMotion()
+  const [open, setOpen] = useState(false)
+  const id = useId()
+
+  return (
+    <div className={[styles.item, open ? styles.itemOpen : ''].filter(Boolean).join(' ')}>
+      <button
+        type="button"
+        className={styles.question}
+        aria-expanded={open}
+        aria-controls={`${id}-answer`}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className={styles.questionText}>{t(qKey)}</span>
+        <Plus size={18} aria-hidden="true" className={styles.marker} />
+      </button>
+
+      <AnimatePresence initial={false}>
+        {open ? (
+          <motion.div
+            id={`${id}-answer`}
+            role="region"
+            className={styles.answerWrap}
+            initial={reduced ? false : { height: 0, opacity: 0 }}
+            animate={reduced ? undefined : { height: 'auto', opacity: 1 }}
+            exit={reduced ? undefined : { height: 0, opacity: 0 }}
+            transition={{
+              height: { duration: 0.34, ease: [0.22, 1, 0.36, 1] },
+              opacity: { duration: 0.22, ease: 'linear' },
+            }}
+          >
+            <p className={styles.answer}>{t(aKey)}</p>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </div>
+  )
+}
 
 interface GroupSpec {
   titleKey: TranslationKey
@@ -62,33 +110,33 @@ function FaqPage() {
       />
 
       <section className={styles.answers}>
-        <Container>
+        <ConstellationBackdrop tone="moss" />
+        <Container className={styles.layer}>
           {GROUPS.map(({ titleKey, items }, groupIndex) => (
-            <ScrollReveal key={titleKey} delay={0.03} className={styles.group}>
-              <h2 className={styles.groupTitle}>
-                <span className={styles.groupIndex} aria-hidden="true">{`0${groupIndex + 1}`}</span>
-                {t(titleKey)}
-              </h2>
+            <div key={titleKey} className={styles.group}>
+              <Surface from="left" distance={46} blur={0}>
+                <h2 className={styles.groupTitle}>
+                  <span className={styles.groupIndex} aria-hidden="true">{`0${groupIndex + 1}`}</span>
+                  {t(titleKey)}
+                </h2>
+              </Surface>
 
-              <div className={styles.items}>
+              {/* Questions arrive one after another rather than all at once. */}
+              <SurfaceGroup className={styles.items} stagger={0.08}>
                 {items.map(({ qKey, aKey }) => (
-                  <details key={qKey} className={styles.item}>
-                    <summary className={styles.question}>
-                      <span className={styles.questionText}>{t(qKey)}</span>
-                      <Plus size={18} aria-hidden="true" className={styles.marker} />
-                    </summary>
-                    <p className={styles.answer}>{t(aKey)}</p>
-                  </details>
+                  <SurfaceItem key={qKey} from="right" distance={54} blur={3}>
+                    <Item qKey={qKey} aKey={aKey} />
+                  </SurfaceItem>
                 ))}
-              </div>
-            </ScrollReveal>
+              </SurfaceGroup>
+            </div>
           ))}
         </Container>
       </section>
 
       <section className={styles.next}>
         <Container>
-          <ScrollReveal>
+          <Surface from="below" distance={40}>
             <p className={styles.nextNote}>
               <span className={styles.nextTitle}>{t('faq.next.title')}</span>
               <span className={styles.nextBody}>{t('faq.next.body')}</span>
@@ -97,7 +145,7 @@ function FaqPage() {
                 <ArrowRight size={16} aria-hidden="true" />
               </Link>
             </p>
-          </ScrollReveal>
+          </Surface>
         </Container>
       </section>
 

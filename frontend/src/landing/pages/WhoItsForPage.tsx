@@ -1,10 +1,13 @@
+import { motion } from 'framer-motion'
 import { BookOpen, Briefcase, GraduationCap, Library, Target, ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useTranslation, type TranslationKey } from '../../i18n'
 import { Container } from '../components/Container'
 import { CtaBand } from '../components/CtaBand'
 import { PageHero } from '../components/PageHero'
-import { ScrollReveal } from '../components/motion/ScrollReveal'
+import { Surface } from '../components/motion/Surface'
+import { MistBackdrop } from '../components/fx/SectionBackdrop'
+import { useStaticReveal } from '../components/motion/Surface'
 import styles from './WhoItsForPage.module.css'
 
 /*
@@ -62,16 +65,43 @@ const PROFILES: readonly ProfileSpec[] = [
   },
 ]
 
+/**
+ * The page's signature: each entry is dealt onto the page like a card being laid
+ * on a desk. It arrives from alternating sides, tilted and lifted, then settles
+ * flat. Dealing again on the way back up keeps the register feeling handled
+ * rather than printed.
+ */
+function DeskEntry({ index, children }: { index: number; children: React.ReactNode }) {
+  const reduced = useStaticReveal()
+  if (reduced) return <div className={styles.entry}>{children}</div>
+
+  const side = index % 2 === 0 ? -1 : 1
+
+  return (
+    <motion.div
+      className={styles.entry}
+      initial={{ opacity: 0, x: side * 110, y: 26, rotate: side * 2.6, scale: 0.95, filter: 'blur(5px)' }}
+      whileInView={{ opacity: 1, x: 0, y: 0, rotate: 0, scale: 1, filter: 'blur(0px)' }}
+      viewport={{ once: false, margin: '-10% 0px -14% 0px' }}
+      transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1] }}
+      style={{ transformPerspective: 1100 }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
 function Directory() {
   const { t } = useTranslation()
 
   return (
     <section className={styles.directory}>
-      <Container>
+      <MistBackdrop tone="plum" />
+      <Container className={styles.layer}>
         <ol className={styles.list}>
           {PROFILES.map(({ icon: Icon, roleKey, whenKey, situationKey, outcomeKey }, index) => (
             <li key={roleKey}>
-              <ScrollReveal delay={0.03} className={styles.entry}>
+              <DeskEntry index={index}>
                 <div className={styles.who}>
                   <span className={styles.index}>{`0${index + 1}`}</span>
                   <span className={styles.roleIcon}>
@@ -86,7 +116,7 @@ function Directory() {
                 </div>
 
                 <p className={styles.outcome}>{t(outcomeKey)}</p>
-              </ScrollReveal>
+              </DeskEntry>
             </li>
           ))}
         </ol>
@@ -102,7 +132,7 @@ function NextPage() {
   return (
     <section className={styles.next}>
       <Container>
-        <ScrollReveal>
+        <Surface from="below" distance={56}>
           <Link to="/product" className={styles.nextBanner}>
             <span className={styles.nextText}>
               <span className={styles.nextTitle}>{t('who.next.title')}</span>
@@ -113,7 +143,7 @@ function NextPage() {
               <ArrowRight size={16} aria-hidden="true" />
             </span>
           </Link>
-        </ScrollReveal>
+        </Surface>
       </Container>
     </section>
   )

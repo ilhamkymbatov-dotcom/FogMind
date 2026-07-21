@@ -1,6 +1,8 @@
 /* How it works is one long moss room with a rail running down it. */
 
 .journey {
+  position: relative;
+  overflow: hidden;
   padding-block: var(--space-8);
   background-image: linear-gradient(
     180deg,
@@ -49,24 +51,37 @@
   gap: var(--space-8);
 }
 
-/* One continuous line behind every marker. It starts and ends at the first and
-   last dot rather than running the full height, so the path reads as finished
-   rather than cut off. */
-.rail::before {
-  content: '';
+/* The unfilled path, always present so the route ahead is visible. */
+.railTrack {
   position: absolute;
   left: 17px;
   top: 18px;
   bottom: 18px;
   width: 2px;
   border-radius: 1px;
+  background-color: rgba(74, 92, 61, 0.14);
+}
+
+/* The filled path, drawn downward by the reader's scroll. */
+.railLine {
+  position: absolute;
+  left: 17px;
+  top: 18px;
+  bottom: 18px;
+  width: 2px;
+  border-radius: 1px;
+  transform-origin: 50% 0%;
   background: linear-gradient(
     180deg,
-    rgba(74, 92, 61, 0.1) 0%,
-    rgba(74, 92, 61, 0.28) 12%,
-    rgba(74, 92, 61, 0.28) 88%,
-    rgba(74, 92, 61, 0.1) 100%
+    rgba(74, 92, 61, 0.34) 0%,
+    rgba(74, 92, 61, 0.34) 88%,
+    rgba(74, 92, 61, 0.12) 100%
   );
+  will-change: transform;
+}
+
+.railLineStatic {
+  transform: none;
 }
 
 /* Marker, copy and visual are three columns of one wide row, so each stop
@@ -84,8 +99,20 @@
 }
 
 .marker {
+  position: relative;
   display: flex;
   justify-content: center;
+}
+
+/* Reaches from the dot toward the copy as the stop attaches. */
+.connector {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--space-5);
+  height: 1.5px;
+  transform-origin: 0 50%;
+  background-color: rgba(74, 92, 61, 0.3);
 }
 
 .dot {
@@ -227,4 +254,10 @@
   .stopVisual {
     padding: var(--space-2);
   }
+}
+
+/* Content sits above the section backdrop. */
+.layer {
+  position: relative;
+  z-index: 1;
 }

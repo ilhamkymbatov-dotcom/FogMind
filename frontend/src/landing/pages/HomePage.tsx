@@ -8,7 +8,9 @@ import { Container } from '../components/Container'
 import { Eyebrow } from '../components/Eyebrow'
 import { Constellation } from '../components/fx/Constellation'
 import { MiniGraphDemo } from '../components/demos/MiniGraphDemo'
-import { ScrollReveal } from '../components/motion/ScrollReveal'
+import { Surface, SurfaceGroup, SurfaceItem } from '../components/motion/Surface'
+import { HeroFogReveal } from '../components/fx/HeroFogReveal'
+import { MistBackdrop, ConstellationBackdrop } from '../components/fx/SectionBackdrop'
 import { usePointerTilt } from '../components/usePointerTilt'
 import { usePrefersReducedMotion } from '../components/motion/useMediaQuery'
 import styles from './HomePage.module.css'
@@ -63,6 +65,8 @@ function Hero() {
     <section ref={ref} className={styles.hero}>
       {reduced ? backdrop : <motion.div style={{ y: backdropY }}>{backdrop}</motion.div>}
 
+      <HeroFogReveal targetRef={ref} />
+
       <Container className={styles.heroContent}>
         {reduced ? copy : <motion.div style={{ y: copyY, opacity: copyOpacity }}>{copy}</motion.div>}
 
@@ -89,27 +93,28 @@ function Idea() {
 
   return (
     <section className={styles.idea}>
-      <Container>
-        <ScrollReveal>
-          <div className={styles.ideaInner}>
+      <ConstellationBackdrop tone="sand" />
+      <Container className={styles.layer}>
+        <div className={styles.ideaInner}>
+          <Surface from="left" distance={90}>
             <div className={styles.ideaLead}>
               <Eyebrow labelKey="home.mood.eyebrow" tone="sand" />
               <h2 className={styles.ideaTitle}>{t('home.mood.title')}</h2>
             </div>
+          </Surface>
+          <Surface from="right" distance={90} delay={0.1}>
             <p className={styles.ideaBody}>{t('home.mood.body')}</p>
-          </div>
-        </ScrollReveal>
+          </Surface>
+        </div>
 
-        <ScrollReveal delay={0.08}>
-          <ul className={styles.notes}>
-            {NOTES.map(({ icon: Icon, key }) => (
-              <li key={key} className={styles.note}>
-                <Icon size={17} aria-hidden="true" />
-                {t(key)}
-              </li>
-            ))}
-          </ul>
-        </ScrollReveal>
+        <SurfaceGroup className={styles.notes} stagger={0.11} delay={0.1}>
+          {NOTES.map(({ icon: Icon, key }) => (
+            <SurfaceItem key={key} from="below" distance={26} className={styles.note}>
+              <Icon size={17} aria-hidden="true" />
+              {t(key)}
+            </SurfaceItem>
+          ))}
+        </SurfaceGroup>
       </Container>
     </section>
   )
@@ -150,12 +155,18 @@ function Chapters() {
   return (
     <section className={styles.chapters}>
       <Container>
-        <ScrollReveal>
+        <Surface from="none" blur={0}>
           <Eyebrow labelKey="home.explore.eyebrow" tone="plum" />
-        </ScrollReveal>
+        </Surface>
         <div className={styles.chapterRow}>
           {CHAPTERS.map(({ headingKey, lineKey, linkKey, to, tone }, index) => (
-            <ScrollReveal key={headingKey} delay={index * 0.1} className={styles.chapterCell}>
+            <Surface
+              key={headingKey}
+              from={index === 0 ? 'left' : 'right'}
+              distance={120}
+              delay={index * 0.08}
+              className={styles.chapterCell}
+            >
               <Link to={to} className={[styles.chapter, styles[tone]].join(' ')}>
                 <span className={styles.chapterIndex}>{`0${index + 1}`}</span>
                 <h2 className={styles.chapterHeading}>{t(headingKey)}</h2>
@@ -165,7 +176,7 @@ function Chapters() {
                   <ArrowRight size={16} aria-hidden="true" />
                 </span>
               </Link>
-            </ScrollReveal>
+            </Surface>
           ))}
         </div>
       </Container>
@@ -178,8 +189,9 @@ function ClosingCta() {
 
   return (
     <section className={styles.cta}>
-      <Container>
-        <ScrollReveal>
+      <MistBackdrop tone="plum" />
+      <Container className={styles.layer}>
+        <Surface from="below" distance={56}>
           <div className={styles.ctaInner}>
             <h2 className={styles.ctaTitle}>{t('cta.title')}</h2>
             <p className={styles.ctaBody}>{t('cta.body')}</p>
@@ -187,7 +199,7 @@ function ClosingCta() {
               {t('cta.button')}
             </Button>
           </div>
-        </ScrollReveal>
+        </Surface>
       </Container>
     </section>
   )

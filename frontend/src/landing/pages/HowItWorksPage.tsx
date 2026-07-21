@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react'
+import { useRef, type ReactNode } from 'react'
+import { motion, useScroll, useSpring, useTransform } from 'framer-motion'
 import { CircleCheck, CloudFog, MessageCircleQuestion } from 'lucide-react'
 import { useTranslation, type TranslationKey } from '../../i18n'
 import { Container } from '../components/Container'
@@ -8,7 +9,8 @@ import { PageHero } from '../components/PageHero'
 import { MiniGraphDemo } from '../components/demos/MiniGraphDemo'
 import { MiniProgressDemo } from '../components/demos/MiniProgressDemo'
 import { MiniUploadDemo } from '../components/demos/MiniUploadDemo'
-import { ScrollReveal } from '../components/motion/ScrollReveal'
+import { Surface, useStaticReveal } from '../components/motion/Surface'
+import { LightSweepBackdrop } from '../components/fx/SectionBackdrop'
 import styles from './HowItWorksPage.module.css'
 
 /*
@@ -115,45 +117,102 @@ const STOPS: readonly StopSpec[] = [
   { titleKey: 'hiw.adaptive.title', bodyKey: 'hiw.adaptive.body', visual: <MiniProgressDemo /> },
 ]
 
+/**
+ * The marker attaches to the rail as the reader reaches it: the dot lands from
+ * slightly back in depth and a short connector reaches out to the copy.
+ */
+function Marker({ index }: { index: number }) {
+  const reduced = useStaticReveal()
+
+  if (reduced) {
+    return (
+      <div className={styles.marker} aria-hidden="true">
+        <span className={styles.dot}>{index + 1}</span>
+      </div>
+    )
+  }
+
+  return (
+    <motion.div
+      className={styles.marker}
+      aria-hidden="true"
+      initial={{ opacity: 0, scale: 0.4, z: -60 }}
+      whileInView={{ opacity: 1, scale: 1, z: 0 }}
+      viewport={{ once: false, margin: '-12% 0px -20% 0px' }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      style={{ transformPerspective: 800 }}
+    >
+      <span className={styles.dot}>{index + 1}</span>
+      <motion.span
+        className={styles.connector}
+        initial={{ scaleX: 0 }}
+        whileInView={{ scaleX: 1 }}
+        viewport={{ once: false, margin: '-12% 0px -20% 0px' }}
+        transition={{ duration: 0.45, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+      />
+    </motion.div>
+  )
+}
+
 /** One stop on the rail: a numbered marker, the copy, and an optional visual. */
 function Stop({ stop, index }: { stop: StopSpec; index: number }) {
   const { t } = useTranslation()
 
   return (
-    <ScrollReveal delay={0.04} className={styles.stop}>
-      <div className={styles.marker} aria-hidden="true">
-        <span className={styles.dot}>{index + 1}</span>
-      </div>
+    <div className={styles.stop}>
+      <Marker index={index} />
 
-      <div className={styles.stopBody}>
+      <Surface from="right" distance={64} delay={0.06} className={styles.stopBody}>
         <span className={styles.stopStep}>{t('hiw.stepN', { n: index + 1 })}</span>
         <h2 className={styles.stopTitle}>{t(stop.titleKey)}</h2>
         <p className={styles.stopText}>{t(stop.bodyKey)}</p>
-      </div>
+      </Surface>
 
-      {stop.visual ? <div className={styles.stopVisual}>{stop.visual}</div> : null}
-    </ScrollReveal>
+      {stop.visual ? (
+        <Surface from="right" distance={110} delay={0.16} blur={6} className={styles.stopVisual}>
+          {stop.visual}
+        </Surface>
+      ) : null}
+    </div>
   )
 }
 
 function Journey() {
   const { t } = useTranslation()
+  const reduced = useStaticReveal()
+  const railRef = useRef<HTMLOListElement>(null)
+
+  // The page's signature: the path is drawn by the reader's own scrolling,
+  // filling from the first stop to the last as they travel down it.
+  const { scrollYProgress } = useScroll({
+    target: railRef,
+    offset: ['start 72%', 'end 65%'],
+  })
+  const drawn = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.4 })
+  const scaleY = useTransform(drawn, (v) => Math.max(0.001, v))
 
   return (
     <section className={styles.journey}>
-      <Container>
-        <ScrollReveal>
-          <div className={styles.journeyHead}>
-            <div className={styles.journeyLeadCol}>
-              <Eyebrow labelKey="hiw.intake.eyebrow" tone="moss" />
-              <h2 className={styles.journeyTitle}>{t('hiw.intake.title')}</h2>
-            </div>
+      <LightSweepBackdrop tone="moss" />
+      <Container className={styles.layer}>
+        <div className={styles.journeyHead}>
+          <Surface from="left" distance={80} className={styles.journeyLeadCol}>
+            <Eyebrow labelKey="hiw.intake.eyebrow" tone="moss" />
+            <h2 className={styles.journeyTitle}>{t('hiw.intake.title')}</h2>
+          </Surface>
+          <Surface from="right" distance={80} delay={0.1}>
             <p className={styles.journeyLead}>{t('hiw.intake.body')}</p>
-          </div>
-        </ScrollReveal>
+          </Surface>
+        </div>
 
-        {/* The rail itself is the page's structure, drawn behind the stops. */}
-        <ol className={styles.rail}>
+        {/* The rail is the page's structure, drawn behind the stops. */}
+        <ol className={styles.rail} ref={railRef}>
+          <span className={styles.railTrack} aria-hidden="true" />
+          {reduced ? (
+            <span className={[styles.railLine, styles.railLineStatic].join(' ')} aria-hidden="true" />
+          ) : (
+            <motion.span className={styles.railLine} style={{ scaleY }} aria-hidden="true" />
+          )}
           {STOPS.map((stop, index) => (
             <li key={stop.titleKey}>
               <Stop stop={stop} index={index} />

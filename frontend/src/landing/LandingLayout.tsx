@@ -1,6 +1,7 @@
 import { Outlet, useLocation } from 'react-router-dom'
 import { Nav } from './components/Nav'
 import { Footer } from './components/Footer'
+import { ScrollBehaviour } from './components/ScrollBehaviour'
 import { GlobalFog } from './components/fx/GlobalFog'
 import { PageTransition } from './components/motion/PageTransition'
 
@@ -23,6 +24,7 @@ export function LandingLayout() {
 
   return (
     <>
+      <ScrollBehaviour />
       <Nav />
       <main>
         <PageTransition key={location.pathname}>

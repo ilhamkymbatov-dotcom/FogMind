@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import type { ReactNode } from 'react'
-import { EASE_OUT } from './Stagger'
+import { EASE_SURFACE } from './Surface'
 import { usePrefersReducedMotion } from './useMediaQuery'
 
 /**
@@ -21,7 +21,7 @@ export function PageTransition({ children }: { children: ReactNode }) {
     <motion.div
       initial={{ opacity: 0, y: 20, scale: 0.992 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.45, ease: EASE_OUT }}
+      transition={{ duration: 0.45, ease: EASE_SURFACE }}
     >
       {children}
     </motion.div>

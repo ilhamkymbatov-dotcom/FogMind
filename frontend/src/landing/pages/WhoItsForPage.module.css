@@ -1,6 +1,8 @@
 /* A directory of dossier entries. Rooms: paper, plum, paper, warm. */
 
 .directory {
+  position: relative;
+  overflow: hidden;
   padding-block: var(--space-8);
   background-image: linear-gradient(
     180deg,
@@ -202,4 +204,10 @@
   .nextBanner {
     padding: var(--space-5);
   }
+}
+
+/* Content sits above the section backdrop. */
+.layer {
+  position: relative;
+  z-index: 1;
 }

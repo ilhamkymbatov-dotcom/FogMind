@@ -3,6 +3,8 @@
 /* Gallery -------------------------------------------------------------------- */
 
 .gallery {
+  position: relative;
+  overflow: hidden;
   padding-block: var(--space-8);
   background-image: linear-gradient(
     180deg,
@@ -44,6 +46,7 @@
 }
 
 .tab {
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -73,6 +76,17 @@
   border-color: var(--color-ink);
   box-shadow: var(--shadow-md);
   color: var(--color-fg);
+}
+
+/* Slides between capabilities rather than blinking on and off. */
+.tabMarker {
+  position: absolute;
+  left: 0;
+  top: 10%;
+  bottom: 10%;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background-color: var(--color-ink);
 }
 
 .tabIcon {
@@ -311,4 +325,10 @@
   .tab {
     padding: var(--space-3);
   }
+}
+
+/* Content sits above the section backdrop. */
+.layer {
+  position: relative;
+  z-index: 1;
 }

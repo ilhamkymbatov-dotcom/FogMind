@@ -50,6 +50,8 @@
 /* The one line that gets the full width -------------------------------------- */
 
 .pullBand {
+  position: relative;
+  overflow: hidden;
   padding-block: var(--space-8);
   background-color: var(--wash-warm);
 }
@@ -144,4 +146,10 @@
   .pull {
     padding-left: var(--space-4);
   }
+}
+
+/* Content sits above the section backdrop. */
+.layer {
+  position: relative;
+  z-index: 1;
 }

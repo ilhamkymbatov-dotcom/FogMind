@@ -120,7 +120,10 @@
 
 /* The idea, on sand ---------------------------------------------------------- */
 
+/* Positioned and clipped so the living backdrop is contained by the room. */
 .idea {
+  position: relative;
+  overflow: hidden;
   padding-block: var(--space-8);
   /* The wash eases in and out of paper, so the room changes without a seam. */
   background-image: linear-gradient(
@@ -293,6 +296,8 @@
 /* Closing call to action, on plum -------------------------------------------- */
 
 .cta {
+  position: relative;
+  overflow: hidden;
   padding-block: var(--space-8);
   background-image: linear-gradient(
     180deg,
@@ -379,4 +384,10 @@
   .stageCard {
     padding: var(--space-2);
   }
+}
+
+/* Content sits above any section backdrop. */
+.layer {
+  position: relative;
+  z-index: 1;
 }

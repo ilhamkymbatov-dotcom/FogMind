@@ -1,4 +1,5 @@
 import { useId, useRef, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { CloudFog, FileText, SlidersHorizontal, Waypoints, MessageCircleQuestion, TrendingUp } from 'lucide-react'
 import { useTranslation, type TranslationKey } from '../../i18n'
 import { Container } from '../components/Container'
@@ -8,8 +9,9 @@ import { PageHero } from '../components/PageHero'
 import { MiniGraphDemo } from '../components/demos/MiniGraphDemo'
 import { MiniProgressDemo } from '../components/demos/MiniProgressDemo'
 import { MiniQuestionDemo } from '../components/demos/MiniQuestionDemo'
-import { ScrollReveal } from '../components/motion/ScrollReveal'
-import { Stagger, StaggerItem } from '../components/motion/Stagger'
+import { Surface, SurfaceGroup, SurfaceItem, useStaticReveal } from '../components/motion/Surface'
+import { TiltCard } from '../components/motion/TiltCard'
+import { InkBackdrop } from '../components/fx/SectionBackdrop'
 import styles from './ProductPage.module.css'
 
 /*
@@ -54,6 +56,7 @@ const CAPABILITIES: readonly CapabilitySpec[] = [
  */
 function Gallery() {
   const { t } = useTranslation()
+  const reduced = useStaticReveal()
   const [active, setActive] = useState(0)
   const baseId = useId()
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([])
@@ -84,13 +87,14 @@ function Gallery() {
 
   return (
     <section className={styles.gallery}>
-      <Container>
-        <ScrollReveal>
+      <InkBackdrop tone="ink" />
+      <Container className={styles.layer}>
+        <Surface from="left" distance={70}>
           <div className={styles.galleryHead}>
             <Eyebrow labelKey="product.gallery.eyebrow" tone="ink" />
             <h2 className={styles.galleryTitle}>{t('product.gallery.title')}</h2>
           </div>
-        </ScrollReveal>
+        </Surface>
 
         <div className={styles.galleryGrid}>
           <div
@@ -101,7 +105,7 @@ function Gallery() {
             onKeyDown={onKeyDown}
           >
             {CAPABILITIES.map(({ icon: Icon, titleKey }, index) => (
-              <button
+              <motion.button
                 key={titleKey}
                 ref={(node) => {
                   tabRefs.current[index] = node
@@ -114,12 +118,22 @@ function Gallery() {
                 tabIndex={index === active ? 0 : -1}
                 className={[styles.tab, index === active ? styles.tabActive : ''].filter(Boolean).join(' ')}
                 onClick={() => setActive(index)}
+                initial={reduced ? false : { opacity: 0, x: -40, filter: 'blur(4px)' }}
+                whileInView={reduced ? undefined : { opacity: 1, x: 0, filter: 'blur(0px)' }}
+                viewport={{ once: false, margin: '-8% 0px' }}
+                transition={{ duration: 0.55, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={reduced ? undefined : { x: 5 }}
+                whileTap={reduced ? undefined : { scale: 0.985 }}
               >
+                {/* One marker that slides between capabilities as they change. */}
+                {index === active && !reduced ? (
+                  <motion.span layoutId={`${baseId}-active`} className={styles.tabMarker} aria-hidden="true" />
+                ) : null}
                 <span className={styles.tabIcon}>
                   <Icon size={18} aria-hidden="true" />
                 </span>
                 <span className={styles.tabLabel}>{t(titleKey)}</span>
-              </button>
+              </motion.button>
             ))}
           </div>
 
@@ -130,11 +144,21 @@ function Gallery() {
             aria-labelledby={`${baseId}-tab-${active}`}
             tabIndex={0}
           >
-            {/* Keyed so each capability mounts its own demo instance. */}
-            <div key={current.titleKey} className={styles.stageInner}>
-              <div className={styles.stageVisual}>{current.visual}</div>
-              <p className={styles.stageBody}>{t(current.bodyKey)}</p>
-            </div>
+            {/* Keyed so each capability mounts its own demo instance, and the
+                outgoing one surfaces away as the incoming one rises. */}
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={current.titleKey}
+                className={styles.stageInner}
+                initial={reduced ? false : { opacity: 0, scale: 0.965, y: 16, filter: 'blur(6px)' }}
+                animate={reduced ? undefined : { opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+                exit={reduced ? undefined : { opacity: 0, scale: 0.985, y: -10, filter: 'blur(4px)' }}
+                transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <div className={styles.stageVisual}>{current.visual}</div>
+                <p className={styles.stageBody}>{t(current.bodyKey)}</p>
+              </motion.div>
+            </AnimatePresence>
           </div>
         </div>
       </Container>
@@ -175,17 +199,21 @@ function Details() {
   return (
     <section className={styles.details}>
       <Container>
-        <ScrollReveal>
+        <Surface from="right" distance={70}>
           <div className={styles.detailsHead}>
             <Eyebrow labelKey="product.more.eyebrow" tone="plum" />
             <h2 className={styles.detailsTitle}>{t('product.more.title')}</h2>
           </div>
-        </ScrollReveal>
+        </Surface>
 
-        <Stagger className={styles.detailGrid}>
-          {DETAILS.map(({ icon: Icon, titleKey, bodyKey, tone, chips }) => (
-            <StaggerItem key={titleKey}>
-              <article className={[styles.detail, styles[tone]].join(' ')}>
+        <SurfaceGroup className={styles.detailGrid} stagger={0.12}>
+          {DETAILS.map(({ icon: Icon, titleKey, bodyKey, tone, chips }, index) => (
+            <SurfaceItem
+              key={titleKey}
+              from={index === 0 ? 'left' : index === 2 ? 'right' : 'below'}
+              distance={index === 1 ? 44 : 90}
+            >
+              <TiltCard className={[styles.detail, styles[tone]].join(' ')}>
                 <span className={styles.detailIcon}>
                   <Icon size={20} aria-hidden="true" />
                 </span>
@@ -200,10 +228,10 @@ function Details() {
                     ))}
                   </div>
                 ) : null}
-              </article>
-            </StaggerItem>
+              </TiltCard>
+            </SurfaceItem>
           ))}
-        </Stagger>
+        </SurfaceGroup>
       </Container>
     </section>
   )
