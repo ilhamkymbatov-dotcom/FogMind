@@ -1,49 +1,54 @@
 # FogMind
 
-An AI learning platform that turns study materials into an interactive knowledge graph with
+A learning platform that turns study materials into an interactive knowledge graph with
 gamified fog clearing progression.
 
-This repository is a monorepo containing two applications and one shared logic package.
+This repository is a monorepo containing one application and two shared packages.
 
 ## Structure
 
 ```
 /
-  landing/     Marketing and presentation site (Vite + React + TypeScript)
-  frontend/    Main product application (Vite + React + TypeScript)
+  frontend/    The whole site: marketing landing, auth and the product app (Vite + React + TypeScript)
   backend/     Shared Supabase logic layer (plain TypeScript, no framework)
   design/      Shared design tokens and global CSS
 ```
+
+The landing site and the product app are one Vite application with a single router, so there is
+one dev server, one port and one deploy. Routes fall into three groups:
+
+| Path | Area | Chrome |
+| --- | --- | --- |
+| `/`, `/how-it-works`, `/product` | Public marketing landing | Landing nav, footer and the global fog |
+| `/login`, `/signup` | Auth | Bare centered cards |
+| `/app`, `/app/documents/:id` | Signed in product app | The app shell, no landing fog |
+
+Signed in visitors to `/login` or `/signup` are redirected to `/app`; unauthenticated visitors to
+`/app` are redirected to `/login`. The landing pages are public to everyone.
 
 Each package manages its own dependencies and is installed independently. There is no workspace
 runner configured yet.
 
 The two shared packages are consumed as source through aliases rather than as installed
-dependencies. Each alias is declared twice, once in the app's `vite.config.ts` and once in its
-`tsconfig.app.json`, and the two must be kept in step:
+dependencies. Each alias is declared twice, once in `frontend/vite.config.ts` and once in
+`frontend/tsconfig.app.json`, and the two must be kept in step:
 
 | Alias | Resolves to | Used by |
 | --- | --- | --- |
 | `@fogmind/backend` | `backend/src` | frontend |
-| `@fogmind/design` | `design/src` | frontend, landing |
+| `@fogmind/design` | `design/src` | frontend |
 
-`design/src/globals.css` is the only definition of the design tokens. Both apps import it from
-their `main.tsx`. Do not copy it into an app.
+`design/src/globals.css` is the only definition of the design tokens. The app imports it from
+`main.tsx`. Do not copy it into the app.
 
 ## Requirements
 
 - Node.js 20 or newer
 - npm 10 or newer
 
-## Running the landing site
+## Running the app
 
-```bash
-cd landing
-npm install
-npm run dev
-```
-
-## Running the frontend application
+One command serves the entire site, landing and product alike:
 
 ```bash
 cd frontend
@@ -51,13 +56,12 @@ npm install
 npm run dev
 ```
 
-Both apps start on port 5173 by default. Run only one at a time, or Vite will move the second to
-the next free port.
+The dev server starts on port 5173. `npm run build` type checks and builds the production bundle.
 
 ## Backend package
 
 The backend is a plain TypeScript library rather than a running service. It holds the Supabase
-client, database types, and query functions shared by the two apps.
+client, database types, and query functions used by the app.
 
 ```bash
 cd backend
@@ -68,17 +72,24 @@ npm run typecheck
 ## Environment variables
 
 Every package ships a `.env.example` listing the variables it expects. Copy it to `.env.local`
-(apps) or `.env` (backend) and fill in the values.
+(the app) or `.env` (backend) and fill in the values.
 
-The apps read `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. The backend package reads
+The app reads `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`. The backend package reads
 `SUPABASE_URL` and `SUPABASE_ANON_KEY`. Never commit a filled in env file.
+
+## Internationalization
+
+The whole site shares one dictionary set (`frontend/src/i18n`) in three languages, English,
+Russian and Kazakh, with strict key parity enforced by the type system. One provider, one
+`useTranslation` hook and one language switcher serve both the landing nav and the app top bar.
+The choice is persisted under `fogmind.lang`, so it carries across every route.
 
 ## Tech stack
 
 - React 19 with TypeScript in strict mode
 - Vite 8
 - React Router 7, with routes lazy loaded through `React.lazy` and `Suspense`
-- Supabase for database and authentication
+- framer-motion for the landing motion, Supabase for database and authentication
 - lucide-react for icons, the only icon source permitted in this project
 - Vercel as the deploy target
 

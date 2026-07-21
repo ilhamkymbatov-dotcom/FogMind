@@ -31,11 +31,3 @@ export function PublicOnlyRoute({ children }: { children: ReactNode }) {
   if (session) return <Navigate to="/app" replace />
   return <>{children}</>
 }
-
-/** The root: send signed in visitors to the app, everyone else to login. */
-export function RootRedirect() {
-  const { session, loading } = useAuth()
-
-  if (loading) return <Resolving />
-  return <Navigate to={session ? '/app' : '/login'} replace />
-}

@@ -10,7 +10,7 @@ import {
   TrendingUp,
   Waypoints,
 } from 'lucide-react'
-import { useTranslation } from '../i18n'
+import { useTranslation } from '../../i18n'
 import { CtaBand } from '../components/CtaBand'
 import { FeatureSection } from '../components/FeatureSection'
 import { PageHero } from '../components/PageHero'

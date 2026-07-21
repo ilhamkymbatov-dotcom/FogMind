@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
-import { useTranslation } from '../i18n'
+import { useTranslation } from '../../i18n'
 import { Container } from './Container'
-import { LanguageSwitcher } from './LanguageSwitcher'
+import { LanguageSwitcher } from '../../components/LanguageSwitcher'
 import styles from './Footer.module.css'
 
 export function Footer() {

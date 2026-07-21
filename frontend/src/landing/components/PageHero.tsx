@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useRef } from 'react'
-import { useTranslation, type TranslationKey } from '../i18n'
+import { useTranslation, type TranslationKey } from '../../i18n'
 import { Container } from './Container'
 import { ScrollReveal } from './motion/ScrollReveal'
 import { usePrefersReducedMotion } from './motion/useMediaQuery'

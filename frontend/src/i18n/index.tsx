@@ -9,7 +9,8 @@ export const LANGUAGES: readonly Language[] = ['en', 'ru', 'kk']
 
 const DICTIONARIES: Record<Language, Dictionary> = { en, ru, kk }
 
-// Shared with the landing site, so a choice made there carries into the app.
+// One key for the whole site, so a language chosen on the landing pages carries
+// straight into the signed in app and back.
 const STORAGE_KEY = 'fogmind.lang'
 
 const KEYS = new Set(Object.keys(en))

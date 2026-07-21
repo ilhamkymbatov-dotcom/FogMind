@@ -144,6 +144,11 @@ export function GlobalFog() {
     const pointer = { x: -1, y: -1, fresh: false }
 
     const compose = () => {
+      // The buffers can be zero sized before the first real layout (a pane that
+      // opens at 0x0, or a hidden container). drawImage throws on a zero area
+      // source, so bail until there is something to paint; the resize listener
+      // recomposes once the viewport has real dimensions.
+      if (canvas.width === 0 || canvas.height === 0) return
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       ctx.globalCompositeOperation = 'source-over'
       ctx.drawImage(fogBuffer, 0, 0)

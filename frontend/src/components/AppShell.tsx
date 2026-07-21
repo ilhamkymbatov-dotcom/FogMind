@@ -29,7 +29,7 @@ export function AppShell() {
   return (
     <div className={styles.shell}>
       <header className={styles.bar}>
-        <Link to="/app" className={styles.wordmark} aria-label={t('shell.home')}>
+        <Link to="/" className={styles.wordmark} aria-label={t('shell.home')}>
           FogMind
         </Link>
         <div className={styles.right}>

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { useTranslation, type TranslationKey } from '../i18n'
+import { useTranslation, type TranslationKey } from '../../i18n'
 import { Container } from './Container'
 import { Parallax } from './motion/Parallax'
 import { Stagger, StaggerItem } from './motion/Stagger'

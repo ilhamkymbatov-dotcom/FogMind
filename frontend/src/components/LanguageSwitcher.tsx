@@ -11,7 +11,7 @@ export function LanguageSwitcher() {
   const { lang, setLang, t } = useTranslation()
 
   return (
-    <div className={styles.switcher} role="group" aria-label={t('lang.label')}>
+    <div className={styles.switcher} role="group" aria-label={t('lang.label')} data-fog-clear>
       {LANGUAGES.map((code) => (
         <button
           key={code}

@@ -1,7 +1,7 @@
 import { useScroll, useMotionValueEvent } from 'framer-motion'
 import { useRef, useState } from 'react'
 import { CircleCheck, CloudFog, MessageCircleQuestion } from 'lucide-react'
-import { useTranslation, type TranslationKey } from '../i18n'
+import { useTranslation, type TranslationKey } from '../../i18n'
 import { Container } from '../components/Container'
 import { CtaBand } from '../components/CtaBand'
 import { PageHero } from '../components/PageHero'
