@@ -1,16 +1,18 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { errorKey, useTranslation, type TranslationKey } from '../i18n'
 import { AuthCard, authStyles as s } from '../components/AuthCard'
 import { Button } from '../components/Button'
 import { Input } from '../components/Input'
 
 function LoginPage() {
   const { signIn } = useAuth()
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<TranslationKey | null>(null)
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(event: FormEvent) {
@@ -18,7 +20,7 @@ function LoginPage() {
     setError(null)
 
     if (!email.trim() || !password) {
-      setError('Please enter your email and password.')
+      setError('auth.err.enterEmailPassword')
       return
     }
 
@@ -29,40 +31,40 @@ function LoginPage() {
       // sends an authenticated visitor on, but navigate explicitly too.
       navigate('/app', { replace: true })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
+      setError(errorKey(err))
       setLoading(false)
     }
   }
 
   return (
     <AuthCard
-      title="Sign in"
-      subtitle="Welcome back to FogMind."
+      title={t('login.title')}
+      subtitle={t('login.subtitle')}
       footer={
         <>
-          New here?{' '}
+          {t('login.footerPrompt')}{' '}
           <Link to="/signup" className={s.link}>
-            Create an account
+            {t('login.footerLink')}
           </Link>
         </>
       }
     >
       <form className={s.form} onSubmit={handleSubmit} noValidate>
         <Input
-          label="Email"
+          label={t('auth.email')}
           type="email"
           autoComplete="email"
-          placeholder="you@example.com"
+          placeholder={t('auth.emailPlaceholder')}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           disabled={loading}
           required
         />
         <Input
-          label="Password"
+          label={t('auth.password')}
           type="password"
           autoComplete="current-password"
-          placeholder="Your password"
+          placeholder={t('login.passwordPlaceholder')}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           disabled={loading}
@@ -70,11 +72,11 @@ function LoginPage() {
         />
         {error ? (
           <div className={s.error} role="alert">
-            {error}
+            {t(error)}
           </div>
         ) : null}
         <Button type="submit" variant="primary" disabled={loading}>
-          {loading ? 'Signing in' : 'Sign in'}
+          {loading ? t('login.submitting') : t('login.submit')}
         </Button>
       </form>
     </AuthCard>

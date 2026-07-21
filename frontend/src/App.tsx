@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { AppShell } from './components/AppShell'
 import { ProtectedRoute, PublicOnlyRoute, RootRedirect } from './components/RouteGuards'
+import { I18nProvider } from './i18n'
 
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const SignupPage = lazy(() => import('./pages/SignupPage'))
@@ -11,8 +12,9 @@ const DocumentDetailPage = lazy(() => import('./pages/DocumentDetailPage'))
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
+    <I18nProvider>
+      <AuthProvider>
+        <BrowserRouter>
         <Suspense fallback={null}>
           <Routes>
             <Route path="/" element={<RootRedirect />} />
@@ -43,10 +45,11 @@ function App() {
               <Route index element={<DashboardPage />} />
               <Route path="documents/:id" element={<DocumentDetailPage />} />
             </Route>
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
-    </AuthProvider>
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </AuthProvider>
+    </I18nProvider>
   )
 }
 

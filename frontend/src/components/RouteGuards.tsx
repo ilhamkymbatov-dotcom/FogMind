@@ -1,13 +1,15 @@
 import type { ReactNode } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useTranslation } from '../i18n'
 import styles from './RouteGuards.module.css'
 
 function Resolving() {
+  const { t } = useTranslation()
   return (
     <div className={styles.loading} role="status" aria-live="polite">
       <span className={styles.spinner} aria-hidden="true" />
-      <span className={styles.srOnly}>Loading</span>
+      <span className={styles.srOnly}>{t('common.loading')}</span>
     </div>
   )
 }

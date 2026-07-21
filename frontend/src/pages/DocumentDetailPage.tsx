@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ChevronLeft, Sparkles } from 'lucide-react'
 import type { Node, Question } from '@fogmind/backend'
+import { useTranslation } from '../i18n'
 import { KnowledgeGraph } from '../components/graph/KnowledgeGraph'
 import { QuestionPanel } from '../components/graph/QuestionPanel'
 import { treeLayout } from '../lib/graphModel'
@@ -15,6 +16,7 @@ type PanelState =
 
 function DocumentDetailPage() {
   const { id } = useParams<{ id: string }>()
+  const { t } = useTranslation()
   const game = useGraphGame(id)
   const [panel, setPanel] = useState<PanelState>(null)
 
@@ -38,22 +40,25 @@ function DocumentDetailPage() {
         <div className={styles.headMain}>
           <Link to="/app" className={styles.back}>
             <ChevronLeft size={16} aria-hidden="true" />
-            All maps
+            {t('detail.allMaps')}
           </Link>
-          <h1 className={styles.title}>{document?.title ?? 'Map'}</h1>
+          <h1 className={styles.title}>{document?.title ?? t('detail.mapFallback')}</h1>
         </div>
         {!loading && !error ? (
           <div className={styles.headRight}>
             {reviewAvailable ? (
               <button type="button" className={styles.reviewButton} onClick={openReview}>
                 <Sparkles size={16} aria-hidden="true" />
-                Review {game.reviewQuestions.length}{' '}
-                {game.reviewQuestions.length === 1 ? 'question' : 'questions'}
+                {t('detail.review', { count: game.reviewQuestions.length })}
               </button>
             ) : null}
             <div className={styles.progress}>
               <span className={styles.progressText}>
-                {summary.mastered} of {summary.total} mastered · {summary.percent}%
+                {t('detail.summary', {
+                  mastered: summary.mastered,
+                  total: summary.total,
+                  percent: summary.percent,
+                })}
               </span>
               <div className={styles.bar} aria-hidden="true">
                 <div className={styles.barFill} style={{ width: `${summary.percent}%` }} />
@@ -64,13 +69,13 @@ function DocumentDetailPage() {
       </div>
 
       {loading ? (
-        <p className={styles.state}>Loading your map</p>
+        <p className={styles.state}>{t('detail.loading')}</p>
       ) : error ? (
         <div className={styles.error} role="alert">
-          {error}
+          {t(error)}
         </div>
       ) : nodes.length === 0 ? (
-        <p className={styles.state}>This document has no map yet.</p>
+        <p className={styles.state}>{t('detail.noMap')}</p>
       ) : (
         <div className={styles.canvas}>
           <KnowledgeGraph
@@ -93,17 +98,17 @@ function DocumentDetailPage() {
           questions={panel.questions}
           onAnswer={game.recordAnswer}
           onClose={() => setPanel(null)}
-          doneTitle="Section complete"
-          doneBody="The fog has cleared here and connected nodes are ready. Answer every question correctly to master it."
+          doneTitle={t('detail.doneNodeTitle')}
+          doneBody={t('detail.doneNodeBody')}
         />
       ) : panel?.kind === 'review' ? (
         <QuestionPanel
-          title="Review round"
+          title={t('detail.reviewTitle')}
           questions={panel.questions}
           onAnswer={game.recordAnswer}
           onClose={() => setPanel(null)}
-          doneTitle="Review complete"
-          doneBody="Every question you get right here masters its node and clears more fog."
+          doneTitle={t('detail.doneReviewTitle')}
+          doneBody={t('detail.doneReviewBody')}
         />
       ) : null}
     </div>

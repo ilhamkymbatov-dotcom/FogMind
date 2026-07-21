@@ -15,6 +15,8 @@ import {
   type Question,
 } from '@fogmind/backend'
 import { supabase } from './supabase'
+import { errorKey } from '../i18n'
+import type { TranslationKey } from '../i18n'
 import {
   buildAdjacency,
   deriveStatus,
@@ -32,7 +34,7 @@ export interface NodeStats {
 
 export interface GraphGame {
   loading: boolean
-  error: string | null
+  error: TranslationKey | null
   document: Document | null
   nodes: Node[]
   edges: Edge[]
@@ -59,7 +61,7 @@ export function useGraphGame(documentId: string | undefined): GraphGame {
   const [answers, setAnswers] = useState<Map<string, boolean>>(new Map())
   const [userId, setUserId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<TranslationKey | null>(null)
 
   useEffect(() => {
     let active = true
@@ -70,7 +72,7 @@ export function useGraphGame(documentId: string | undefined): GraphGame {
       try {
         const { data: sessionData } = await supabase.auth.getSession()
         const doc = await getDocument(supabase, documentId)
-        if (!doc) throw new Error('That document was not found.')
+        if (!doc) throw new Error('err.docNotFound')
         const [nodeRows, edgeRows] = await Promise.all([
           listNodesForDocument(supabase, documentId),
           listEdgesForDocument(supabase, documentId),
@@ -106,7 +108,7 @@ export function useGraphGame(documentId: string | undefined): GraphGame {
         setProgressByNode(new Map(progressRows.map((p) => [p.node_id, p])))
         setAnswers(new Map(answerRows.map((a) => [a.question_id, a.is_correct])))
       } catch (err) {
-        if (active) setError(err instanceof Error ? err.message : 'Could not load this map.')
+        if (active) setError(errorKey(err))
       } finally {
         if (active) setLoading(false)
       }
@@ -191,7 +193,7 @@ export function useGraphGame(documentId: string | undefined): GraphGame {
   const recordAnswer = useCallback(
     async (question: Question, chosenOption: string): Promise<boolean> => {
       const isCorrect = chosenOption === question.correct_answer
-      if (!userId) throw new Error('Your session expired. Please sign in again.')
+      if (!userId) throw new Error('auth.err.sessionExpired')
 
       // Optimistic: update the answer map so the graph reacts immediately.
       const prevValue = answers.get(question.id)
@@ -245,7 +247,7 @@ export function useGraphGame(documentId: string | undefined): GraphGame {
           else next.set(question.id, prevValue)
           return next
         })
-        throw err instanceof Error ? err : new Error('Could not save your answer.')
+        throw err instanceof Error ? err : new Error('panel.errSave')
       }
     },
     [answers, progressByNode, questionsByNode, userId],

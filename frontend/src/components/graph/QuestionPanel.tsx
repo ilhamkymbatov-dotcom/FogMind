@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Check, CircleCheck, X } from 'lucide-react'
 import type { Question } from '@fogmind/backend'
+import { useTranslation, type TranslationKey } from '../../i18n'
 import { Button } from '../Button'
 import styles from './QuestionPanel.module.css'
 
@@ -15,8 +16,8 @@ interface QuestionPanelProps {
   doneBody: string
 }
 
-const DIFFICULTY_LABEL: Record<number, string> = { 1: 'Easy', 2: 'Medium', 3: 'Hard' }
 const BLANK = '_____'
+const CLOSE_MS = 160
 
 function optionsOf(question: Question): string[] {
   return Array.isArray(question.options) ? question.options.map((o) => String(o)) : []
@@ -33,18 +34,26 @@ function shuffled(values: string[]): string[] {
 }
 
 export function QuestionPanel({ title, questions, onAnswer, onClose, doneTitle, doneBody }: QuestionPanelProps) {
+  const { t } = useTranslation()
   const [index, setIndex] = useState(0)
   const [picked, setPicked] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<TranslationKey | null>(null)
+  const [closing, setClosing] = useState(false)
+
+  const requestClose = () => {
+    setClosing(true)
+    window.setTimeout(onClose, CLOSE_MS)
+  }
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') requestClose()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const current = questions[index]
   const done = index >= questions.length
@@ -56,6 +65,12 @@ export function QuestionPanel({ title, questions, onAnswer, onClose, doneTitle, 
     [current?.id],
   )
 
+  const parts = useMemo(() => {
+    if (!current) return null
+    const [before, after] = current.prompt.split(BLANK)
+    return { before, after: after ?? '' }
+  }, [current])
+
   async function choose(option: string) {
     if (answered || saving || !current) return
     setSaving(true)
@@ -63,8 +78,8 @@ export function QuestionPanel({ title, questions, onAnswer, onClose, doneTitle, 
     try {
       await onAnswer(current, option)
       setPicked(option)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not save your answer.')
+    } catch {
+      setError('panel.errSave')
     } finally {
       setSaving(false)
     }
@@ -76,27 +91,20 @@ export function QuestionPanel({ title, questions, onAnswer, onClose, doneTitle, 
     setIndex((i) => i + 1)
   }
 
-  // After answering, show the sentence completed with the correct word.
-  const filled = useMemo(() => {
-    if (!current) return null
-    const [before, after] = current.prompt.split(BLANK)
-    return { before, after: after ?? '' }
-  }, [current])
-
   return (
     <div
-      className={styles.overlay}
+      className={[styles.overlay, closing ? styles.overlayClosing : ''].filter(Boolean).join(' ')}
       role="dialog"
       aria-modal="true"
       aria-label={title}
       onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose()
+        if (e.target === e.currentTarget) requestClose()
       }}
     >
-      <div className={styles.panel}>
+      <div className={[styles.panel, closing ? styles.panelClosing : ''].filter(Boolean).join(' ')}>
         <div className={styles.header}>
           <h2 className={styles.nodeTitle}>{title}</h2>
-          <button type="button" className={styles.close} onClick={onClose} aria-label="Close">
+          <button type="button" className={styles.close} onClick={requestClose} aria-label={t('common.close')}>
             <X size={20} aria-hidden="true" />
           </button>
         </div>
@@ -106,29 +114,26 @@ export function QuestionPanel({ title, questions, onAnswer, onClose, doneTitle, 
             <CircleCheck className={styles.doneIcon} size={32} aria-hidden="true" />
             <p className={styles.doneTitle}>{doneTitle}</p>
             <p className={styles.doneBody}>{doneBody}</p>
-            <Button variant="primary" className={styles.next} onClick={onClose}>
-              Back to the map
+            <Button variant="primary" className={styles.next} onClick={requestClose}>
+              {t('panel.backToMap')}
             </Button>
           </div>
-        ) : current ? (
+        ) : current && parts ? (
           <div key={current.id} className={styles.questionBlock}>
             <div className={styles.meta}>
-              <span>
-                Question {index + 1} of {questions.length}
-              </span>
-              <span>{DIFFICULTY_LABEL[current.difficulty]}</span>
+              <span>{t('panel.questionOf', { n: index + 1, total: questions.length })}</span>
+              <span>{t(`panel.difficulty.${current.difficulty}` as TranslationKey)}</span>
             </div>
 
             <p className={styles.prompt}>
-              {answered && filled ? (
-                <>
-                  {filled.before}
-                  <span className={styles.filled}>{current.correct_answer}</span>
-                  {filled.after}
-                </>
-              ) : (
-                current.prompt
-              )}
+              {parts.before}
+              <span
+                className={[styles.slot, answered ? styles.slotFilled : ''].filter(Boolean).join(' ')}
+                style={{ minWidth: `${Math.max(current.correct_answer.length, 3)}ch` }}
+              >
+                {answered ? current.correct_answer : ''}
+              </span>
+              {parts.after}
             </p>
 
             <div className={styles.options}>
@@ -139,6 +144,7 @@ export function QuestionPanel({ title, questions, onAnswer, onClose, doneTitle, 
                   styles.option,
                   answered && isCorrect ? styles.optionCorrect : '',
                   answered && isPicked && !isCorrect ? styles.optionWrong : '',
+                  answered && !isCorrect && !isPicked ? styles.optionMuted : '',
                 ]
                   .filter(Boolean)
                   .join(' ')
@@ -163,22 +169,29 @@ export function QuestionPanel({ title, questions, onAnswer, onClose, doneTitle, 
                 className={[styles.feedback, picked === current.correct_answer ? styles.feedbackRight : styles.feedbackWrong].join(' ')}
                 role="status"
               >
-                {picked === current.correct_answer ? 'Correct' : 'The correct answer is shown above'}
+                {picked === current.correct_answer ? (
+                  <>
+                    <Check size={16} aria-hidden="true" />
+                    {t('panel.correct')}
+                  </>
+                ) : (
+                  t('panel.correctShown')
+                )}
               </div>
             ) : null}
 
-            {error ? <p className={styles.error}>{error}</p> : null}
+            {error ? <p className={styles.error}>{t(error)}</p> : null}
 
             {answered ? (
               <div className={styles.actions}>
                 <Button variant="primary" className={styles.next} onClick={next}>
-                  {index + 1 >= questions.length ? 'Finish' : 'Next question'}
+                  {index + 1 >= questions.length ? t('panel.finish') : t('panel.next')}
                 </Button>
               </div>
             ) : null}
           </div>
         ) : (
-          <p className={styles.doneBody}>There are no questions to show.</p>
+          <p className={styles.doneBody}>{t('panel.noQuestions')}</p>
         )}
       </div>
     </div>

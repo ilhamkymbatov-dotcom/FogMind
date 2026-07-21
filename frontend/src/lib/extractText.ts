@@ -64,17 +64,12 @@ export async function extractFromFile(file: File): Promise<Extracted> {
       case 'text':
         return { text: await file.text(), sourceType: 'text' }
       default:
-        throw new ExtractionError(
-          'Unsupported file type. Please upload a PDF, DOCX, MD or TXT file.',
-        )
+        // Message is a translation key; the display layer runs it through t().
+        throw new ExtractionError('err.unsupportedFile')
     }
   } catch (err) {
     if (err instanceof ExtractionError) throw err
-    throw new ExtractionError(
-      `Could not read that file. It may be corrupted or protected. ${
-        err instanceof Error ? err.message : ''
-      }`.trim(),
-    )
+    throw new ExtractionError('err.readFile')
   }
 }
 

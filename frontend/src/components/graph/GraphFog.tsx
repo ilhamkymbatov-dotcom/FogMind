@@ -26,11 +26,19 @@ interface GraphFogProps {
 // fully readable against the darker fog.
 const CLEAR_RADIUS: Record<NodeStatus, number> = {
   locked: 0,
-  available: 104,
-  completed: 148,
-  mastered: 182,
+  available: 120,
+  completed: 168,
+  mastered: 200,
 }
-const BRANCH_WIDTH = 86
+// Peak clearing strength by status. Below 1 so the pocket thins the mist to a
+// readable haze rather than punching a pure white hole.
+const CLEAR_STRENGTH: Record<NodeStatus, number> = {
+  locked: 0,
+  available: 0.7,
+  completed: 0.86,
+  mastered: 0.9,
+}
+const BRANCH_WIDTH = 72
 const SWEEP_MS = 600
 
 interface Blob {
@@ -116,10 +124,14 @@ export function GraphFog({ width, height, transform, nodes, branches }: GraphFog
       ctx.fill()
     }
 
+    // A wide, gradual feather so clearings blend into the mist instead of
+    // reading as hard white bubbles. Only a small core is near full strength;
+    // the rest is a long soft falloff.
     const punch = (cx: number, cy: number, radius: number, strength: number) => {
       const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius)
       g.addColorStop(0, `rgba(0, 0, 0, ${strength})`)
-      g.addColorStop(0.68, `rgba(0, 0, 0, ${strength * 0.92})`)
+      g.addColorStop(0.35, `rgba(0, 0, 0, ${strength * 0.82})`)
+      g.addColorStop(0.7, `rgba(0, 0, 0, ${strength * 0.32})`)
       g.addColorStop(1, 'rgba(0, 0, 0, 0)')
       ctx.fillStyle = g
       ctx.beginPath()
@@ -156,7 +168,7 @@ export function GraphFog({ width, height, transform, nodes, branches }: GraphFog
         const radius = CLEAR_RADIUS[node.status]
         if (radius <= 0) continue
         const p = toScreen(node.point)
-        punch(p.x, p.y, radius * t.k * scale, node.status === 'available' ? 0.9 : 1)
+        punch(p.x, p.y, radius * t.k * scale, CLEAR_STRENGTH[node.status])
       }
 
       for (const branch of fogBranches) {
@@ -165,10 +177,10 @@ export function GraphFog({ width, height, transform, nodes, branches }: GraphFog
         const progress = reduced ? 1 : Math.min(1, (now - started) / SWEEP_MS)
         const from = toScreen(branch.from)
         const to = toScreen(branch.to)
-        const steps = 12
+        const steps = 16
         for (let i = 0; i <= steps; i++) {
           const f = (i / steps) * progress
-          punch(from.x + (to.x - from.x) * f, from.y + (to.y - from.y) * f, ((BRANCH_WIDTH * t.k) / 2) * scale, 1)
+          punch(from.x + (to.x - from.x) * f, from.y + (to.y - from.y) * f, ((BRANCH_WIDTH * t.k) / 2) * scale, 0.82)
         }
       }
 

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Plus, Waypoints } from 'lucide-react'
 import { countNodes, listDocumentsForUser, type Document, type DocumentStatus } from '@fogmind/backend'
 import { useAuth } from '../context/AuthContext'
+import { errorKey, useTranslation, type TranslationKey } from '../i18n'
 import { supabase } from '../lib/supabase'
 import { Button } from '../components/Button'
 import { UploadModal } from '../components/UploadModal'
@@ -12,21 +13,24 @@ interface DocumentRow extends Document {
   nodeCount: number
 }
 
-const STATUS_LABEL: Record<DocumentStatus, string> = {
-  pending: 'Pending',
-  processing: 'Processing',
-  ready: 'Ready',
-  failed: 'Failed',
+const STATUS_KEY: Record<DocumentStatus, TranslationKey> = {
+  pending: 'status.pending',
+  processing: 'status.processing',
+  ready: 'status.ready',
+  failed: 'status.failed',
 }
 
-const SOURCE_LABEL: Record<string, string> = {
-  pdf: 'PDF',
-  docx: 'DOCX',
-  markdown: 'Markdown',
-  text: 'Text',
+// PDF, DOCX and Markdown are names kept as is; plain text is translated.
+function sourceLabel(source: string, t: (k: TranslationKey) => string): string {
+  if (source === 'pdf') return 'PDF'
+  if (source === 'docx') return 'DOCX'
+  if (source === 'markdown') return 'Markdown'
+  if (source === 'text') return t('source.text')
+  return source
 }
 
 function StatusBadge({ status }: { status: DocumentStatus }) {
+  const { t } = useTranslation()
   const cls = [
     styles.badge,
     status === 'ready' ? styles.badgeReady : '',
@@ -37,22 +41,22 @@ function StatusBadge({ status }: { status: DocumentStatus }) {
   return (
     <span className={cls}>
       <span className={styles.dot} aria-hidden="true" />
-      {STATUS_LABEL[status]}
+      {t(STATUS_KEY[status])}
     </span>
   )
 }
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
-}
-
 function DashboardPage() {
   const { user } = useAuth()
+  const { t, lang } = useTranslation()
   const navigate = useNavigate()
   const [rows, setRows] = useState<DocumentRow[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<TranslationKey | null>(null)
   const [uploadOpen, setUploadOpen] = useState(false)
+
+  const formatDate = (iso: string): string =>
+    new Date(iso).toLocaleDateString(lang, { year: 'numeric', month: 'short', day: 'numeric' })
 
   const load = useCallback(async () => {
     if (!user) return
@@ -65,7 +69,7 @@ function DashboardPage() {
       )
       setRows(withCounts)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not load your documents.')
+      setError(errorKey(err))
     } finally {
       setLoading(false)
     }
@@ -79,8 +83,8 @@ function DashboardPage() {
     <div className={styles.page}>
       <div className={styles.header}>
         <div>
-          <p className={styles.greeting}>Signed in as {user?.email}</p>
-          <h1 className={styles.title}>Your knowledge maps</h1>
+          <p className={styles.greeting}>{t('dash.signedInAs', { email: user?.email ?? '' })}</p>
+          <h1 className={styles.title}>{t('dash.title')}</h1>
         </div>
         <Button
           variant="primary"
@@ -88,26 +92,23 @@ function DashboardPage() {
           className={styles.uploadButton}
           onClick={() => setUploadOpen(true)}
         >
-          Upload
+          {t('dash.upload')}
         </Button>
       </div>
 
       {loading ? (
-        <p className={styles.state}>Loading your documents</p>
+        <p className={styles.state}>{t('dash.loading')}</p>
       ) : error ? (
         <div className={styles.error} role="alert">
-          {error}
+          {t(error)}
         </div>
       ) : rows.length === 0 ? (
         <div className={styles.empty}>
           <Waypoints className={styles.emptyIcon} size={32} aria-hidden="true" />
-          <h2 className={styles.emptyTitle}>No maps yet</h2>
-          <p className={styles.emptyBody}>
-            Upload a PDF, DOCX, Markdown or text file, or paste your notes, to build your first
-            knowledge map.
-          </p>
+          <h2 className={styles.emptyTitle}>{t('dash.emptyTitle')}</h2>
+          <p className={styles.emptyBody}>{t('dash.emptyBody')}</p>
           <Button variant="primary" icon={Plus} onClick={() => setUploadOpen(true)}>
-            Upload
+            {t('dash.upload')}
           </Button>
         </div>
       ) : (
@@ -122,8 +123,11 @@ function DashboardPage() {
               <div className={styles.rowMain}>
                 <div className={styles.rowTitle}>{row.title}</div>
                 <div className={styles.rowMeta}>
-                  {SOURCE_LABEL[row.source_type] ?? row.source_type} · {row.nodeCount} nodes ·{' '}
-                  {formatDate(row.created_at)}
+                  {t('dash.rowMeta', {
+                    source: sourceLabel(row.source_type, t),
+                    count: row.nodeCount,
+                    date: formatDate(row.created_at),
+                  })}
                 </div>
               </div>
               <div className={styles.rowRight}>

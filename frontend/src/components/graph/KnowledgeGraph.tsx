@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Check, CircleCheck, CloudFog, Lock, Minus, Plus } from 'lucide-react'
 import type { Edge, Node } from '@fogmind/backend'
+import { useTranslation } from '../../i18n'
 import { fitPoints, type NodeStatus, type Point, type Transform } from '../../lib/graphModel'
 import { GraphFog, type FogBranch, type FogNode } from './GraphFog'
 import styles from './KnowledgeGraph.module.css'
@@ -16,8 +17,8 @@ interface KnowledgeGraphProps {
 
 const MIN_K = 0.2
 const MAX_K = 4
-export const CARD_W = 160
-export const CARD_H = 60
+export const CARD_W = 208
+export const CARD_H = 76
 
 function clampK(k: number): number {
   return Math.min(MAX_K, Math.max(MIN_K, k))
@@ -37,6 +38,7 @@ function branchPath(a: Point, b: Point): string {
 }
 
 export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOpen }: KnowledgeGraphProps) {
+  const { t: tr } = useTranslation()
   const wrapRef = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState({ w: 0, h: 0 })
   const [transform, setTransform] = useState<Transform | null>(null)
@@ -150,13 +152,19 @@ export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOp
     [nodes, pos, statusOf],
   )
 
+  // Clearing follows the tree: the mist thins along every branch that links two
+  // cleared nodes, and along the branch that leads from a cleared node to the
+  // next available one, so the path reads as an opening rather than stamped
+  // circles.
   const branches: FogBranch[] = useMemo(() => {
     const out: FogBranch[] = []
     const clears = (s: NodeStatus) => s === 'completed' || s === 'mastered'
     for (const edge of edges) {
       const sa = statusOf(edge.source_node_id)
       const sb = statusOf(edge.target_node_id)
-      if (clears(sa) && sb === 'available') {
+      if (clears(sa) && clears(sb)) {
+        out.push({ key: `link-${edge.id}`, from: pos(edge.source_node_id), to: pos(edge.target_node_id) })
+      } else if (clears(sa) && sb === 'available') {
         out.push({ key: `${edge.source_node_id}-${edge.target_node_id}`, from: pos(edge.source_node_id), to: pos(edge.target_node_id) })
       } else if (clears(sb) && sa === 'available') {
         out.push({ key: `${edge.target_node_id}-${edge.source_node_id}`, from: pos(edge.target_node_id), to: pos(edge.source_node_id) })
@@ -169,6 +177,8 @@ export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOp
     <div
       className={styles.wrap}
       ref={wrapRef}
+      role="application"
+      aria-label={tr('graph.mapLabel')}
       onWheel={onWheel}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
@@ -216,7 +226,7 @@ export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOp
               style={{ left: p.x, top: p.y, width: CARD_W, height: CARD_H, marginLeft: -CARD_W / 2, marginTop: -CARD_H / 2 }}
               role={clickable ? 'button' : undefined}
               tabIndex={clickable ? 0 : undefined}
-              aria-label={clickable ? `Open ${node.title}` : undefined}
+              aria-label={clickable ? tr('graph.open', { title: node.title }) : undefined}
               aria-hidden={clickable ? undefined : true}
               onClick={() => clickable && onOpen(node)}
               onKeyDown={(e) => {
@@ -226,12 +236,12 @@ export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOp
                 }
               }}
             >
-              <Icon className={styles.cardIcon} size={14} aria-hidden="true" />
+              <Icon className={styles.cardIcon} size={17} aria-hidden="true" />
               <div className={styles.cardBody}>
                 <span className={styles.cardTitle}>{node.title}</span>
                 {status !== 'locked' && hint.total > 0 ? (
                   <span className={styles.cardHint}>
-                    {Math.min(hint.answered, hint.total)} of {hint.total} answered
+                    {tr('graph.answered', { answered: Math.min(hint.answered, hint.total), total: hint.total })}
                   </span>
                 ) : null}
               </div>
@@ -245,14 +255,14 @@ export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOp
       <GraphFog width={size.w} height={size.h} transform={t} nodes={fogNodes} branches={branches} />
 
       <div className={styles.controls}>
-        <button type="button" className={styles.controlButton} aria-label="Zoom in" onClick={() => zoomAround(size.w / 2, size.h / 2, 1.2)}>
+        <button type="button" className={styles.controlButton} aria-label={tr('graph.zoomIn')} onClick={() => zoomAround(size.w / 2, size.h / 2, 1.2)}>
           <Plus size={18} aria-hidden="true" />
         </button>
-        <button type="button" className={styles.controlButton} aria-label="Zoom out" onClick={() => zoomAround(size.w / 2, size.h / 2, 1 / 1.2)}>
+        <button type="button" className={styles.controlButton} aria-label={tr('graph.zoomOut')} onClick={() => zoomAround(size.w / 2, size.h / 2, 1 / 1.2)}>
           <Minus size={18} aria-hidden="true" />
         </button>
       </div>
-      <p className={styles.hint}>Drag to pan, scroll or pinch to zoom</p>
+      <p className={styles.hint}>{tr('graph.panHint')}</p>
     </div>
   )
 }

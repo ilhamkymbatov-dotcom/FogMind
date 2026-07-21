@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import { Upload, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
+import { errorKey, useTranslation, type TranslationKey } from '../i18n'
 import { extractFromFile, extractedFromPastedText, ExtractionError } from '../lib/extractText'
 import { ingest, type IngestResult } from '../lib/ingest'
 import { Button } from './Button'
@@ -21,13 +22,14 @@ function defaultTitle(fileName: string): string {
 
 export function UploadModal({ onClose, onComplete }: UploadModalProps) {
   const { user } = useAuth()
+  const { t } = useTranslation()
   const [mode, setMode] = useState<Mode>('file')
   const [file, setFile] = useState<File | null>(null)
   const [pasteText, setPasteText] = useState('')
   const [title, setTitle] = useState('')
   const [working, setWorking] = useState(false)
-  const [statusText, setStatusText] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const [statusKey, setStatusKey] = useState<TranslationKey | null>(null)
+  const [error, setError] = useState<TranslationKey | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -50,35 +52,35 @@ export function UploadModal({ onClose, onComplete }: UploadModalProps) {
     setError(null)
 
     if (!user) {
-      setError('Your session expired. Please sign in again.')
+      setError('auth.err.sessionExpired')
       return
     }
     if (!title.trim()) {
-      setError('Please give this a title.')
+      setError('upload.errTitle')
       return
     }
     if (mode === 'file' && !file) {
-      setError('Please choose a file to upload.')
+      setError('upload.errChooseFile')
       return
     }
     if (mode === 'paste' && !pasteText.trim()) {
-      setError('Please paste some text to map.')
+      setError('upload.errPasteText')
       return
     }
 
     setWorking(true)
     try {
-      setStatusText('Reading your material')
+      setStatusKey('upload.statusReading')
       const extracted =
         mode === 'file' && file
           ? await extractFromFile(file)
           : extractedFromPastedText(pasteText)
 
       if (!extracted.text.trim()) {
-        throw new ExtractionError('That material looks empty. Please try a different file or text.')
+        throw new ExtractionError('upload.errEmpty')
       }
 
-      setStatusText('Building your knowledge map')
+      setStatusKey('upload.statusBuilding')
       const result = await ingest({
         userId: user.id,
         title: title.trim(),
@@ -87,7 +89,7 @@ export function UploadModal({ onClose, onComplete }: UploadModalProps) {
       })
       onComplete(result)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
+      setError(errorKey(err))
       setWorking(false)
     }
   }
@@ -97,15 +99,15 @@ export function UploadModal({ onClose, onComplete }: UploadModalProps) {
       className={styles.overlay}
       role="dialog"
       aria-modal="true"
-      aria-label="Upload material"
+      aria-label={t('upload.title')}
       onMouseDown={(e) => {
         if (e.target === e.currentTarget && !working) onClose()
       }}
     >
       <div className={styles.modal}>
         <div className={styles.header}>
-          <h2 className={styles.title}>Add material</h2>
-          <button type="button" className={styles.close} onClick={onClose} aria-label="Close" disabled={working}>
+          <h2 className={styles.title}>{t('upload.title')}</h2>
+          <button type="button" className={styles.close} onClick={onClose} aria-label={t('common.close')} disabled={working}>
             <X size={20} aria-hidden="true" />
           </button>
         </div>
@@ -119,7 +121,7 @@ export function UploadModal({ onClose, onComplete }: UploadModalProps) {
             onClick={() => setMode('file')}
             disabled={working}
           >
-            Upload a file
+            {t('upload.tabFile')}
           </button>
           <button
             type="button"
@@ -129,7 +131,7 @@ export function UploadModal({ onClose, onComplete }: UploadModalProps) {
             onClick={() => setMode('paste')}
             disabled={working}
           >
-            Paste text
+            {t('upload.tabPaste')}
           </button>
         </div>
 
@@ -146,7 +148,7 @@ export function UploadModal({ onClose, onComplete }: UploadModalProps) {
                 {file ? (
                   <span className={styles.fileName}>{file.name}</span>
                 ) : (
-                  <span>Choose a PDF, DOCX, MD or TXT file</span>
+                  <span>{t('upload.dropzone')}</span>
                 )}
               </button>
               <input
@@ -160,7 +162,7 @@ export function UploadModal({ onClose, onComplete }: UploadModalProps) {
           ) : (
             <textarea
               className={styles.textarea}
-              placeholder="Paste your notes or article text here"
+              placeholder={t('upload.pastePlaceholder')}
               value={pasteText}
               onChange={(e) => setPasteText(e.target.value)}
               disabled={working}
@@ -168,29 +170,29 @@ export function UploadModal({ onClose, onComplete }: UploadModalProps) {
           )}
 
           <Input
-            label="Title"
+            label={t('upload.titleLabel')}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Give this a name"
+            placeholder={t('upload.titlePlaceholder')}
             disabled={working}
             required
           />
 
           {error ? (
             <div className={styles.error} role="alert">
-              {error}
+              {t(error)}
             </div>
           ) : null}
 
-          {working ? (
+          {working && statusKey ? (
             <div className={styles.status} role="status" aria-live="polite">
               <span className={styles.spinner} aria-hidden="true" />
-              {statusText}
+              {t(statusKey)}
             </div>
           ) : null}
 
           <Button type="submit" variant="primary" className={styles.submit} disabled={working}>
-            {working ? 'Working' : 'Create map'}
+            {working ? t('upload.working') : t('upload.submit')}
           </Button>
         </form>
       </div>

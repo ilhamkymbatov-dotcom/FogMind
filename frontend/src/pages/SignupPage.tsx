@@ -2,16 +2,18 @@ import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { MailCheck } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
+import { errorKey, useTranslation, type TranslationKey } from '../i18n'
 import { AuthCard, authStyles as s } from '../components/AuthCard'
 import { Button } from '../components/Button'
 import { Input } from '../components/Input'
 
 function SignupPage() {
   const { signUp } = useAuth()
+  const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [displayName, setDisplayName] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<TranslationKey | null>(null)
   const [loading, setLoading] = useState(false)
   const [confirmSent, setConfirmSent] = useState(false)
 
@@ -20,11 +22,11 @@ function SignupPage() {
     setError(null)
 
     if (!email.trim() || !password) {
-      setError('Please enter your email and a password.')
+      setError('auth.err.enterEmailPassword')
       return
     }
     if (password.length < 6) {
-      setError('Please use a password of at least 6 characters.')
+      setError('auth.err.passwordTooShort')
       return
     }
 
@@ -32,12 +34,9 @@ function SignupPage() {
     try {
       const { session } = await signUp(email.trim(), password, displayName)
       // Email confirmation is on, so success gives a user but no session.
-      // Show the confirmation screen rather than assuming a login.
-      if (!session) {
-        setConfirmSent(true)
-      }
+      if (!session) setConfirmSent(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
+      setError(errorKey(err))
     } finally {
       setLoading(false)
     }
@@ -46,22 +45,19 @@ function SignupPage() {
   if (confirmSent) {
     return (
       <AuthCard
-        title="Confirm your email"
+        title={t('signup.confirmTitle')}
         footer={
           <>
-            Already confirmed?{' '}
+            {t('signup.confirmFooterPrompt')}{' '}
             <Link to="/login" className={s.link}>
-              Sign in
+              {t('signup.confirmFooterLink')}
             </Link>
           </>
         }
       >
         <div className={s.notice}>
           <MailCheck className={s.noticeIcon} size={28} aria-hidden="true" />
-          <p className={s.noticeBody}>
-            We sent a confirmation link to <span className={s.noticeEmail}>{email.trim()}</span>.
-            Open it to finish setting up your account, then sign in.
-          </p>
+          <p className={s.noticeBody}>{t('signup.confirmBody', { email: email.trim() })}</p>
         </div>
       </AuthCard>
     )
@@ -69,54 +65,54 @@ function SignupPage() {
 
   return (
     <AuthCard
-      title="Create your account"
-      subtitle="Start turning your material into maps you can learn."
+      title={t('signup.title')}
+      subtitle={t('signup.subtitle')}
       footer={
         <>
-          Already have an account?{' '}
+          {t('signup.footerPrompt')}{' '}
           <Link to="/login" className={s.link}>
-            Sign in
+            {t('signup.footerLink')}
           </Link>
         </>
       }
     >
       <form className={s.form} onSubmit={handleSubmit} noValidate>
         <Input
-          label="Email"
+          label={t('auth.email')}
           type="email"
           autoComplete="email"
-          placeholder="you@example.com"
+          placeholder={t('auth.emailPlaceholder')}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           disabled={loading}
           required
         />
         <Input
-          label="Password"
+          label={t('auth.password')}
           type="password"
           autoComplete="new-password"
-          placeholder="At least 6 characters"
+          placeholder={t('signup.passwordPlaceholder')}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           disabled={loading}
           required
         />
         <Input
-          label="Display name (optional)"
+          label={t('signup.displayName')}
           type="text"
           autoComplete="name"
-          placeholder="How should we greet you"
+          placeholder={t('signup.displayNamePlaceholder')}
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
           disabled={loading}
         />
         {error ? (
           <div className={s.error} role="alert">
-            {error}
+            {t(error)}
           </div>
         ) : null}
         <Button type="submit" variant="primary" disabled={loading}>
-          {loading ? 'Creating account' : 'Create account'}
+          {loading ? t('signup.submitting') : t('signup.submit')}
         </Button>
       </form>
     </AuthCard>

@@ -16,25 +16,17 @@ export interface AuthResult {
 function messageFor(error: AuthError): string {
   const raw = error.message.toLowerCase()
 
-  if (raw.includes('invalid login credentials')) {
-    return 'That email or password is not correct.'
-  }
-  if (raw.includes('email not confirmed')) {
-    return 'Please confirm your email first. Open the link we sent to your inbox.'
-  }
-  if (raw.includes('already registered') || raw.includes('already been registered')) {
-    return 'An account with this email already exists. Try signing in instead.'
-  }
-  if (raw.includes('password should be at least')) {
-    return 'Please use a password of at least 6 characters.'
-  }
-  if (raw.includes('unable to validate email') || raw.includes('invalid email')) {
-    return 'Please enter a valid email address.'
-  }
-  if (raw.includes('rate limit') || raw.includes('too many')) {
-    return 'Too many attempts. Please wait a moment and try again.'
-  }
-  return error.message
+  // Returns a translation key; the display layer runs it through t(). An
+  // unmapped case yields the generic key rather than a raw English string.
+  if (raw.includes('invalid login credentials')) return 'auth.err.invalidCredentials'
+  if (raw.includes('email not confirmed')) return 'auth.err.emailNotConfirmed'
+  if (raw.includes('already registered') || raw.includes('already been registered'))
+    return 'auth.err.alreadyRegistered'
+  if (raw.includes('password should be at least')) return 'auth.err.passwordTooShort'
+  if (raw.includes('unable to validate email') || raw.includes('invalid email'))
+    return 'auth.err.invalidEmail'
+  if (raw.includes('rate limit') || raw.includes('too many')) return 'auth.err.rateLimited'
+  return 'common.somethingWrong'
 }
 
 /**

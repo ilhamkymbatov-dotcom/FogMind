@@ -48,7 +48,8 @@ export async function ingest(input: IngestInput): Promise<IngestResult> {
   try {
     const graph = analyze(text)
     if (graph.nodes.length === 0) {
-      throw new Error('We could not find any readable content to map in that document.')
+      // Message is a translation key; the display layer runs it through t().
+      throw new Error('err.noContent')
     }
 
     const nodeRows: NodeInsert[] = graph.nodes.map((node) => ({
