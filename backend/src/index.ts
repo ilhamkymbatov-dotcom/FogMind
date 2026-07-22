@@ -45,6 +45,7 @@ export {
   listDocumentsForUser,
   getDocument,
   updateDocumentStatus,
+  deleteDocument,
   type CreateDocumentInput,
 } from './queries/documents'
 export { insertNodes, listNodesForDocument, countNodes } from './queries/nodes'
@@ -59,7 +60,9 @@ export {
   createInitialProgressForNodes,
   listProgressForNodes,
   updateProgress,
+  resetProgressForDocument,
   type InitialProgressInput,
+  type ResetProgressResult,
 } from './queries/progress'
 export { upsertQuestionAnswer, listAnswersForQuestions } from './queries/questionAnswers'
 export { recordActivityDay, listActivityDates } from './queries/activityDays'

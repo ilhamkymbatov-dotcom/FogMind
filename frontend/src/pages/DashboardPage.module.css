@@ -37,11 +37,14 @@
   gap: var(--space-3);
 }
 
+/* The row is a container rather than one big button, because the delete control
+   inside it is a button too and buttons cannot nest. Opening the map and
+   deleting it are two separate targets. */
 .row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
+  gap: var(--space-3);
   width: 100%;
   min-height: 44px;
   padding: var(--space-4);
@@ -50,11 +53,26 @@
   background-color: var(--color-surface);
   box-shadow: var(--shadow-sm);
   text-align: left;
-  cursor: pointer;
   transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 
-.row:hover {
+/* Everything except the controls opens the map. */
+.rowOpen {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.row:has(.rowOpen:hover) {
   border-color: var(--color-border-strong);
   box-shadow: var(--shadow-md);
   transform: translateY(-1px);

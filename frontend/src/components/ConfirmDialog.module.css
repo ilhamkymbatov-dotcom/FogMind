@@ -1,0 +1,97 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background-color: rgba(0, 0, 0, 0.42);
+}
+
+.panel {
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-6);
+}
+
+.title {
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.014em;
+}
+
+.body {
+  margin-top: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--color-muted);
+}
+
+/* The one line that has to land. Held apart and set in the destructive tone,
+   without turning the whole dialog into a warning. */
+.warning {
+  padding-left: var(--space-4);
+  border-left: 2px solid var(--color-danger);
+  color: var(--color-danger);
+  font-weight: var(--weight-medium);
+}
+
+.error {
+  margin-top: var(--space-4);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background-color: var(--tint-danger);
+  font-size: var(--text-sm);
+  line-height: var(--leading-sm);
+  color: var(--color-danger);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+/* The shared button is 40px at its default size. These two decide whether
+   something is destroyed, so they get the full target. */
+.actions > button {
+  min-height: 44px;
+}
+
+/* The only red fill on the site. */
+.destructive {
+  background-color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+.destructive:hover:not(:disabled) {
+  background-color: var(--color-danger-hover);
+  border-color: var(--color-danger-hover);
+}
+
+@media (max-width: 480px) {
+  .panel {
+    padding: var(--space-5);
+  }
+
+  /* Stacked and full width, so neither target is cramped on a phone. */
+  .actions {
+    flex-direction: column-reverse;
+  }
+
+  .actions > * {
+    width: 100%;
+  }
+}

@@ -116,6 +116,15 @@ select {
   --tint-warm: #f8efe7;
   --wash-warm: #f9f4f0;
 
+  /* Destructive only. The one red on the site, reserved for an action that
+     cannot be undone, and never used for emphasis anywhere else. Sits in the
+     same warm family as the terracotta so it reads as a deeper register of the
+     palette rather than a system alert. White on it measures 6.66:1, and it
+     measures 6.33:1 as text on paper. */
+  --color-danger: #a8322a;
+  --color-danger-hover: #8f2620;
+  --tint-danger: #fbeeec;
+
   /* Corners. Comfortable rounding on cards and panels, tighter on controls.
      Nothing pill shaped. */
   --radius: 12px;

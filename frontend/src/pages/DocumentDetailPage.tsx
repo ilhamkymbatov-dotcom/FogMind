@@ -1,8 +1,11 @@
 import { useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { ChevronLeft, Sparkles } from 'lucide-react'
-import type { Node, Question } from '@fogmind/backend'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { ChevronLeft, RotateCcw, Sparkles, Trash2 } from 'lucide-react'
+import { deleteDocument, type Node, type Question } from '@fogmind/backend'
 import { useTranslation } from '../i18n'
+import { supabase } from '../lib/supabase'
+import { IconButton } from '../components/IconButton'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 import { KnowledgeGraph } from '../components/graph/KnowledgeGraph'
 import { QuestionPanel } from '../components/graph/QuestionPanel'
 import { treeLayout } from '../lib/graphModel'
@@ -18,7 +21,9 @@ function DocumentDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { t } = useTranslation()
   const game = useGraphGame(id)
+  const navigate = useNavigate()
   const [panel, setPanel] = useState<PanelState>(null)
+  const [confirming, setConfirming] = useState<'delete' | 'reset' | null>(null)
 
   const { loading, error, document, nodes, edges, statusOf, statsOf, summary } = game
   const positions = useMemo(() => treeLayout(nodes, edges), [nodes, edges])
@@ -64,9 +69,55 @@ function DocumentDetailPage() {
                 <div className={styles.barFill} style={{ width: `${summary.percent}%` }} />
               </div>
             </div>
+
+            {/* Set apart from the reading controls, so neither is reachable by
+                a stray click meant for the map. */}
+            <div className={styles.manage}>
+              <IconButton
+                icon={RotateCcw}
+                label={t('doc.reset')}
+                onClick={() => setConfirming('reset')}
+              />
+              <IconButton
+                icon={Trash2}
+                tone="danger"
+                label={t('doc.delete')}
+                onClick={() => setConfirming('delete')}
+              />
+            </div>
           </div>
         ) : null}
       </div>
+
+      {confirming === 'reset' ? (
+        <ConfirmDialog
+          titleKey="doc.resetTitle"
+          body={<p>{t('doc.resetBody', { title: document?.title ?? t('detail.mapFallback') })}</p>}
+          confirmKey="doc.resetConfirm"
+          workingKey="doc.resetting"
+          onConfirm={async () => {
+            await game.resetProgress()
+            setPanel(null)
+            setConfirming(null)
+          }}
+          onClose={() => setConfirming(null)}
+        />
+      ) : null}
+
+      {confirming === 'delete' && id ? (
+        <ConfirmDialog
+          titleKey="doc.deleteTitle"
+          body={<p>{t('doc.deleteBody', { title: document?.title ?? t('detail.mapFallback') })}</p>}
+          confirmKey="doc.deleteConfirm"
+          workingKey="doc.deleting"
+          onConfirm={async () => {
+            await deleteDocument(supabase, id)
+            // The map no longer exists, so there is nothing to return to.
+            navigate('/app', { replace: true })
+          }}
+          onClose={() => setConfirming(null)}
+        />
+      ) : null}
 
       {loading ? (
         <p className={styles.state}>{t('detail.loading')}</p>

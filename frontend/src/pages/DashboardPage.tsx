@@ -1,13 +1,22 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Waypoints } from 'lucide-react'
-import { countNodes, listDocumentsForUser, type Document, type DocumentStatus } from '@fogmind/backend'
+import { useState as useReactState } from 'react'
+import { Plus, Trash2, Waypoints } from 'lucide-react'
+import {
+  countNodes,
+  deleteDocument,
+  listDocumentsForUser,
+  type Document,
+  type DocumentStatus,
+} from '@fogmind/backend'
 import { useAuth } from '../context/AuthContext'
 import { errorKey, useTranslation, type TranslationKey } from '../i18n'
 import { supabase } from '../lib/supabase'
 import { Button } from '../components/Button'
 import { UploadModal } from '../components/UploadModal'
 import { StreakCard } from '../components/StreakCard'
+import { IconButton } from '../components/IconButton'
+import { ConfirmDialog } from '../components/ConfirmDialog'
 import styles from './DashboardPage.module.css'
 
 interface DocumentRow extends Document {
@@ -55,6 +64,7 @@ function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<TranslationKey | null>(null)
   const [uploadOpen, setUploadOpen] = useState(false)
+  const [pendingDelete, setPendingDelete] = useReactState<DocumentRow | null>(null)
 
   const formatDate = (iso: string): string =>
     new Date(iso).toLocaleDateString(lang, { year: 'numeric', month: 'short', day: 'numeric' })
@@ -117,29 +127,55 @@ function DashboardPage() {
       ) : (
         <div className={styles.list}>
           {rows.map((row) => (
-            <button
-              key={row.id}
-              type="button"
-              className={styles.row}
-              onClick={() => navigate(`/app/documents/${row.id}`)}
-            >
-              <div className={styles.rowMain}>
-                <div className={styles.rowTitle}>{row.title}</div>
-                <div className={styles.rowMeta}>
-                  {t('dash.rowMeta', {
-                    source: sourceLabel(row.source_type, t),
-                    count: row.nodeCount,
-                    date: formatDate(row.created_at),
-                  })}
+            <div key={row.id} className={styles.row}>
+              <button
+                type="button"
+                className={styles.rowOpen}
+                onClick={() => navigate(`/app/documents/${row.id}`)}
+              >
+                <div className={styles.rowMain}>
+                  <div className={styles.rowTitle}>{row.title}</div>
+                  <div className={styles.rowMeta}>
+                    {t('dash.rowMeta', {
+                      source: sourceLabel(row.source_type, t),
+                      count: row.nodeCount,
+                      date: formatDate(row.created_at),
+                    })}
+                  </div>
                 </div>
-              </div>
+              </button>
               <div className={styles.rowRight}>
                 <StatusBadge status={row.status} />
+                {/* Tucked past the status, so it is never on the way to
+                    opening the map. */}
+                <IconButton
+                  icon={Trash2}
+                  tone="danger"
+                  label={t('doc.delete')}
+                  onClick={() => setPendingDelete(row)}
+                />
               </div>
-            </button>
+            </div>
           ))}
         </div>
       )}
+
+      {pendingDelete ? (
+        <ConfirmDialog
+          titleKey="doc.deleteTitle"
+          body={<p>{t('doc.deleteBody', { title: pendingDelete.title })}</p>}
+          confirmKey="doc.deleteConfirm"
+          workingKey="doc.deleting"
+          onConfirm={async () => {
+            await deleteDocument(supabase, pendingDelete.id)
+            // Drop it locally rather than refetching, so the card leaves at the
+            // moment the delete lands.
+            setRows((prev) => prev.filter((r) => r.id !== pendingDelete.id))
+            setPendingDelete(null)
+          }}
+          onClose={() => setPendingDelete(null)}
+        />
+      ) : null}
 
       {uploadOpen ? (
         <UploadModal

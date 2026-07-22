@@ -470,6 +470,24 @@ export const en = {
   'streak.wd4': 'T',
   'streak.wd5': 'F',
   'streak.wd6': 'S',
+
+  // Destructive actions --------------------------------------------------------
+  'confirm.cancel': 'Cancel',
+  'confirm.permanent': 'This cannot be undone.',
+
+  'doc.delete': 'Delete this map',
+  'doc.deleteTitle': 'Delete this map?',
+  'doc.deleteBody':
+    'This removes {title} along with its topics, connections, questions and everything you have answered on it.',
+  'doc.deleteConfirm': 'Delete map',
+  'doc.deleting': 'Deleting',
+
+  'doc.reset': 'Reset progress',
+  'doc.resetTitle': 'Reset progress on this map?',
+  'doc.resetBody':
+    'Every topic in {title} goes back under the fog and your answers on it are cleared. The map itself, its topics and its questions all stay, and your streak is not affected.',
+  'doc.resetConfirm': 'Reset progress',
+  'doc.resetting': 'Resetting',
 } as const
 
 export type TranslationKey = keyof typeof en

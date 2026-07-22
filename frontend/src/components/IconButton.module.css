@@ -1,0 +1,83 @@
+.wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+/* A 16px mark inside a 44px target: quiet to look at, easy to hit. */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition:
+    color 140ms ease,
+    background-color 140ms ease,
+    border-color 140ms ease;
+}
+
+.button:hover {
+  background-color: var(--color-sunken);
+  color: var(--color-fg);
+}
+
+.button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* Destructive controls only warm to red on approach, never at rest, so a row
+   of cards is not a row of warnings. */
+.danger:hover:not(:disabled) {
+  background-color: var(--tint-danger);
+  border-color: rgba(168, 50, 42, 0.24);
+  color: var(--color-danger);
+}
+
+/* Tooltip -------------------------------------------------------------------- */
+
+.tip {
+  position: absolute;
+  bottom: calc(100% + 2px);
+  z-index: 20;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-xs);
+  background-color: var(--color-fg);
+  color: var(--color-surface);
+  font-size: var(--text-xs);
+  line-height: var(--leading-xs);
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 140ms ease, visibility 140ms ease;
+}
+
+/* Anchored to one edge so a tooltip near the side of a card stays on screen. */
+.tipEnd {
+  right: 0;
+}
+
+.tipStart {
+  left: 0;
+}
+
+/* Keyboard focus reveals it too, which the title attribute never does. */
+.button:hover + .tip,
+.button:focus-visible + .tip {
+  opacity: 1;
+  visibility: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button,
+  .tip {
+    transition: none;
+  }
+}

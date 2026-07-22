@@ -8,6 +8,7 @@ import {
   listQuestionsForNodes,
   updateProgress,
   upsertQuestionAnswer,
+  resetProgressForDocument,
   type Document,
   type Edge,
   type Node,
@@ -51,6 +52,8 @@ export interface GraphGame {
   userId: string | null
   /** Records one answer, upserts it, updates node progress, returns correctness. */
   recordAnswer: (question: Question, chosenOption: string) => Promise<boolean>
+  /** Puts every node of this document back under the fog. */
+  resetProgress: () => Promise<void>
 }
 
 export function useGraphGame(documentId: string | undefined): GraphGame {
@@ -260,6 +263,30 @@ export function useGraphGame(documentId: string | undefined): GraphGame {
     [answers, progressByNode, questionsByNode, userId, markActiveToday],
   )
 
+  const resetProgress = useCallback(async (): Promise<void> => {
+    if (!documentId) return
+    await resetProgressForDocument(supabase, documentId)
+
+    // Node status is derived from the answers, so emptying them is what
+    // actually re fogs the map: nothing completed, nothing mastered, only the
+    // starting node reachable. The progress rows are the persisted mirror and
+    // are brought back into line here so a reload agrees with the screen.
+    setAnswers(new Map())
+    setProgressByNode((prev) => {
+      const next = new Map<string, Progress>()
+      for (const [nodeId, progress] of prev) {
+        next.set(nodeId, {
+          ...progress,
+          state: 'fogged',
+          correct_count: 0,
+          attempt_count: 0,
+          last_reviewed_at: null,
+        })
+      }
+      return next
+    })
+  }, [documentId])
+
   return {
     loading,
     error,
@@ -275,5 +302,6 @@ export function useGraphGame(documentId: string | undefined): GraphGame {
     summary,
     userId,
     recordAnswer,
+    resetProgress,
   }
 }
