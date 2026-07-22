@@ -2,25 +2,27 @@
    needs is declared here and nowhere else, so the dark cannot leak into the
    bar above it or anywhere else in the app. */
 .wrap {
-  --map-ground: #0b1120;
-  --map-panel: rgba(12, 18, 31, 0.9);
-  --map-panel-line: rgba(146, 170, 210, 0.22);
-  --map-title: #eaf0f8;
-  --map-hint: #a2b3cb;
+  --map-ground: #131416;
+  --map-panel: rgba(23, 24, 27, 0.9);
+  --map-panel-line: rgba(190, 194, 202, 0.2);
+  --map-title: #eef0f2;
+  --map-hint: #a8abb2;
   /* The accent itself is far too dark to read on this ground. This is the same
-     hue lifted until it carries text, and it is used only in here. */
+     hue lifted until it carries text, and it is used only in here. The glows
+     and strokes stay on the brand accent proper. */
   --map-accent-lit: #8ab0ff;
 
   position: relative;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  /* Deep ink blue, lifted a little at the top, with a vignette pulling the eye
-     to the middle. Never flat, never black. */
+  /* Deep neutral graphite, lifted a little at the top, with a vignette pulling
+     the eye to the middle. Never flat, never black, and never tinted: the only
+     colour the scene is allowed is the accent on the nodes. */
   background-color: var(--map-ground);
   background-image:
-    radial-gradient(125% 95% at 50% 38%, rgba(24, 36, 62, 0) 38%, rgba(3, 6, 14, 0.9) 100%),
-    linear-gradient(180deg, #16223a 0%, #0d1526 55%, #070c17 100%);
+    radial-gradient(125% 95% at 50% 38%, rgba(40, 42, 46, 0) 38%, rgba(6, 6, 7, 0.92) 100%),
+    linear-gradient(180deg, #1f2124 0%, #17181b 55%, #0e0f11 100%);
   touch-action: none;
   user-select: none;
   cursor: grab;
@@ -64,7 +66,7 @@
 
 /* A cold thread in the mist: present, but nothing to follow yet. */
 .edge {
-  stroke: #6f88ad;
+  stroke: #8d9096;
   stroke-linecap: round;
   opacity: 0.3;
   transition: stroke 400ms ease, opacity 400ms ease;
@@ -79,7 +81,7 @@
 /* The travelling highlight. A short dash sliding along a stroke that is solid
    underneath it, so the limb reads as lit rather than broken. */
 .edgeSpark {
-  stroke: #d6e4ff;
+  stroke: #b9cdff;
   stroke-linecap: round;
   opacity: 0.75;
   stroke-dasharray: 16 150;
@@ -152,7 +154,7 @@
   width: 30px;
   height: 30px;
   border-radius: var(--radius-graph);
-  background-color: rgba(140, 170, 220, 0.12);
+  background-color: rgba(198, 202, 210, 0.11);
   color: var(--map-hint);
   transition: background-color 200ms ease, color 200ms ease;
 }
@@ -191,13 +193,13 @@
 /* Still shut: cold, dim, and half swallowed by the mist above it. */
 .card_locked {
   opacity: 0.34;
-  border-color: rgba(146, 170, 210, 0.12);
-  background-color: rgba(10, 15, 27, 0.72);
+  border-color: rgba(190, 194, 202, 0.11);
+  background-color: rgba(20, 21, 24, 0.72);
   box-shadow: none;
 }
 
 .card_locked .cardTitle {
-  color: #9aa9c0;
+  color: #9b9ea4;
 }
 
 /* Reachable. The one card the eye should find, breathing quietly so it reads
@@ -247,11 +249,11 @@
 /* Answered, but not all of it right. Softly lit and fully readable,
    deliberately without the accent, so it never reads as finished. */
 .card_completed {
-  border-color: rgba(178, 198, 230, 0.32);
+  border-color: rgba(198, 202, 210, 0.3);
 }
 
 .card_completed .cardIconWrap {
-  background-color: rgba(170, 195, 235, 0.18);
+  background-color: rgba(198, 202, 210, 0.17);
   color: var(--map-title);
 }
 

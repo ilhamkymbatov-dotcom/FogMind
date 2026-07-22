@@ -65,11 +65,11 @@ interface Layer {
 }
 
 /**
- * The lantern. Cleared ground is lit warm, which against the cold blue of the
- * mist is what makes the map read as somewhere with a temperature rather than
- * a gray sheet. Used only as light inside the canvas, never as a UI colour.
+ * The colour of open air. Cleared ground reads as mist thinning to a clean
+ * neutral light, not as a lamp being shone on it: the map is a schematic in
+ * fog, and the only colour in the scene is the brand accent on the nodes.
  */
-const WARM = '255, 208, 150'
+const OPEN_AIR = '214, 217, 222'
 
 interface Mote {
   x: number
@@ -84,7 +84,7 @@ const frac = (v: number) => v - Math.floor(v)
 /** A cheap fixed hash, so every speck keeps its place between frames. */
 const spread = (i: number, salt: number) => frac(Math.sin(i * 12.9898 + salt) * 43758.5453)
 
-/** Dust turning in the lantern light. */
+/** Dust turning in the open air. */
 const MOTES: Mote[] = Array.from({ length: 40 }, (_, i) => ({
   x: spread(i, 0),
   y: spread(i, 1.7),
@@ -148,13 +148,14 @@ export function useFogLayers({ width, height, transform, nodes, branches }: FogL
   // place the product allows itself no colour at all.
   const tiles = useMemo(
     () => ({
-      // The dark cold body of the mist, which is what swallows unexplored
-      // ground. Nearly black, and blue rather than gray.
-      body: bakeNoiseTile({ size: TILE, period: 2, octaves: 5, seed: 1337, contrast: 1.3, rgb: [7, 12, 26], alpha: 0.92 }),
-      // Billow tops catching what light there is. Cool, never white.
-      light: bakeNoiseTile({ size: TILE, period: 3, octaves: 5, seed: 90210, contrast: 1.6, rgb: [104, 128, 170], alpha: 0.62 }),
+      // The dark body of the mist, which is what swallows unexplored ground.
+      // Nearly black and strictly neutral. The high contrast is what separates
+      // it into clumps with weight instead of an even film.
+      body: bakeNoiseTile({ size: TILE, period: 2, octaves: 5, seed: 1337, contrast: 1.85, rgb: [9, 9, 10], alpha: 1 }),
+      // Billow tops catching what light there is. Gray, never blue.
+      light: bakeNoiseTile({ size: TILE, period: 3, octaves: 5, seed: 90210, contrast: 1.95, rgb: [150, 152, 156], alpha: 0.86 }),
       // Thin filaments, the wisps that sell it as vapour rather than paint.
-      wisp: bakeNoiseTile({ size: TILE, period: 5, octaves: 4, seed: 5150, ridged: true, contrast: 3, rgb: [158, 186, 226], alpha: 0.4 }),
+      wisp: bakeNoiseTile({ size: TILE, period: 5, octaves: 4, seed: 5150, ridged: true, contrast: 3, rgb: [198, 200, 205], alpha: 0.46 }),
       // The chisel that eats irregular bites out of the clearing boundary.
       // Mostly dark with scattered bright teeth, so it takes bites rather than
       // thinning everything evenly, and fine grained so the teeth land on the
@@ -188,18 +189,22 @@ export function useFogLayers({ width, height, transform, nodes, branches }: FogL
     if (!maskCtx) return
 
     // Weighted toward the dark tile on purpose. What survives the punch is all
-    // that is left inside a pocket, and a white haze over a white card would
+    // that is left inside a pocket, and a haze the colour of open air would
     // survive as nothing at all, which is how a pocket ends up a bare disc.
     const backLayers: Layer[] = [
-      { tile: tiles.body, scale: 4.6, vx: 4, vy: -2, alpha: 0.46, parallax: 0.18 },
-      { tile: tiles.body, scale: 1.7, vx: 6.2, vy: -3.1, alpha: 0.26, parallax: 0.14 },
-      { tile: tiles.light, scale: 3.2, vx: -2.6, vy: -1.4, alpha: 0.16, parallax: 0.18 },
+      { tile: tiles.body, scale: 5.4, vx: 4, vy: -2, alpha: 0.54, parallax: 0.18 },
+      { tile: tiles.body, scale: 1.9, vx: 6.2, vy: -3.1, alpha: 0.32, parallax: 0.14 },
+      { tile: tiles.light, scale: 3.4, vx: -2.6, vy: -1.4, alpha: 0.2, parallax: 0.18 },
     ]
+    // Five octaves rather than four, spanning a wider range of scales: big slow
+    // banks for the mass, a mid layer for the clumping, and fine wisps on top.
+    // Together they give the mist body instead of an even film.
     const frontLayers: Layer[] = [
-      { tile: tiles.body, scale: 3.2, vx: 3.4, vy: -1.8, alpha: 0.6, parallax: 0.07 },
-      { tile: tiles.light, scale: 1.9, vx: -5.2, vy: -2.8, alpha: 0.52, parallax: 0.07 },
-      { tile: tiles.body, scale: 1.15, vx: 6.4, vy: -3.6, alpha: 0.3, parallax: 0.05 },
-      { tile: tiles.wisp, scale: 1.1, vx: 9, vy: -5, alpha: 0.3, parallax: 0.035 },
+      { tile: tiles.body, scale: 4.4, vx: 2.8, vy: -1.5, alpha: 0.86, parallax: 0.07 },
+      { tile: tiles.light, scale: 2.4, vx: -5.2, vy: -2.8, alpha: 0.46, parallax: 0.07 },
+      { tile: tiles.body, scale: 1.5, vx: 6.4, vy: -3.6, alpha: 0.56, parallax: 0.05 },
+      { tile: tiles.light, scale: 0.85, vx: -8.1, vy: -4.4, alpha: 0.2, parallax: 0.04 },
+      { tile: tiles.wisp, scale: 1.1, vx: 9, vy: -5, alpha: 0.24, parallax: 0.035 },
     ]
 
     // A pattern belongs to the context that made it, so they are cached per
@@ -381,20 +386,20 @@ export function useFogLayers({ width, height, transform, nodes, branches }: FogL
     }
 
     /**
-     * The lantern pools. Warm light spilling from every clearing, which is the
-     * whole temperature story: warm where the learner has been, cold where the
-     * map is still shut.
+     * The open air of a clearing: the mist thinning to a clean neutral light
+     * where the learner has been, against the near black of ground still shut.
+     * All value, no hue, so the only colour in the scene stays the accent.
      */
-    const paintLanterns = (ctx: CanvasRenderingContext2D, t: Transform, lit: FogNode[], peak: number, reachBy: number) => {
+    const paintClearing = (ctx: CanvasRenderingContext2D, t: Transform, lit: FogNode[], peak: number, reachBy: number) => {
       for (const node of lit) {
         const radius = CLEAR_RADIUS[node.status] * reachBy * t.k * RES
         if (radius <= 0) continue
         const p = screenOf(node, t)
         const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, radius)
-        g.addColorStop(0, `rgba(${WARM}, ${peak})`)
-        g.addColorStop(0.42, `rgba(${WARM}, ${peak * 0.44})`)
-        g.addColorStop(0.72, `rgba(${WARM}, ${peak * 0.15})`)
-        g.addColorStop(1, `rgba(${WARM}, 0)`)
+        g.addColorStop(0, `rgba(${OPEN_AIR}, ${peak})`)
+        g.addColorStop(0.42, `rgba(${OPEN_AIR}, ${peak * 0.44})`)
+        g.addColorStop(0.72, `rgba(${OPEN_AIR}, ${peak * 0.15})`)
+        g.addColorStop(1, `rgba(${OPEN_AIR}, 0)`)
         ctx.fillStyle = g
         ctx.beginPath()
         ctx.arc(p.x, p.y, radius, 0, Math.PI * 2)
@@ -402,10 +407,10 @@ export function useFogLayers({ width, height, transform, nodes, branches }: FogL
       }
     }
 
-    /** Dust turning in the lantern light. Warm, and only where the air is clear. */
+    /** Dust adrift, and only where the air is actually clear. */
     const paintDust = (ctx: CanvasRenderingContext2D, seconds: number, t: Transform, lit: FogNode[]) => {
       if (lit.length === 0) return
-      ctx.fillStyle = `rgba(${WARM}, 1)`
+      ctx.fillStyle = `rgba(${OPEN_AIR}, 1)`
       for (const mote of MOTES) {
         const x = wrap01(mote.x + mote.vx * seconds) * w
         const y = wrap01(mote.y + mote.vy * seconds) * h
@@ -420,13 +425,13 @@ export function useFogLayers({ width, height, transform, nodes, branches }: FogL
     }
 
     /**
-     * Distant stars. They belong to the cold unexplored half of the map, so
-     * they fade out as a clearing approaches, where the lantern would drown
-     * them anyway. They drift with the map rather than the screen, which is
-     * what makes the dark read as a place rather than an overlay.
+     * Distant specks. They belong to the unexplored half of the map, so they
+     * fade out as a clearing approaches, where the open air would drown them
+     * anyway. They drift with the map rather than the screen, which is what
+     * makes the dark read as a place rather than an overlay.
      */
     const paintStars = (ctx: CanvasRenderingContext2D, seconds: number, t: Transform, lit: FogNode[]) => {
-      ctx.fillStyle = 'rgba(206, 222, 250, 1)'
+      ctx.fillStyle = 'rgba(222, 224, 229, 1)'
       for (let i = 0; i < STARS.length; i++) {
         const star = STARS[i]
         const x = wrap01(star.x + t.x * RES * 0.00018) * w
@@ -461,53 +466,53 @@ export function useFogLayers({ width, height, transform, nodes, branches }: FogL
       backCtx.setTransform(1, 0, 0, 1, 0, 0)
       backCtx.globalAlpha = 1
       backCtx.globalCompositeOperation = 'copy'
-      backCtx.fillStyle = 'rgba(12, 19, 36, 0.34)'
+      backCtx.fillStyle = 'rgba(22, 23, 26, 0.4)'
       backCtx.fillRect(0, 0, w, h)
       backCtx.globalCompositeOperation = 'source-over'
       for (const layer of backLayers) paintLayer(backCtx, layer, seconds, t)
-      // Thin the cold haze where the map is open, then pour the warm light in
-      // after, so the punch never eats the lantern.
+      // Thin the haze where the map is open, then lift the open air in after,
+      // so the punch never eats the clearing.
       backCtx.globalCompositeOperation = 'destination-out'
       backCtx.globalAlpha = 0.72
       backCtx.drawImage(mask, 0, 0)
       backCtx.globalCompositeOperation = 'source-over'
       backCtx.globalAlpha = 1
       paintStars(backCtx, seconds, t, lit)
-      // Light adds, it does not cover. Painted normally over the dark haze the
-      // lantern comes out as brown sludge; added to it, it glows. This one is
+      // Light adds, it does not cover. Painted normally over the dark haze it
+      // comes out as dead sludge; added to it, the air opens up. This one is
       // the soft spill past the clearing, which fog would carry anyway.
       backCtx.globalCompositeOperation = 'lighter'
-      paintLanterns(backCtx, t, lit, 0.46, 1.45)
+      paintClearing(backCtx, t, lit, 0.42, 1.45)
       backCtx.globalCompositeOperation = 'source-over'
 
-      // Front: the cold weather that actually hides the map.
+      // Front: the weather that actually hides the map.
       frontCtx.setTransform(1, 0, 0, 1, 0, 0)
       frontCtx.globalAlpha = 1
       frontCtx.globalCompositeOperation = 'copy'
-      frontCtx.fillStyle = 'rgba(9, 15, 30, 0.55)'
+      frontCtx.fillStyle = 'rgba(15, 16, 18, 0.8)'
       frontCtx.fillRect(0, 0, w, h)
       frontCtx.globalCompositeOperation = 'source-over'
       for (const layer of frontLayers) paintLayer(frontCtx, layer, seconds, t)
-      // Mist close to a clearing catches the lantern. Drawn with source-atop so
-      // it only tints vapour that is already there and never thickens the air
+      // Mist close to a clearing is already thinning. Drawn with source-atop so
+      // it only lifts vapour that is already there and never thickens the air
       // over open ground.
       frontCtx.globalCompositeOperation = 'source-atop'
-      paintLanterns(frontCtx, t, lit, 0.36, 1.3)
+      paintClearing(frontCtx, t, lit, 0.32, 1.3)
       frontCtx.globalCompositeOperation = 'destination-out'
       frontCtx.globalAlpha = 1
       frontCtx.drawImage(mask, 0, 0)
 
       // Both punches are done, so the mask is free to be reused as the shape of
-      // the lantern itself. Recolouring it in place gives warm light with the
-      // clearing's own torn, dissolving edge, instead of a smooth disc of glow
+      // the clearing itself. Recolouring it in place gives open air with the
+      // clearing's own torn, dissolving edge, instead of a smooth disc of light
       // sitting over it and quietly undoing all that tearing.
       // One flat fill through the mask, not one gradient per node: repeating
-      // source-in would multiply the lanterns into each other and dim the whole
-      // field. The mask's own falloff is the falloff.
+      // source-in would multiply the clearings into each other and dim the
+      // whole field. The mask's own falloff is the falloff.
       const m = maskCtx
       m.globalCompositeOperation = 'source-in'
       m.globalAlpha = 1
-      m.fillStyle = `rgba(${WARM}, 1)`
+      m.fillStyle = `rgba(${OPEN_AIR}, 1)`
       m.fillRect(0, 0, w, h)
       backCtx.globalCompositeOperation = 'lighter'
       backCtx.globalAlpha = 0.2
