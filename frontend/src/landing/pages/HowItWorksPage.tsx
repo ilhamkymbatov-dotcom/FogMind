@@ -11,6 +11,8 @@ import { MiniProgressDemo } from '../components/demos/MiniProgressDemo'
 import { MiniUploadDemo } from '../components/demos/MiniUploadDemo'
 import { Surface, useStaticReveal } from '../components/motion/Surface'
 import { LightSweepBackdrop } from '../components/fx/SectionBackdrop'
+import { BookmarkRibbon } from '../components/paper/BookmarkRibbon'
+import { HandMark } from '../components/paper/HandMark'
 import styles from './HowItWorksPage.module.css'
 
 /*
@@ -107,13 +109,15 @@ interface StopSpec {
   titleKey: TranslationKey
   bodyKey: TranslationKey
   visual?: ReactNode
+  /** An annotation pencilled in beside the visual, with an arrow to it. */
+  noteKey?: TranslationKey
 }
 
 const STOPS: readonly StopSpec[] = [
   { titleKey: 'hiw.upload.title', bodyKey: 'hiw.upload.body', visual: <MiniUploadDemo /> },
   { titleKey: 'hiw.reads.title', bodyKey: 'hiw.reads.body' },
   { titleKey: 'hiw.map.title', bodyKey: 'hiw.map.body', visual: <MiniGraphDemo /> },
-  { titleKey: 'hiw.fog.title', bodyKey: 'hiw.fog.body', visual: <ClearedMap /> },
+  { titleKey: 'hiw.fog.title', bodyKey: 'hiw.fog.body', visual: <ClearedMap />, noteKey: 'hiw.mapNote' },
   { titleKey: 'hiw.adaptive.title', bodyKey: 'hiw.adaptive.body', visual: <MiniProgressDemo /> },
 ]
 
@@ -171,6 +175,12 @@ function Stop({ stop, index }: { stop: StopSpec; index: number }) {
       {stop.visual ? (
         <Surface from="right" distance={110} delay={0.16} blur={6} className={styles.stopVisual}>
           {stop.visual}
+          {stop.noteKey ? (
+            <span className={styles.annotation}>
+              <span className={styles.annotationText}>{t(stop.noteKey)}</span>
+              <HandMark kind="arrow" className={styles.annotationArrow} delay={0.5} />
+            </span>
+          ) : null}
         </Surface>
       ) : null}
     </div>
@@ -194,6 +204,7 @@ function Journey() {
   return (
     <section className={styles.journey}>
       <LightSweepBackdrop tone="moss" />
+      <BookmarkRibbon tone="moss" />
       <Container className={styles.layer}>
         <div className={styles.journeyHead}>
           <Surface from="left" distance={80} className={styles.journeyLeadCol}>

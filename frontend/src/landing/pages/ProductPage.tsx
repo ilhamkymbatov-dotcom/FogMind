@@ -12,6 +12,7 @@ import { MiniQuestionDemo } from '../components/demos/MiniQuestionDemo'
 import { Surface, SurfaceGroup, SurfaceItem, useStaticReveal } from '../components/motion/Surface'
 import { TiltCard } from '../components/motion/TiltCard'
 import { InkBackdrop } from '../components/fx/SectionBackdrop'
+import { HandMark } from '../components/paper/HandMark'
 import styles from './ProductPage.module.css'
 
 /*
@@ -173,6 +174,8 @@ interface DetailSpec {
   bodyKey: TranslationKey
   tone: 'plum' | 'moss' | 'sand'
   chips?: boolean
+  /** A note stuck to the card, in the reader's own words. */
+  stickyKey?: TranslationKey
 }
 
 const DETAILS: readonly DetailSpec[] = [
@@ -189,6 +192,7 @@ const DETAILS: readonly DetailSpec[] = [
     bodyKey: 'product.formats.body',
     tone: 'sand',
     chips: true,
+    stickyKey: 'product.sticky',
   },
 ]
 
@@ -207,7 +211,7 @@ function Details() {
         </Surface>
 
         <SurfaceGroup className={styles.detailGrid} stagger={0.12}>
-          {DETAILS.map(({ icon: Icon, titleKey, bodyKey, tone, chips }, index) => (
+          {DETAILS.map(({ icon: Icon, titleKey, bodyKey, tone, chips, stickyKey }, index) => (
             <SurfaceItem
               key={titleKey}
               from={index === 0 ? 'left' : index === 2 ? 'right' : 'below'}
@@ -227,6 +231,12 @@ function Details() {
                       </span>
                     ))}
                   </div>
+                ) : null}
+                {stickyKey ? (
+                  <span className={styles.sticky}>
+                    <HandMark kind="underline" className={styles.stickyRule} delay={0.35} />
+                    {t(stickyKey)}
+                  </span>
                 ) : null}
               </TiltCard>
             </SurfaceItem>

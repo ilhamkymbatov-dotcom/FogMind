@@ -1,0 +1,32 @@
+.note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  max-width: 20ch;
+  /* Written in afterwards, so it sits a touch off the type grid. */
+  rotate: -0.7deg;
+}
+
+/* A ring drawn round the figure, uneven on every corner. */
+.number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 21px;
+  height: 21px;
+  flex-shrink: 0;
+  border: 1.5px solid var(--color-warm);
+  border-radius: 60% 45% 55% 50%;
+  opacity: 0.8;
+  font-size: 11px;
+  line-height: 1;
+  font-weight: var(--weight-bold);
+  color: var(--color-warm-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.text {
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--color-muted);
+}

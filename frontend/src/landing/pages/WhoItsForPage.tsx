@@ -7,6 +7,7 @@ import { CtaBand } from '../components/CtaBand'
 import { PageHero } from '../components/PageHero'
 import { Surface } from '../components/motion/Surface'
 import { MistBackdrop } from '../components/fx/SectionBackdrop'
+import { HandMark } from '../components/paper/HandMark'
 import { useStaticReveal } from '../components/motion/Surface'
 import styles from './WhoItsForPage.module.css'
 
@@ -97,13 +98,18 @@ function Directory() {
   return (
     <section className={styles.directory}>
       <MistBackdrop tone="plum" />
+      <span className={styles.rule} aria-hidden="true" />
       <Container className={styles.layer}>
+        <p className={styles.deskNote}>{t('who.deskNote')}</p>
         <ol className={styles.list}>
           {PROFILES.map(({ icon: Icon, roleKey, whenKey, situationKey, outcomeKey }, index) => (
             <li key={roleKey}>
               <DeskEntry index={index}>
                 <div className={styles.who}>
-                  <span className={styles.index}>{`0${index + 1}`}</span>
+                  <span className={styles.index}>
+                    {`0${index + 1}`}
+                    {index === 0 ? <HandMark kind="circle" className={styles.ring} delay={0.3} /> : null}
+                  </span>
                   <span className={styles.roleIcon}>
                     <Icon size={18} aria-hidden="true" />
                   </span>

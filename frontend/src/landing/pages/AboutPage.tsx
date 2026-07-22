@@ -6,6 +6,8 @@ import { CtaBand } from '../components/CtaBand'
 import { PageHero } from '../components/PageHero'
 import { Surface } from '../components/motion/Surface'
 import { InkBackdrop } from '../components/fx/SectionBackdrop'
+import { PaperGrain } from '../components/paper/PaperGrain'
+import { Highlighter } from '../components/paper/Highlighter'
 import styles from './AboutPage.module.css'
 
 /*
@@ -43,7 +45,8 @@ function AboutPage() {
       />
 
       <section className={styles.manifesto}>
-        <Container>
+        <PaperGrain />
+        <Container className={styles.layer}>
           {before.map(({ labelKey, bodyKey }) => (
             <div key={labelKey} className={styles.stanza}>
               <Surface from="left" distance={34} blur={0} duration={0.9}>
@@ -61,13 +64,16 @@ function AboutPage() {
         <InkBackdrop tone="warm" />
         <Container className={styles.layer}>
           <Surface from="left" distance={64} blur={6} duration={1.15}>
-            <p className={styles.pull}>{t('about.pull')}</p>
+            <p className={styles.pull}>
+              <Highlighter text={t('about.pull')} phrase={t('about.pull.mark')} delay={0.3} />
+            </p>
           </Surface>
         </Container>
       </section>
 
       <section className={styles.manifestoLower}>
-        <Container>
+        <PaperGrain />
+        <Container className={styles.layer}>
           {after.map(({ labelKey, bodyKey }) => (
             <div key={labelKey} className={styles.stanza}>
               <Surface from="left" distance={34} blur={0} duration={0.9}>

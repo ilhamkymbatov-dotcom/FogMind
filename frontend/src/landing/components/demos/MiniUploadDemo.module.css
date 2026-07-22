@@ -61,7 +61,20 @@
 .lines {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 5px;
+}
+
+/* Genuine text at a legible miniature size, so the page being read is clearly
+   a page of notes and not a placeholder. */
+.textLine {
+  font-size: 6.5px;
+  line-height: 1.5;
+  color: var(--color-muted);
+  transition: color 400ms ease;
+}
+
+.textRead {
+  color: var(--color-accent);
 }
 
 .line {

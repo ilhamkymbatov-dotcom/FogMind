@@ -1,6 +1,8 @@
 /* A manifesto. Rooms: paper, warm, paper for the line, warm, moss. */
 
 .manifesto {
+  position: relative;
+  overflow: hidden;
   padding-block: var(--space-8) var(--space-7);
   background-image: linear-gradient(
     180deg,
@@ -11,6 +13,8 @@
 }
 
 .manifestoLower {
+  position: relative;
+  overflow: hidden;
   padding-block: var(--space-7) var(--space-8);
   background-image: linear-gradient(
     180deg,

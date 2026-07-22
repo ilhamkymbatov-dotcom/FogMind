@@ -11,6 +11,9 @@ import { MiniGraphDemo } from '../components/demos/MiniGraphDemo'
 import { Surface, SurfaceGroup, SurfaceItem } from '../components/motion/Surface'
 import { HeroFogReveal } from '../components/fx/HeroFogReveal'
 import { MistBackdrop, ConstellationBackdrop } from '../components/fx/SectionBackdrop'
+import { PaperGrain } from '../components/paper/PaperGrain'
+import { DeckledEdge } from '../components/paper/DeckledEdge'
+import { Highlighter } from '../components/paper/Highlighter'
 import { usePointerTilt } from '../components/usePointerTilt'
 import { usePrefersReducedMotion } from '../components/motion/useMediaQuery'
 import styles from './HomePage.module.css'
@@ -93,13 +96,17 @@ function Idea() {
 
   return (
     <section className={styles.idea}>
+      <DeckledEdge color="var(--color-bg)" side="top" />
       <ConstellationBackdrop tone="sand" />
+      <PaperGrain />
       <Container className={styles.layer}>
         <div className={styles.ideaInner}>
           <Surface from="left" distance={90}>
             <div className={styles.ideaLead}>
               <Eyebrow labelKey="home.mood.eyebrow" tone="sand" />
-              <h2 className={styles.ideaTitle}>{t('home.mood.title')}</h2>
+              <h2 className={styles.ideaTitle}>
+                <Highlighter text={t('home.mood.title')} phrase={t('home.mood.mark')} delay={0.25} />
+              </h2>
             </div>
           </Surface>
           <Surface from="right" distance={90} delay={0.1}>
@@ -175,6 +182,7 @@ function Chapters() {
                   {t(linkKey)}
                   <ArrowRight size={16} aria-hidden="true" />
                 </span>
+                <span className={styles.corner} aria-hidden="true" />
               </Link>
             </Surface>
           ))}

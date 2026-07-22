@@ -133,6 +133,23 @@ export function ConstellationBackdrop({ tone, strength = 1 }: BackdropProps) {
 
 /* Light sweep ---------------------------------------------------------------- */
 
+/*
+ * Motes hanging in the shaft. Fixed positions with their own slow drift and
+ * breathing phase, so they never march in step. They only show where the light
+ * actually is, which is what makes them read as dust rather than as stars.
+ */
+const MOTES = Array.from({ length: 26 }, (_, i) => {
+  const golden = 0.618033988749895
+  return {
+    x: ((i * golden) % 1),
+    y: ((i * 0.4142 + 0.17) % 1),
+    r: 0.7 + ((i * 7) % 5) * 0.32,
+    drift: 0.004 + ((i * 3) % 7) * 0.0016,
+    sway: 0.012 + ((i * 5) % 6) * 0.004,
+    phase: (i * 1.37) % 6.283,
+  }
+})
+
 /** A soft shaft of light crossing the section, like light over a desk. */
 export function LightSweepBackdrop({ tone, strength = 1 }: BackdropProps) {
   const rgb = TONE_RGB[tone]
@@ -160,6 +177,20 @@ export function LightSweepBackdrop({ tone, strength = 1 }: BackdropProps) {
       g2.addColorStop(1, `rgba(${rgb}, 0)`)
       ctx.fillStyle = g2
       ctx.fillRect(0, 0, w, h)
+
+      // Dust, lit only while the shaft is passing over it.
+      for (const m of MOTES) {
+        const mx = ((m.x + Math.sin(t * m.sway + m.phase) * 0.02 + 1) % 1) * w
+        const my = (((m.y - m.drift * t) % 1) + 1) % 1 * h
+        // Distance from the centre of the shaft, in fractions of the width.
+        const lit = 1 - Math.min(1, Math.abs(mx / w - centre) / band)
+        if (lit <= 0) continue
+        const twinkle = 0.6 + Math.sin(t * 0.8 + m.phase) * 0.4
+        ctx.fillStyle = `rgba(255, 255, 255, ${0.5 * lit * twinkle * strength})`
+        ctx.beginPath()
+        ctx.arc(mx, my, m.r, 0, Math.PI * 2)
+        ctx.fill()
+      }
     },
     { staticAt: 6.5 },
   )

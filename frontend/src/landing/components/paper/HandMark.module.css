@@ -1,0 +1,14 @@
+.mark {
+  display: block;
+  pointer-events: none;
+  color: var(--color-warm);
+  /* Pen on paper sinks into the stock rather than sitting on top of it. */
+  opacity: 0.72;
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}

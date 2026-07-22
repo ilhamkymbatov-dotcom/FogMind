@@ -409,4 +409,20 @@ export const ru: Dictionary = {
   'faq.next.title': 'Все еще интересно, как это устроено',
   'faq.next.body': 'Весь путь, от файла до расчищенной карты, описан на странице о том, как это работает.',
   'faq.next.link': 'Посмотреть, как это работает',
+
+  // Marginalia. The mark keys name the words a reader would have highlighted or
+  // underlined; they must appear verbatim in the line they belong to.
+  'home.mood.mark': 'в тумане',
+  'about.pull.mark': 'действительно прошли',
+  'why.lead.mark': 'кажется, что работа делается',
+  'why.note1': 'То, что ощущается как работа, и есть работа.',
+  'why.note2': 'Сначала забыть, потом вернуться. Это и закрепляет.',
+  'hiw.mapNote': 'Каждый ответ расчищает еще немного этого.',
+  'product.sticky': 'Несите как есть. Прибираться заранее не нужно.',
+  'who.deskNote': 'Пять столов, пять разных вторников.',
+
+  // The page of notes in the intake demo, so the example is real material.
+  'demo.upload.l1': 'Фотосинтез превращает энергию света в химическую энергию.',
+  'demo.upload.l2': 'Он идет в хлоропласте, внутри тилакоидной мембраны.',
+  'demo.upload.l3': 'Световые реакции дают АТФ и НАДФН для цикла Кальвина.',
 }

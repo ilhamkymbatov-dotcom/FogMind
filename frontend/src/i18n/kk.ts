@@ -409,4 +409,20 @@ export const kk: Dictionary = {
   'faq.next.title': 'Қалай жұмыс істейтіні әлі қызық болса',
   'faq.next.body': 'Файлдан тазартылған картаға дейінгі бүкіл жол қалай жұмыс істейді бетінде жазылған.',
   'faq.next.link': 'Қалай жұмыс істейтінін көру',
+
+  // Marginalia. The mark keys name the words a reader would have highlighted or
+  // underlined; they must appear verbatim in the line they belong to.
+  'home.mood.mark': 'тұманнан',
+  'about.pull.mark': 'шын жүрген',
+  'why.lead.mark': 'жұмыс істеліп жатқандай сезіледі',
+  'why.note1': 'Жұмыс сияқты сезілетіні нағыз жұмыс.',
+  'why.note2': 'Алдымен ұмыту, сосын оралу. Бекітетіні осы.',
+  'hiw.mapNote': 'Әр жауап мұның тағы азын тазартады.',
+  'product.sticky': 'Бар күйінде әкеліңіз. Алдын ала реттеудің қажеті жоқ.',
+  'who.deskNote': 'Бес үстел, бес түрлі сейсенбі.',
+
+  // The page of notes in the intake demo, so the example is real material.
+  'demo.upload.l1': 'Фотосинтез жарық энергиясын химиялық энергияға айналдырады.',
+  'demo.upload.l2': 'Ол хлоропласта, тилакоид мембранасының ішінде жүреді.',
+  'demo.upload.l3': 'Жарық реакциялары Кальвин циклі үшін АТФ пен НАДФН береді.',
 }

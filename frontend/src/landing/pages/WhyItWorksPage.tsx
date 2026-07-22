@@ -7,6 +7,8 @@ import { CtaBand } from '../components/CtaBand'
 import { PageHero } from '../components/PageHero'
 import { Surface } from '../components/motion/Surface'
 import { LightSweepBackdrop } from '../components/fx/SectionBackdrop'
+import { HandMark } from '../components/paper/HandMark'
+import { MarginNote } from '../components/paper/MarginNote'
 import { useStaticReveal } from '../components/motion/Surface'
 import styles from './WhyItWorksPage.module.css'
 
@@ -128,6 +130,27 @@ function Diagram({ variant, aKey, bKey }: { variant: DiagramVariant; aKey: Trans
   )
 }
 
+/**
+ * Draws a pen underline beneath one phrase in a longer line. Like the
+ * highlighter, the phrase is named separately so translators keep a clean
+ * sentence, and a phrase that no longer matches simply renders unmarked.
+ */
+function Underlined({ text, phrase }: { text: string; phrase: string }) {
+  const at = phrase ? text.indexOf(phrase) : -1
+  if (at === -1) return <>{text}</>
+
+  return (
+    <>
+      {text.slice(0, at)}
+      <span className={styles.underlined}>
+        {text.slice(at, at + phrase.length)}
+        <HandMark kind="underline" className={styles.underlineMark} delay={0.35} />
+      </span>
+      {text.slice(at + phrase.length)}
+    </>
+  )
+}
+
 interface PrincipleSpec {
   titleKey: TranslationKey
   failsKey: TranslationKey
@@ -136,6 +159,8 @@ interface PrincipleSpec {
   aKey: TranslationKey
   bKey: TranslationKey
   variant: DiagramVariant
+  /** A remark pencilled into the margin beside this principle. */
+  noteKey?: TranslationKey
 }
 
 const PRINCIPLES: readonly PrincipleSpec[] = [
@@ -147,6 +172,7 @@ const PRINCIPLES: readonly PrincipleSpec[] = [
     aKey: 'why.p1.a',
     bKey: 'why.p1.b',
     variant: 'bars',
+    noteKey: 'why.note1',
   },
   {
     titleKey: 'why.p2.title',
@@ -156,6 +182,7 @@ const PRINCIPLES: readonly PrincipleSpec[] = [
     aKey: 'why.p2.a',
     bKey: 'why.p2.b',
     variant: 'spacing',
+    noteKey: 'why.note2',
   },
   {
     titleKey: 'why.p3.title',
@@ -182,10 +209,13 @@ function Principle({ spec, index }: { spec: PrincipleSpec; index: number }) {
 
   return (
     <div className={styles.principle}>
-      <Surface from="left" distance={56} blur={0}>
+      <Surface from="left" distance={56} blur={0} className={styles.margin}>
         <span className={styles.numeral} aria-hidden="true">
           {index + 1}
         </span>
+        {spec.noteKey ? (
+          <MarginNote n={index + 1} text={t(spec.noteKey)} className={styles.marginNote} />
+        ) : null}
       </Surface>
       <Surface from="right" distance={72} delay={0.08} className={styles.principleBody}>
         <h2 className={styles.principleTitle}>{t(spec.titleKey)}</h2>
@@ -213,7 +243,9 @@ function WhyItWorksPage() {
       <section className={styles.essay}>
         <Container>
           <Surface from="left" distance={70} blur={0}>
-            <p className={styles.lead}>{t('why.lead')}</p>
+            <p className={styles.lead}>
+              <Underlined text={t('why.lead')} phrase={t('why.lead.mark')} />
+            </p>
           </Surface>
 
           {PRINCIPLES.slice(0, 2).map((spec, i) => (

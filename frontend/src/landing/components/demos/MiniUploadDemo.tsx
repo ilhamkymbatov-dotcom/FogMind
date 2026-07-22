@@ -1,5 +1,5 @@
 import { FileText } from 'lucide-react'
-import { useTranslation } from '../../../i18n'
+import { useTranslation, type TranslationKey } from '../../../i18n'
 import { useDemoLoop } from './useDemoLoop'
 import styles from './MiniUploadDemo.module.css'
 
@@ -14,7 +14,11 @@ import styles from './MiniUploadDemo.module.css'
  */
 
 const STEPS = 5
-const LINES = [92, 76, 88, 64, 80, 54]
+
+/* Real lines from a real subject, so the example is study material rather than
+   grey filler. The trailing bars stand for the rest of the page. */
+const TEXT_LINES: readonly TranslationKey[] = ['demo.upload.l1', 'demo.upload.l2', 'demo.upload.l3']
+const TAIL_BARS = [88, 62]
 
 const W = 280
 const H = 200
@@ -68,11 +72,20 @@ export function MiniUploadDemo() {
             <span className={styles.sheetName}>{t('demo.upload.file')}</span>
           </div>
           <div className={styles.lines}>
-            {LINES.map((width, i) => (
+            {TEXT_LINES.map((key, i) => (
+              <span
+                key={key}
+                className={[styles.textLine, reading ? styles.textRead : ''].filter(Boolean).join(' ')}
+                style={{ transitionDelay: `${i * 70}ms` }}
+              >
+                {t(key)}
+              </span>
+            ))}
+            {TAIL_BARS.map((width, i) => (
               <span
                 key={i}
                 className={[styles.line, reading ? styles.lineRead : ''].filter(Boolean).join(' ')}
-                style={{ width: `${width}%`, transitionDelay: `${i * 70}ms` }}
+                style={{ width: `${width}%`, transitionDelay: `${(TEXT_LINES.length + i) * 70}ms` }}
               />
             ))}
           </div>

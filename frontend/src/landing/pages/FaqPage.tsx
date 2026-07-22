@@ -8,6 +8,7 @@ import { CtaBand } from '../components/CtaBand'
 import { PageHero } from '../components/PageHero'
 import { Surface, SurfaceGroup, SurfaceItem } from '../components/motion/Surface'
 import { ConstellationBackdrop } from '../components/fx/SectionBackdrop'
+import { BookmarkRibbon } from '../components/paper/BookmarkRibbon'
 import { usePrefersReducedMotion } from '../components/motion/useMediaQuery'
 import styles from './FaqPage.module.css'
 
@@ -111,6 +112,7 @@ function FaqPage() {
 
       <section className={styles.answers}>
         <ConstellationBackdrop tone="moss" />
+        <BookmarkRibbon tone="moss" />
         <Container className={styles.layer}>
           {GROUPS.map(({ titleKey, items }, groupIndex) => (
             <div key={titleKey} className={styles.group}>

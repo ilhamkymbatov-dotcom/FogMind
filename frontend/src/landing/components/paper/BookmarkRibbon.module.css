@@ -1,0 +1,46 @@
+.hanger {
+  position: absolute;
+  top: 0;
+  z-index: 2;
+  width: 20px;
+  height: 92px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* The strip itself, notched at the foot like a sewn bookmark. */
+.ribbon {
+  display: block;
+  width: 100%;
+  height: 78px;
+  background-color: var(--ribbon, var(--color-moss));
+  opacity: 0.5;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%);
+}
+
+.moss {
+  --ribbon: var(--color-moss);
+}
+
+.plum {
+  --ribbon: var(--color-plum);
+}
+
+.ink {
+  --ribbon: var(--color-ink);
+}
+
+.sand {
+  --ribbon: var(--color-sand);
+}
+
+@media (max-width: 720px) {
+  .hanger {
+    width: 14px;
+    height: 66px;
+  }
+
+  .ribbon {
+    height: 56px;
+  }
+}

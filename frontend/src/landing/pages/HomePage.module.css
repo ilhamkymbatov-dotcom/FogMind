@@ -125,11 +125,12 @@
   position: relative;
   overflow: hidden;
   padding-block: var(--space-8);
-  /* The wash eases in and out of paper, so the room changes without a seam. */
+  /* The top of this room is a torn edge rather than a fade, so the wash starts
+     at full strength and the tear supplies the boundary. The foot still eases
+     back into paper. */
   background-image: linear-gradient(
     180deg,
-    var(--color-bg) 0%,
-    var(--wash-sand) 7%,
+    var(--wash-sand) 0%,
     var(--wash-sand) 93%,
     var(--color-bg) 100%
   );
@@ -210,7 +211,20 @@
   margin-top: var(--space-7);
 }
 
+/* Laid down by hand: each card is off square by a different fraction, and the
+   pair is not the same height. */
+.chapterCell:nth-child(1) .chapter {
+  rotate: -0.7deg;
+}
+
+.chapterCell:nth-child(2) .chapter {
+  rotate: 0.85deg;
+  min-height: 324px;
+}
+
 .chapter {
+  position: relative;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -230,6 +244,24 @@
 .chapter:focus-visible {
   box-shadow: var(--shadow-md);
   transform: translateY(-3px);
+}
+
+/* A page corner, turned up a little when the card is picked up. */
+.corner {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 26px;
+  height: 26px;
+  background: linear-gradient(135deg, transparent 50%, rgba(28, 22, 16, 0.07) 50%);
+  border-top-left-radius: 3px;
+  transition: width 260ms ease, height 260ms ease;
+}
+
+.chapter:hover .corner,
+.chapter:focus-visible .corner {
+  width: 40px;
+  height: 40px;
 }
 
 .moss {

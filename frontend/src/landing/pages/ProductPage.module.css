@@ -177,7 +177,23 @@
   gap: var(--space-4);
 }
 
+/* Index cards, set down by hand: each is off square by a different amount and
+   the middle one rides a little lower than its neighbours. */
+.detailGrid > *:nth-child(1) .detail {
+  rotate: -0.8deg;
+}
+
+.detailGrid > *:nth-child(2) .detail {
+  rotate: 0.5deg;
+  margin-top: var(--space-4);
+}
+
+.detailGrid > *:nth-child(3) .detail {
+  rotate: -0.35deg;
+}
+
 .detail {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -192,7 +208,58 @@
 
 .detail:hover {
   box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+}
+
+/* The edges of the sheets underneath, so a card reads as the top of a small
+   stack rather than a lone rectangle. */
+.detail::before,
+.detail::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border: 1px solid var(--color-border);
+  border-radius: inherit;
+  background-color: var(--color-surface);
+}
+
+.detail::before {
+  translate: 3px 4px;
+  rotate: 0.9deg;
+  opacity: 0.75;
+}
+
+.detail::after {
+  translate: 6px 8px;
+  rotate: 1.7deg;
+  opacity: 0.45;
+}
+
+/* A note stuck on afterwards, in the corner where there was room. */
+.sticky {
+  position: relative;
+  align-self: stretch;
+  margin-top: var(--space-3);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  rotate: -1.1deg;
+  border-radius: 2px 2px var(--radius-xs) var(--radius-xs);
+  /* A deeper step of the sand family rather than a new hue, so the note reads
+     as stuck on without leaving the palette. */
+  background-color: #f6ead0;
+  box-shadow: var(--shadow-sm);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--color-fg);
+}
+
+.stickyRule {
+  position: absolute;
+  left: var(--space-3);
+  right: var(--space-3);
+  bottom: 6px;
+  height: 7px;
+  color: var(--color-sand);
+  opacity: 0.5;
 }
 
 /* Each card sits in its own hue, so the grid reads as a set of related but

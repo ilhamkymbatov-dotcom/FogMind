@@ -1,11 +1,25 @@
 /* An essay. Rooms: paper, paper, ink for the quote, paper, sand. */
 
 .essay {
+  position: relative;
   padding-block: var(--space-8) var(--space-7);
   background-color: var(--color-bg);
 }
 
+/* The margin rule the numerals hang against, as on ruled essay paper. */
+.essay::before,
+.essayLower::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: max(var(--space-4), calc((100vw - 1120px) / 2 + 84px));
+  width: 1px;
+  background-color: rgba(42, 58, 85, 0.12);
+}
+
 .essayLower {
+  position: relative;
   padding-block: var(--space-7) var(--space-8);
   background-color: var(--color-bg);
 }
@@ -325,4 +339,59 @@
 .layer {
   position: relative;
   z-index: 1;
+}
+
+/* The underlined phrase in the lead. */
+.underlined {
+  position: relative;
+  display: inline;
+}
+
+.underlineMark {
+  position: absolute;
+  left: -0.1em;
+  right: -0.1em;
+  bottom: -0.34em;
+  height: 0.34em;
+}
+
+/* The margin column: the numeral, and under it any pencilled remark. */
+.margin {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.marginNote {
+  /* Written into the margin after the fact, so it hangs slightly outside it. */
+  margin-left: -6px;
+}
+
+@media (max-width: 720px) {
+  .essay::before,
+  .essayLower::before {
+    display: none;
+  }
+
+  .marginNote {
+    margin-left: 0;
+  }
+}
+
+/* On a wide screen the margin earns real width, so a pencilled remark reads as
+   a note rather than a column of single words. The rule and the endnote move
+   with it so the hanging alignment holds. */
+@media (min-width: 1080px) {
+  .principle {
+    grid-template-columns: 172px minmax(0, 1fr);
+  }
+
+  .essay::before,
+  .essayLower::before {
+    left: max(var(--space-4), calc((100vw - 1120px) / 2 + 154px));
+  }
+
+  .endnote {
+    margin-left: calc(172px + var(--space-5));
+  }
 }

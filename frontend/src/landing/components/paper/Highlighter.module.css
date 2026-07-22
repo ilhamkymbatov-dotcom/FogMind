@@ -1,0 +1,30 @@
+.wrap {
+  position: relative;
+  display: inline;
+  white-space: pre-wrap;
+}
+
+/*
+ * The stroke. Corners are all different and the whole thing is tilted a fraction
+ * of a degree, so the pass reads as a hand rather than a rectangle. It sits
+ * behind the glyphs and stops short of the cap height at the top, the way a
+ * marker rides low across a line of text.
+ */
+.stroke {
+  position: absolute;
+  left: -0.14em;
+  right: -0.16em;
+  top: 0.16em;
+  bottom: 0.02em;
+  z-index: 0;
+  transform-origin: 0 50%;
+  rotate: -0.5deg;
+  border-radius: 4px 11px 5px 9px;
+  background-color: rgba(192, 102, 58, 0.22);
+  pointer-events: none;
+}
+
+.text {
+  position: relative;
+  z-index: 1;
+}

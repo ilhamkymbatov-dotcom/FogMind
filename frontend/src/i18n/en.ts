@@ -422,6 +422,22 @@ export const en = {
   'faq.next.title': 'Still curious how it actually works',
   'faq.next.body': 'The whole process, from a file to a cleared map, is on the how it works page.',
   'faq.next.link': 'See how it works',
+
+  // Marginalia. The mark keys name the words a reader would have highlighted or
+  // underlined; they must appear verbatim in the line they belong to.
+  'home.mood.mark': 'in the fog',
+  'about.pull.mark': 'actually walked',
+  'why.lead.mark': 'feels productive',
+  'why.note1': 'The part that feels like work is the part doing the work.',
+  'why.note2': 'Forgetting first is what makes the return stick.',
+  'hiw.mapNote': 'Each answer clears a little more of this.',
+  'product.sticky': 'Bring it as it is. No tidying up first.',
+  'who.deskNote': 'Five desks, five different Tuesdays.',
+
+  // The page of notes in the intake demo, so the example is real material.
+  'demo.upload.l1': 'Photosynthesis converts light energy into chemical energy.',
+  'demo.upload.l2': 'It takes place in the chloroplast, inside the thylakoid membrane.',
+  'demo.upload.l3': 'The light reactions produce ATP and NADPH for the Calvin cycle.',
 } as const
 
 export type TranslationKey = keyof typeof en
