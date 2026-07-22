@@ -1,4 +1,4 @@
-import { computeStreak, recentDays, addDays } from './streak.ts'
+import { computeStreak, currentWeek, addDays, weekdayOf } from './streak.ts'
 
 const TODAY = '2026-07-22'
 const d = (n: number) => addDays(TODAY, -n) // n days ago
@@ -52,13 +52,39 @@ check('longest never below current', (() => {
   const r = computeStreak([d(2), d(1), d(0)], TODAY); return r.longestStreak >= r.currentStreak
 })(), true)
 
-// week view
-check('week view: active, bridged, missed, today',
-  recentDays([d(3), d(1), d(0)], TODAY, 5).map(x => `${x.kind}${x.isToday ? '*' : ''}`),
-  ['missed', 'active', 'bridged', 'active', 'active*'])
-check('week view: yesterday held open before today is used',
-  recentDays([d(3), d(2)], TODAY, 4).map(x => `${x.kind}${x.isToday ? '*' : ''}`),
-  ['active', 'active', 'bridged', 'missed*'])
+// week view: a fixed Monday to Sunday week containing today.
+// TODAY is 2026-07-22, a Wednesday, so the week runs Mon 20 to Sun 26 and
+// Thu 23 onward are upcoming.
+check('week starts on Monday',
+  currentWeek([], TODAY).map(x => x.date),
+  ['2026-07-20','2026-07-21','2026-07-22','2026-07-23','2026-07-24','2026-07-25','2026-07-26'])
+
+check('week labels run Mon..Sun',
+  currentWeek([], TODAY).map(x => x.weekday),
+  [1, 2, 3, 4, 5, 6, 0])
+
+check('today is marked and later days are upcoming',
+  currentWeek([], TODAY).map(x => `${x.kind}${x.isToday ? '*' : ''}`),
+  ['missed', 'missed', 'missed*', 'upcoming', 'upcoming', 'upcoming', 'upcoming'])
+
+// Mon and Wed active, Tue covered by the freeze.
+check('active, bridged and today inside the week',
+  currentWeek([d(2), d(0)], TODAY).map(x => `${x.kind}${x.isToday ? '*' : ''}`),
+  ['active', 'bridged', 'active*', 'upcoming', 'upcoming', 'upcoming', 'upcoming'])
+
+// Yesterday held open by a live run that today has not yet renewed.
+check('yesterday shown as covered before today is used',
+  currentWeek([d(2)], TODAY).map(x => x.kind),
+  ['active', 'bridged', 'missed', 'upcoming', 'upcoming', 'upcoming', 'upcoming'])
+
+// A Sunday: the whole week is in the past, nothing upcoming.
+check('on a Sunday the week is complete',
+  currentWeek([], '2026-07-26').map(x => `${x.kind}${x.isToday ? '*' : ''}`),
+  ['missed','missed','missed','missed','missed','missed','missed*'])
+
+check('weekdayOf agrees with the calendar', [
+  weekdayOf('2026-07-20'), weekdayOf('2026-07-22'), weekdayOf('2026-07-26'),
+], [1, 3, 0])
 
 // midnight safety: a date built from a local evening moment
 const evening = new Date(2026, 6, 22, 23, 30)

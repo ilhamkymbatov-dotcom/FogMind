@@ -440,20 +440,25 @@ export const en = {
   'demo.upload.l3': 'The light reactions produce ATP and NADPH for the Calvin cycle.',
 
   // Learning streak ------------------------------------------------------------
-  'streak.aria': 'Current streak: {count} days',
+  'streak.aria': 'Current streak: {count} {unit}',
   'streak.ariaNone': 'No streak yet',
   'streak.title': 'Your streak',
   'streak.current': 'Running now',
   'streak.longest': 'Best so far',
-  'streak.dayUnit': 'days',
+  // One value per plural category. Every base must define all four.
+  'streak.dayUnit.one': 'day',
+  'streak.dayUnit.few': 'days',
+  'streak.dayUnit.many': 'days',
+  'streak.dayUnit.other': 'days',
   'streak.empty': 'Answer one question today and your streak starts.',
   'streak.freezeNote': 'A missed day is covered, so your streak is still going. Pick it up whenever suits you.',
   'streak.celebrateFirst': 'Streak started',
-  'streak.celebrate': '{count} day streak',
+  'streak.celebrate': '{count} {unit} in a row',
   'streak.celebrateBody': 'That is today done. See you tomorrow.',
   'streak.dayActive': 'Active',
   'streak.dayBridged': 'Covered',
   'streak.dayMissed': 'No activity',
+  'streak.dayUpcoming': 'Still to come',
   'streak.today': 'Today',
   // Weekday initials for the week view, indexed by getDay(). Held here rather
   // than taken from Intl because not every runtime ships Kazakh calendar data,

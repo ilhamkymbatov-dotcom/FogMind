@@ -12,13 +12,15 @@ import styles from './StreakBadge.module.css'
  */
 export function StreakBadge() {
   const { currentStreak, loading } = useStreak()
-  const { t } = useTranslation()
+  const { t, plural } = useTranslation()
 
   // Nothing to say until the history has loaded.
   if (loading) return null
 
   const running = currentStreak > 0
-  const label = running ? t('streak.aria', { count: currentStreak }) : t('streak.ariaNone')
+  const label = running
+    ? t('streak.aria', { count: currentStreak, unit: plural('streak.dayUnit', currentStreak) })
+    : t('streak.ariaNone')
 
   return (
     <span

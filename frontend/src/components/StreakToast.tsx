@@ -16,7 +16,7 @@ const VISIBLE_MS = 5200
  */
 export function StreakToast() {
   const { celebration, dismissCelebration } = useStreak()
-  const { t } = useTranslation()
+  const { t, plural } = useTranslation()
 
   useEffect(() => {
     if (celebration === null) return
@@ -27,7 +27,12 @@ export function StreakToast() {
   if (celebration === null) return null
 
   const heading =
-    celebration <= 1 ? t('streak.celebrateFirst') : t('streak.celebrate', { count: celebration })
+    celebration <= 1
+      ? t('streak.celebrateFirst')
+      : t('streak.celebrate', {
+          count: celebration,
+          unit: plural('streak.dayUnit', celebration),
+        })
 
   return (
     <div className={styles.toast} role="status" aria-live="polite">

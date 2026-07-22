@@ -47,10 +47,38 @@ function interpolate(text: string, vars?: Vars): string {
   return text.replace(/\{(\w+)\}/g, (whole, name) => (name in vars ? String(vars[name]) : whole))
 }
 
+/**
+ * Keys that carry one value per plural category rather than a single string.
+ *
+ * A base of 'streak.dayUnit' means the dictionary holds 'streak.dayUnit.one',
+ * '.few', '.many' and '.other'. Every base must define all four in English, and
+ * because the other dictionaries are typed against English they cannot omit
+ * any, so the lookup below can never miss.
+ */
+export type PluralBase = 'streak.dayUnit'
+
+/**
+ * Chooses the plural form for a count.
+ *
+ * Intl.PluralRules does the categorising, which matters most for Russian: one
+ * день, two дня, five дней, and then twenty one день again, a rule no amount of
+ * string concatenation gets right. Kazakh reports one and other, which is
+ * correct for it, since a Kazakh noun stays singular after a numeral and both
+ * forms are simply "күн".
+ */
+function pluralForm(lang: Language, base: PluralBase, count: number): string {
+  const dictionary = DICTIONARIES[lang]
+  const category = new Intl.PluralRules(lang).select(count)
+  const key = `${base}.${category}` as TranslationKey
+  return dictionary[key] ?? dictionary[`${base}.other` as TranslationKey]
+}
+
 interface I18nContextValue {
   lang: Language
   setLang: (lang: Language) => void
   t: (key: TranslationKey, vars?: Vars) => string
+  /** The correctly declined form of a counted noun, for example days. */
+  plural: (base: PluralBase, count: number) => string
 }
 
 const I18nContext = createContext<I18nContextValue | null>(null)
@@ -72,6 +100,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       lang,
       setLang,
       t: (key, vars) => interpolate(DICTIONARIES[lang][key], vars),
+      plural: (base, count) => pluralForm(lang, base, count),
     }),
     [lang, setLang],
   )

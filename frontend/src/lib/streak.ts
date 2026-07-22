@@ -43,12 +43,14 @@ export interface StreakSummary {
 }
 
 /** How a single day reads in the week view. */
-export type DayKind = 'active' | 'bridged' | 'missed'
+export type DayKind = 'active' | 'bridged' | 'missed' | 'upcoming'
 
 export interface DaySlot {
   date: string
   kind: DayKind
   isToday: boolean
+  /** 0 is Sunday, matching Date.getDay, so labels can be looked up by index. */
+  weekday: number
 }
 
 const MS_PER_DAY = 86_400_000
@@ -145,27 +147,53 @@ export function computeStreak(activeDates: readonly string[], today: string): St
 }
 
 /**
- * The last `count` days ending today, labelled for the week view.
+ * Which day of the week a calendar day falls on, 0 for Sunday.
  *
- * A day counts as bridged when it was missed but sits between two active days,
- * which is exactly the gap the freeze covers. Yesterday is also shown as
- * bridged while it is being held open by a live run that has not been renewed
- * today, so the reader can see the cover before they have used it.
+ * Derived from the day number rather than from Date.getDay, so it cannot shift
+ * with the machine's timezone. Epoch day zero, 1 January 1970, was a Thursday,
+ * which is where the offset of four comes from.
  */
-export function recentDays(
-  activeDates: readonly string[],
-  today: string,
-  count = 7,
-): DaySlot[] {
+export function weekdayOf(date: string): number {
+  return (((toDayNumber(date) + 4) % 7) + 7) % 7
+}
+
+/**
+ * The calendar week containing today, Monday first.
+ *
+ * A plain seven day window ending today is accurate but reads badly: the
+ * columns start on whatever weekday it happens to be, so the same history looks
+ * different every day and nothing lines up with how a week is normally read.
+ * This returns the actual Monday to Sunday week instead.
+ *
+ * A day is bridged when it was missed but sits between two active days, which
+ * is exactly the gap the freeze covers. Yesterday also shows as bridged while
+ * it is being held open by a live run that today has not yet renewed, so the
+ * cover is visible before it has been earned. Days later in the week than today
+ * are upcoming: empty, and not a reproach.
+ *
+ * Only the display changes here. The streak counts themselves are unaffected.
+ */
+export function currentWeek(activeDates: readonly string[], today: string): DaySlot[] {
   const todayNumber = toDayNumber(today)
   const active = new Set(normalise(activeDates, todayNumber))
   const { currentStreak } = computeStreak(activeDates, today)
 
-  const slots: DaySlot[] = []
-  for (let offset = count - 1; offset >= 0; offset--) {
-    const dayNumber = todayNumber - offset
-    const isActive = active.has(dayNumber)
+  // Shift Sunday first (0..6) to Monday first, so Monday is column zero.
+  const mondayIndex = (weekdayOf(today) + 6) % 7
+  const weekStart = todayNumber - mondayIndex
 
+  const slots: DaySlot[] = []
+  for (let i = 0; i < 7; i++) {
+    const dayNumber = weekStart + i
+    const date = fromDayNumber(dayNumber)
+    const weekday = (((dayNumber + 4) % 7) + 7) % 7
+
+    if (dayNumber > todayNumber) {
+      slots.push({ date, kind: 'upcoming', isToday: false, weekday })
+      continue
+    }
+
+    const isActive = active.has(dayNumber)
     let kind: DayKind = isActive ? 'active' : 'missed'
     if (!isActive) {
       const heldBetweenActiveDays = active.has(dayNumber - 1) && active.has(dayNumber + 1)
@@ -174,7 +202,7 @@ export function recentDays(
       if (heldBetweenActiveDays || heldOpenRightNow) kind = 'bridged'
     }
 
-    slots.push({ date: fromDayNumber(dayNumber), kind, isToday: dayNumber === todayNumber })
+    slots.push({ date, kind, isToday: dayNumber === todayNumber, weekday })
   }
   return slots
 }

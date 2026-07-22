@@ -11,7 +11,7 @@ import {
 import { listActivityDates, recordActivityDay } from '@fogmind/backend'
 import { useAuth } from './AuthContext'
 import { supabase } from '../lib/supabase'
-import { computeStreak, localDateKey, recentDays, type DaySlot } from '../lib/streak'
+import { computeStreak, currentWeek, localDateKey, type DaySlot } from '../lib/streak'
 
 /**
  * The learning streak: which days the reader has been active, and what that
@@ -34,7 +34,7 @@ interface StreakValue {
   activeToday: boolean
   /** True while a missed day is being held open inside the live run. */
   freezeUsed: boolean
-  /** The last seven days, oldest first, for the week view. */
+  /** The current calendar week, Monday first, for the week view. */
   days: DaySlot[]
   loading: boolean
   /** Cheap and idempotent. Call whenever an answer is given. */
@@ -103,7 +103,7 @@ export function StreakProvider({ children }: { children: ReactNode }) {
   const today = localDateKey()
 
   const summary = useMemo(() => computeStreak(dates, today), [dates, today])
-  const days = useMemo(() => recentDays(dates, today, 7), [dates, today])
+  const days = useMemo(() => currentWeek(dates, today), [dates, today])
 
   const markActiveToday = useCallback(() => {
     if (!userId) return

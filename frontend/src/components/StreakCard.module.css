@@ -94,6 +94,13 @@
   background-color: var(--color-sunken);
 }
 
+/* Later this week: an empty slot waiting, not a day that was skipped. */
+.upcoming {
+  border-style: dashed;
+  border-color: var(--color-border);
+  background-color: transparent;
+}
+
 /* Today is ringed rather than filled, so it reads as the day in progress. */
 .today {
   outline: 2px solid var(--color-accent);

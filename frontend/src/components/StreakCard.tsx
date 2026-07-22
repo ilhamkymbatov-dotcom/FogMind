@@ -1,13 +1,14 @@
 import { Flame, ShieldCheck, Trophy } from 'lucide-react'
 import { useStreak } from '../context/StreakContext'
 import { useTranslation, type TranslationKey } from '../i18n'
-import { toDayNumber } from '../lib/streak'
+import type { DayKind } from '../lib/streak'
 import styles from './StreakCard.module.css'
 
-const KIND_LABEL: Record<'active' | 'bridged' | 'missed', TranslationKey> = {
+const KIND_LABEL: Record<DayKind, TranslationKey> = {
   active: 'streak.dayActive',
   bridged: 'streak.dayBridged',
   missed: 'streak.dayMissed',
+  upcoming: 'streak.dayUpcoming',
 }
 
 /** Weekday initials by getDay(), taken from the dictionary rather than Intl. */
@@ -51,16 +52,25 @@ function hasMonthNames(locale: string): boolean {
  */
 export function StreakCard() {
   const { currentStreak, longestStreak, freezeUsed, days, loading } = useStreak()
-  const { t, lang } = useTranslation()
+  const { t, lang, plural } = useTranslation()
 
   if (loading) return null
 
-  const localised = hasMonthNames(lang)
-  const longDate = localised ? new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'long' }) : null
-  const describeDate = (at: Date): string =>
-    longDate
-      ? longDate.format(at)
-      : `${`${at.getDate()}`.padStart(2, '0')}.${`${at.getMonth() + 1}`.padStart(2, '0')}`
+  const longDate = hasMonthNames(lang)
+    ? new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'long' })
+    : null
+
+  /** Local midnight of a plain calendar day, so no timezone can shift it. */
+  const asLocalDate = (date: string): Date => {
+    const [year, month, day] = date.split('-').map(Number)
+    return new Date(year, month - 1, day)
+  }
+
+  const describeDate = (date: string): string => {
+    if (longDate) return longDate.format(asLocalDate(date))
+    const [, month, day] = date.split('-')
+    return `${day}.${month}`
+  }
 
   return (
     <section className={styles.card} aria-label={t('streak.title')}>
@@ -71,18 +81,16 @@ export function StreakCard() {
         </span>
         <span className={styles.best}>
           <Trophy size={14} aria-hidden="true" />
-          {t('streak.longest')}: {longestStreak} {t('streak.dayUnit')}
+          {t('streak.longest')}: {longestStreak} {plural('streak.dayUnit', longestStreak)}
         </span>
       </div>
 
       <ol className={styles.week}>
         {days.map((slot) => {
-          // Midday avoids any chance of a local date landing on the day before.
-          const at = new Date(toDayNumber(slot.date) * 86_400_000 + 43_200_000)
           return (
             <li key={slot.date} className={styles.daySlot}>
               <span className={styles.dayName} aria-hidden="true">
-                {t(WEEKDAY_KEY[at.getDay()])}
+                {t(WEEKDAY_KEY[slot.weekday])}
               </span>
               <span
                 className={[
@@ -92,11 +100,11 @@ export function StreakCard() {
                 ]
                   .filter(Boolean)
                   .join(' ')}
-                title={`${describeDate(at)}: ${t(KIND_LABEL[slot.kind])}`}
+                title={`${describeDate(slot.date)}: ${t(KIND_LABEL[slot.kind])}`}
               >
                 <span className={styles.srOnly}>
                   {slot.isToday ? `${t('streak.today')}. ` : ''}
-                  {describeDate(at)}: {t(KIND_LABEL[slot.kind])}
+                  {describeDate(slot.date)}: {t(KIND_LABEL[slot.kind])}
                 </span>
               </span>
             </li>
@@ -110,7 +118,7 @@ export function StreakCard() {
         <p className={styles.count}>
           <strong className={styles.countNumber}>{currentStreak}</strong>
           <span className={styles.countLabel}>
-            {t('streak.dayUnit')} · {t('streak.current')}
+            {plural('streak.dayUnit', currentStreak)} · {t('streak.current')}
           </span>
         </p>
       )}
