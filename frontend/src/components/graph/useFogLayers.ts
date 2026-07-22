@@ -64,6 +64,13 @@ interface Layer {
   parallax: number
 }
 
+/**
+ * The lantern. Cleared ground is lit warm, which against the cold blue of the
+ * mist is what makes the map read as somewhere with a temperature rather than
+ * a gray sheet. Used only as light inside the canvas, never as a UI colour.
+ */
+const WARM = '255, 208, 150'
+
 interface Mote {
   x: number
   y: number
@@ -73,21 +80,37 @@ interface Mote {
   alpha: number
 }
 
-/** Dust drifting in the lit air. Fixed, so it never flickers between frames. */
-const MOTES: Mote[] = Array.from({ length: 44 }, (_, i) => {
-  const a = Math.sin(i * 12.9898) * 43758.5453
-  const b = Math.sin(i * 78.233) * 12345.6789
-  const c = Math.sin(i * 4.1414) * 9871.234
-  const frac = (v: number) => v - Math.floor(v)
-  return {
-    x: frac(a),
-    y: frac(b),
-    r: 0.6 + frac(c) * 1.1,
-    vx: (frac(a * 3) - 0.5) * 0.012,
-    vy: -0.006 - frac(b * 3) * 0.012,
-    alpha: 0.16 + frac(c * 5) * 0.24,
-  }
-})
+const frac = (v: number) => v - Math.floor(v)
+/** A cheap fixed hash, so every speck keeps its place between frames. */
+const spread = (i: number, salt: number) => frac(Math.sin(i * 12.9898 + salt) * 43758.5453)
+
+/** Dust turning in the lantern light. */
+const MOTES: Mote[] = Array.from({ length: 40 }, (_, i) => ({
+  x: spread(i, 0),
+  y: spread(i, 1.7),
+  r: 0.6 + spread(i, 3.1) * 1.1,
+  vx: (spread(i, 5.3) - 0.5) * 0.012,
+  vy: -0.006 - spread(i, 7.9) * 0.012,
+  alpha: 0.3 + spread(i, 9.4) * 0.4,
+}))
+
+interface Star {
+  x: number
+  y: number
+  r: number
+  alpha: number
+  /** Offsets the twinkle so the field does not breathe in unison. */
+  phase: number
+}
+
+/** Distant stars, seen only where the mist is thin and the ground unexplored. */
+const STARS: Star[] = Array.from({ length: 90 }, (_, i) => ({
+  x: spread(i, 21.3),
+  y: spread(i, 33.7),
+  r: 0.5 + spread(i, 41.1) * 0.9,
+  alpha: 0.25 + spread(i, 55.5) * 0.6,
+  phase: spread(i, 67.2) * Math.PI * 2,
+}))
 
 const wrap01 = (v: number) => ((v % 1) + 1) % 1
 
@@ -125,12 +148,13 @@ export function useFogLayers({ width, height, transform, nodes, branches }: FogL
   // place the product allows itself no colour at all.
   const tiles = useMemo(
     () => ({
-      // Big soft masses, the body of the cloud.
-      body: bakeNoiseTile({ size: TILE, period: 2, octaves: 5, seed: 1337, contrast: 1.35, rgb: [88, 87, 86], alpha: 0.8 }),
-      // Bright billow tops catching the light.
-      light: bakeNoiseTile({ size: TILE, period: 3, octaves: 5, seed: 90210, contrast: 1.55, rgb: [253, 252, 251], alpha: 0.78 }),
+      // The dark cold body of the mist, which is what swallows unexplored
+      // ground. Nearly black, and blue rather than gray.
+      body: bakeNoiseTile({ size: TILE, period: 2, octaves: 5, seed: 1337, contrast: 1.3, rgb: [7, 12, 26], alpha: 0.92 }),
+      // Billow tops catching what light there is. Cool, never white.
+      light: bakeNoiseTile({ size: TILE, period: 3, octaves: 5, seed: 90210, contrast: 1.6, rgb: [104, 128, 170], alpha: 0.62 }),
       // Thin filaments, the wisps that sell it as vapour rather than paint.
-      wisp: bakeNoiseTile({ size: TILE, period: 5, octaves: 4, seed: 5150, ridged: true, contrast: 3, rgb: [255, 255, 255], alpha: 0.44 }),
+      wisp: bakeNoiseTile({ size: TILE, period: 5, octaves: 4, seed: 5150, ridged: true, contrast: 3, rgb: [158, 186, 226], alpha: 0.4 }),
       // The chisel that eats irregular bites out of the clearing boundary.
       // Mostly dark with scattered bright teeth, so it takes bites rather than
       // thinning everything evenly, and fine grained so the teeth land on the
@@ -337,25 +361,57 @@ export function useFogLayers({ width, height, transform, nodes, branches }: FogL
       }
     }
 
-    const paintDust = (ctx: CanvasRenderingContext2D, seconds: number, t: Transform, fogNodes: FogNode[]) => {
-      const lit = fogNodes.filter((n) => CLEAR_RADIUS[n.status] > 0)
+    /** Screen position of a node under the current pan and zoom. */
+    const screenOf = (node: FogNode, t: Transform) => ({
+      x: (node.point.x * t.k + t.x) * RES,
+      y: (node.point.y * t.k + t.y) * RES,
+    })
+
+    /** How lit a point is, 1 at the heart of a clearing and 0 out in the cold. */
+    const litness = (x: number, y: number, lit: FogNode[], t: Transform, spreadBy = 1) => {
+      let near = 0
+      for (const node of lit) {
+        const radius = CLEAR_RADIUS[node.status] * spreadBy * t.k * RES
+        if (radius <= 0) continue
+        const p = screenOf(node, t)
+        const d = Math.hypot(x - p.x, y - p.y)
+        if (d < radius) near = Math.max(near, 1 - d / radius)
+      }
+      return near
+    }
+
+    /**
+     * The lantern pools. Warm light spilling from every clearing, which is the
+     * whole temperature story: warm where the learner has been, cold where the
+     * map is still shut.
+     */
+    const paintLanterns = (ctx: CanvasRenderingContext2D, t: Transform, lit: FogNode[], peak: number, reachBy: number) => {
+      for (const node of lit) {
+        const radius = CLEAR_RADIUS[node.status] * reachBy * t.k * RES
+        if (radius <= 0) continue
+        const p = screenOf(node, t)
+        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, radius)
+        g.addColorStop(0, `rgba(${WARM}, ${peak})`)
+        g.addColorStop(0.42, `rgba(${WARM}, ${peak * 0.44})`)
+        g.addColorStop(0.72, `rgba(${WARM}, ${peak * 0.15})`)
+        g.addColorStop(1, `rgba(${WARM}, 0)`)
+        ctx.fillStyle = g
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, radius, 0, Math.PI * 2)
+        ctx.fill()
+      }
+    }
+
+    /** Dust turning in the lantern light. Warm, and only where the air is clear. */
+    const paintDust = (ctx: CanvasRenderingContext2D, seconds: number, t: Transform, lit: FogNode[]) => {
       if (lit.length === 0) return
-      ctx.globalCompositeOperation = 'source-over'
-      ctx.fillStyle = 'rgba(255, 255, 255, 1)'
+      ctx.fillStyle = `rgba(${WARM}, 1)`
       for (const mote of MOTES) {
         const x = wrap01(mote.x + mote.vx * seconds) * w
         const y = wrap01(mote.y + mote.vy * seconds) * h
-        // Only alight where the air is actually clear.
-        let near = 0
-        for (const node of lit) {
-          const radius = CLEAR_RADIUS[node.status] * t.k * RES
-          const nx = (node.point.x * t.k + t.x) * RES
-          const ny = (node.point.y * t.k + t.y) * RES
-          const d = Math.hypot(x - nx, y - ny)
-          if (d < radius) near = Math.max(near, 1 - d / radius)
-        }
+        const near = litness(x, y, lit, t)
         if (near <= 0.02) continue
-        ctx.globalAlpha = mote.alpha * near * 0.55
+        ctx.globalAlpha = mote.alpha * near * 0.7
         ctx.beginPath()
         ctx.arc(x, y, mote.r, 0, Math.PI * 2)
         ctx.fill()
@@ -363,28 +419,27 @@ export function useFogLayers({ width, height, transform, nodes, branches }: FogL
       ctx.globalAlpha = 1
     }
 
-    /** A soft key light so the map has a focal point instead of flat cover. */
-    const paintKeyLight = (ctx: CanvasRenderingContext2D, t: Transform, fogNodes: FogNode[]) => {
-      const lit = fogNodes.filter((n) => CLEAR_RADIUS[n.status] > 0)
-      let cx = w / 2
-      let cy = h * 0.42
-      if (lit.length > 0) {
-        let sx = 0
-        let sy = 0
-        for (const node of lit) {
-          sx += (node.point.x * t.k + t.x) * RES
-          sy += (node.point.y * t.k + t.y) * RES
-        }
-        cx = sx / lit.length
-        cy = sy / lit.length
+    /**
+     * Distant stars. They belong to the cold unexplored half of the map, so
+     * they fade out as a clearing approaches, where the lantern would drown
+     * them anyway. They drift with the map rather than the screen, which is
+     * what makes the dark read as a place rather than an overlay.
+     */
+    const paintStars = (ctx: CanvasRenderingContext2D, seconds: number, t: Transform, lit: FogNode[]) => {
+      ctx.fillStyle = 'rgba(206, 222, 250, 1)'
+      for (let i = 0; i < STARS.length; i++) {
+        const star = STARS[i]
+        const x = wrap01(star.x + t.x * RES * 0.00018) * w
+        const y = wrap01(star.y + t.y * RES * 0.00018) * h
+        const dark = 1 - litness(x, y, lit, t, 1.3)
+        if (dark <= 0.03) continue
+        const twinkle = 0.72 + 0.28 * Math.sin(seconds * 0.7 + star.phase)
+        ctx.globalAlpha = star.alpha * dark * twinkle
+        ctx.beginPath()
+        ctx.arc(x, y, star.r, 0, Math.PI * 2)
+        ctx.fill()
       }
-      const radius = Math.max(w, h) * 0.95
-      const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius)
-      g.addColorStop(0, 'rgba(255, 255, 255, 0.16)')
-      g.addColorStop(0.5, 'rgba(255, 255, 255, 0.06)')
-      g.addColorStop(1, 'rgba(255, 255, 255, 0)')
-      ctx.fillStyle = g
-      ctx.fillRect(0, 0, w, h)
+      ctx.globalAlpha = 1
     }
 
     let raf = 0
@@ -397,38 +452,69 @@ export function useFogLayers({ width, height, transform, nodes, branches }: FogL
 
       buildMask(now, seconds, t, fogNodes, fogBranches)
 
-      // Back: pale haze behind the cards, so they sit inside the weather.
+      const lit = fogNodes.filter((n) => CLEAR_RADIUS[n.status] > 0)
+
+      // Back: the lit atmosphere behind the cards. The deep ground colour is
+      // the wrap's own background, so this layer only adds to it.
       // The first fill copies rather than draws, which replaces the previous
       // frame outright and saves clearing the canvas first.
       backCtx.setTransform(1, 0, 0, 1, 0, 0)
       backCtx.globalAlpha = 1
       backCtx.globalCompositeOperation = 'copy'
-      backCtx.fillStyle = 'rgba(150, 149, 147, 0.32)'
+      backCtx.fillStyle = 'rgba(12, 19, 36, 0.34)'
       backCtx.fillRect(0, 0, w, h)
       backCtx.globalCompositeOperation = 'source-over'
-      paintKeyLight(backCtx, t, fogNodes)
       for (const layer of backLayers) paintLayer(backCtx, layer, seconds, t)
-      // Cleared only halfway. What is left is the haze that keeps a pocket
-      // reading as thinned weather with a card inside it, rather than a clean
-      // white hole cut in a gray sheet. It sits behind the cards, so it costs
-      // the text nothing.
+      // Thin the cold haze where the map is open, then pour the warm light in
+      // after, so the punch never eats the lantern.
       backCtx.globalCompositeOperation = 'destination-out'
-      backCtx.globalAlpha = 0.44
+      backCtx.globalAlpha = 0.72
       backCtx.drawImage(mask, 0, 0)
+      backCtx.globalCompositeOperation = 'source-over'
       backCtx.globalAlpha = 1
-      paintDust(backCtx, seconds, t, fogNodes)
+      paintStars(backCtx, seconds, t, lit)
+      // Light adds, it does not cover. Painted normally over the dark haze the
+      // lantern comes out as brown sludge; added to it, it glows. This one is
+      // the soft spill past the clearing, which fog would carry anyway.
+      backCtx.globalCompositeOperation = 'lighter'
+      paintLanterns(backCtx, t, lit, 0.46, 1.45)
+      backCtx.globalCompositeOperation = 'source-over'
 
-      // Front: the weather that actually hides the map.
+      // Front: the cold weather that actually hides the map.
       frontCtx.setTransform(1, 0, 0, 1, 0, 0)
       frontCtx.globalAlpha = 1
       frontCtx.globalCompositeOperation = 'copy'
-      frontCtx.fillStyle = 'rgba(140, 139, 137, 0.44)'
+      frontCtx.fillStyle = 'rgba(9, 15, 30, 0.55)'
       frontCtx.fillRect(0, 0, w, h)
       frontCtx.globalCompositeOperation = 'source-over'
       for (const layer of frontLayers) paintLayer(frontCtx, layer, seconds, t)
+      // Mist close to a clearing catches the lantern. Drawn with source-atop so
+      // it only tints vapour that is already there and never thickens the air
+      // over open ground.
+      frontCtx.globalCompositeOperation = 'source-atop'
+      paintLanterns(frontCtx, t, lit, 0.36, 1.3)
       frontCtx.globalCompositeOperation = 'destination-out'
       frontCtx.globalAlpha = 1
       frontCtx.drawImage(mask, 0, 0)
+
+      // Both punches are done, so the mask is free to be reused as the shape of
+      // the lantern itself. Recolouring it in place gives warm light with the
+      // clearing's own torn, dissolving edge, instead of a smooth disc of glow
+      // sitting over it and quietly undoing all that tearing.
+      // One flat fill through the mask, not one gradient per node: repeating
+      // source-in would multiply the lanterns into each other and dim the whole
+      // field. The mask's own falloff is the falloff.
+      const m = maskCtx
+      m.globalCompositeOperation = 'source-in'
+      m.globalAlpha = 1
+      m.fillStyle = `rgba(${WARM}, 1)`
+      m.fillRect(0, 0, w, h)
+      backCtx.globalCompositeOperation = 'lighter'
+      backCtx.globalAlpha = 0.2
+      backCtx.drawImage(mask, 0, 0)
+      backCtx.globalAlpha = 1
+      backCtx.globalCompositeOperation = 'source-over'
+      paintDust(backCtx, seconds, t, lit)
 
       if (running && visible && !reduced) raf = requestAnimationFrame(render)
     }

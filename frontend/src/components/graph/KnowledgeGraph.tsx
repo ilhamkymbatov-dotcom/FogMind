@@ -39,32 +39,43 @@ const STATUS_ICON: Record<NodeStatus, typeof Lock> = {
 
 const cleared = (status: NodeStatus) => status === 'completed' || status === 'mastered'
 
-/** A stable -1..1 from an id, so every branch keeps its own bend across renders. */
-function bowOf(id: string): number {
-  let hash = 0
-  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) | 0
-  return ((hash >>> 0) % 2000) / 1000 - 1
+/**
+ * Where a branch should meet a card: the point on the card's edge facing the
+ * other node, so a limb stops at the panel instead of running under it.
+ */
+function anchor(from: Point, to: Point): Point {
+  const dx = to.x - from.x
+  const dy = to.y - from.y
+  if (dx === 0 && dy === 0) return from
+  const byX = dx === 0 ? Infinity : CARD_W / 2 / Math.abs(dx)
+  const byY = dy === 0 ? Infinity : CARD_H / 2 / Math.abs(dy)
+  // Never past the halfway point. Two nodes sitting closer together than their
+  // own cards would otherwise swap ends and draw the limb backwards.
+  const t = Math.min(byX, byY, 0.45)
+  return { x: from.x + dx * t, y: from.y + dy * t }
 }
 
 /**
- * A grown limb rather than a wire: the classic vertical ease between two rows,
- * pushed sideways by a per branch amount so even a perfectly vertical link
- * bends. Control points sit on the midline, which keeps the curve leaving and
- * entering each card cleanly.
+ * A calm limb, shaped only by where the two nodes sit.
+ *
+ * The curve leaves and enters along the dominant axis, with control points set
+ * back by a fixed fraction of the span. Nothing here is random, so two children
+ * placed symmetrically under a parent get mirrored curves, a child sitting
+ * directly above its parent gets a straight limb, and the same tree always
+ * draws the same way.
  */
-function branchPath(a: Point, b: Point, bow: number): string {
+function branchPath(a: Point, b: Point): string {
   const dx = b.x - a.x
   const dy = b.y - a.y
-  const length = Math.hypot(dx, dy) || 1
-  const nx = -dy / length
-  const ny = dx / length
-  const offset = bow * Math.min(length * 0.2, 38)
-  const midY = (a.y + b.y) / 2
-  const c1x = a.x + nx * offset
-  const c1y = midY + ny * offset
-  const c2x = b.x + nx * offset
-  const c2y = midY + ny * offset
-  return `M ${a.x} ${a.y} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${b.x} ${b.y}`
+  const TENSION = 0.55
+  if (Math.abs(dy) >= Math.abs(dx)) {
+    const reach = Math.abs(dy) * TENSION
+    const dir = Math.sign(dy)
+    return `M ${a.x} ${a.y} C ${a.x} ${a.y + dir * reach}, ${b.x} ${b.y - dir * reach}, ${b.x} ${b.y}`
+  }
+  const reach = Math.abs(dx) * TENSION
+  const dir = Math.sign(dx)
+  return `M ${a.x} ${a.y} C ${a.x + dir * reach} ${a.y}, ${b.x - dir * reach} ${b.y}, ${b.x} ${b.y}`
 }
 
 export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOpen }: KnowledgeGraphProps) {
@@ -255,10 +266,10 @@ export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOp
             const b = pos(edge.target_node_id)
             const sa = statusOf(edge.source_node_id)
             const sb = statusOf(edge.target_node_id)
-            const bow = bowOf(edge.id)
-            const d = branchPath(a, b, bow)
-            // A limb drawn by hand is never one weight the whole way.
-            const width = 1.15 + Math.abs(bow) * 0.75
+            const d = branchPath(anchor(a, b), anchor(b, a))
+            // A long limb reaches further and carries less, the way a real one
+            // tapers. Derived from the span, so it never wobbles.
+            const width = Math.max(0.9, 1.7 - Math.hypot(b.x - a.x, b.y - a.y) / 520)
 
             const grown = cleared(sa) && cleared(sb)
             const leading = (cleared(sa) && sb === 'available') || (cleared(sb) && sa === 'available')
