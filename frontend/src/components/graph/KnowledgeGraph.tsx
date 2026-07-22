@@ -40,43 +40,19 @@ const STATUS_ICON: Record<NodeStatus, typeof Lock> = {
 const cleared = (status: NodeStatus) => status === 'completed' || status === 'mastered'
 
 /**
- * Where a branch should meet a card: the point on the card's edge facing the
- * other node, so a limb stops at the panel instead of running under it.
- */
-function anchor(from: Point, to: Point): Point {
-  const dx = to.x - from.x
-  const dy = to.y - from.y
-  if (dx === 0 && dy === 0) return from
-  const byX = dx === 0 ? Infinity : CARD_W / 2 / Math.abs(dx)
-  const byY = dy === 0 ? Infinity : CARD_H / 2 / Math.abs(dy)
-  // Never past the halfway point. Two nodes sitting closer together than their
-  // own cards would otherwise swap ends and draw the limb backwards.
-  const t = Math.min(byX, byY, 0.45)
-  return { x: from.x + dx * t, y: from.y + dy * t }
-}
-
-/**
- * A calm limb, shaped only by where the two nodes sit.
+ * A constellation link: the straight line between two nodes, centre to centre.
  *
- * The curve leaves and enters along the dominant axis, with control points set
- * back by a fixed fraction of the span. Nothing here is random, so two children
- * placed symmetrically under a parent get mirrored curves, a child sitting
- * directly above its parent gets a straight limb, and the same tree always
- * draws the same way.
+ * This is the landing page's MiniGraphDemo connector, which is a thin bar
+ * rotated to the angle between two nodes and left to run under them. Same
+ * geometry here, drawn as an SVG segment because the map already has an SVG
+ * layer under the cards, which is what hides the ends.
  */
 function branchPath(a: Point, b: Point): string {
-  const dx = b.x - a.x
-  const dy = b.y - a.y
-  const TENSION = 0.55
-  if (Math.abs(dy) >= Math.abs(dx)) {
-    const reach = Math.abs(dy) * TENSION
-    const dir = Math.sign(dy)
-    return `M ${a.x} ${a.y} C ${a.x} ${a.y + dir * reach}, ${b.x} ${b.y - dir * reach}, ${b.x} ${b.y}`
-  }
-  const reach = Math.abs(dx) * TENSION
-  const dir = Math.sign(dx)
-  return `M ${a.x} ${a.y} C ${a.x + dir * reach} ${a.y}, ${b.x - dir * reach} ${b.y}, ${b.x} ${b.y}`
+  return `M ${a.x} ${a.y} L ${b.x} ${b.y}`
 }
+
+/** One weight for every link, as in the demo. Refinement over variation. */
+const BRANCH_WIDTH = 1.5
 
 export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOpen }: KnowledgeGraphProps) {
   const { t: tr } = useTranslation()
@@ -266,10 +242,10 @@ export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOp
             const b = pos(edge.target_node_id)
             const sa = statusOf(edge.source_node_id)
             const sb = statusOf(edge.target_node_id)
-            const d = branchPath(anchor(a, b), anchor(b, a))
-            // A long limb reaches further and carries less, the way a real one
-            // tapers. Derived from the span, so it never wobbles.
-            const width = Math.max(0.9, 1.7 - Math.hypot(b.x - a.x, b.y - a.y) / 520)
+            // Centre to centre, exactly as the landing demo does it. The card
+            // layer sits above this one and covers the ends, so only the span
+            // between two nodes is ever seen.
+            const d = branchPath(a, b)
 
             const grown = cleared(sa) && cleared(sb)
             const leading = (cleared(sa) && sb === 'available') || (cleared(sb) && sa === 'available')
@@ -277,18 +253,18 @@ export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOp
             return (
               <g key={edge.id}>
                 {grown || leading ? (
-                  <path className={styles.edgeGlow} d={d} fill="none" strokeWidth={width * 6} />
+                  <path className={styles.edgeGlow} d={d} fill="none" strokeWidth={BRANCH_WIDTH * 5} />
                 ) : null}
                 <path
                   className={[styles.edge, grown || leading ? styles.edgeLit : ''].filter(Boolean).join(' ')}
                   d={d}
                   fill="none"
-                  strokeWidth={width}
+                  strokeWidth={BRANCH_WIDTH}
                 />
-                {/* A spark travelling the limb toward what opens next. Drawn
-                    over the solid stroke, so the branch never reads as dashed. */}
+                {/* A spark travelling the link toward what opens next. Drawn
+                    over the solid stroke, so the line never reads as dashed. */}
                 {leading ? (
-                  <path className={styles.edgeSpark} d={d} fill="none" strokeWidth={width * 1.5} />
+                  <path className={styles.edgeSpark} d={d} fill="none" strokeWidth={BRANCH_WIDTH * 1.4} />
                 ) : null}
               </g>
             )

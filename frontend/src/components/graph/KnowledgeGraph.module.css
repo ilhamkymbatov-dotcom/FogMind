@@ -64,11 +64,11 @@
   z-index: 1;
 }
 
-/* A cold thread in the mist: present, but nothing to follow yet. */
+/* A faint cool thread in the mist: present, but nothing to follow yet. */
 .edge {
-  stroke: #8d9096;
+  stroke: #8a8f96;
   stroke-linecap: round;
-  opacity: 0.3;
+  opacity: 0.34;
   transition: stroke 400ms ease, opacity 400ms ease;
 }
 
@@ -88,12 +88,13 @@
   animation: flow 3.2s linear infinite;
 }
 
-/* A wide, faint underlay rather than an SVG filter: the same halo at a
-   fraction of the cost, and it never triggers a filter repaint on pan. */
+/* The outer glow. A wider, fainter copy of the same line rather than an SVG
+   filter: the same halo at a fraction of the cost, and it never triggers a
+   filter repaint on pan. Kept low so the link reads as lit, not as a tube. */
 .edgeGlow {
   stroke: var(--color-accent);
   stroke-linecap: round;
-  opacity: 0.3;
+  opacity: 0.22;
 }
 
 @keyframes flow {
