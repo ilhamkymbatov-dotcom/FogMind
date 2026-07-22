@@ -85,4 +85,10 @@
   .signOutLabel {
     display: none;
   }
+
+  /* Once the label is gone the button collapses to its padding, which is
+     narrower than a finger. Hold the square. */
+  .signOut {
+    min-width: 44px;
+  }
 }

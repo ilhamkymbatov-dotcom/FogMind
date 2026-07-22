@@ -2,8 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Check, CircleCheck, CloudFog, Lock, Minus, Plus } from 'lucide-react'
 import type { Edge, Node } from '@fogmind/backend'
 import { useTranslation } from '../../i18n'
-import { fitPoints, type NodeStatus, type Point, type Transform } from '../../lib/graphModel'
-import { GraphFog, type FogBranch, type FogNode } from './GraphFog'
+import { CARD_H, CARD_W, fitPoints, type NodeStatus, type Point } from '../../lib/graphModel'
+import { useFogLayers, type FogBranch, type FogNode } from './useFogLayers'
 import styles from './KnowledgeGraph.module.css'
 
 interface KnowledgeGraphProps {
@@ -17,8 +17,14 @@ interface KnowledgeGraphProps {
 
 const MIN_K = 0.2
 const MAX_K = 4
-export const CARD_W = 208
-export const CARD_H = 76
+export { CARD_H, CARD_W }
+
+/**
+ * The smallest scale the map will open at. Below this a card stops being
+ * readable and stops being a 44px target, which matters most on a phone, where
+ * the natural fit is smallest.
+ */
+const MIN_FIT_K = 0.82
 
 function clampK(k: number): number {
   return Math.min(MAX_K, Math.max(MIN_K, k))
@@ -31,18 +37,43 @@ const STATUS_ICON: Record<NodeStatus, typeof Lock> = {
   mastered: CircleCheck,
 }
 
-/** A gentle vertical bezier from one node centre to another, for tree branches. */
-function branchPath(a: Point, b: Point): string {
+const cleared = (status: NodeStatus) => status === 'completed' || status === 'mastered'
+
+/** A stable -1..1 from an id, so every branch keeps its own bend across renders. */
+function bowOf(id: string): number {
+  let hash = 0
+  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) | 0
+  return ((hash >>> 0) % 2000) / 1000 - 1
+}
+
+/**
+ * A grown limb rather than a wire: the classic vertical ease between two rows,
+ * pushed sideways by a per branch amount so even a perfectly vertical link
+ * bends. Control points sit on the midline, which keeps the curve leaving and
+ * entering each card cleanly.
+ */
+function branchPath(a: Point, b: Point, bow: number): string {
+  const dx = b.x - a.x
+  const dy = b.y - a.y
+  const length = Math.hypot(dx, dy) || 1
+  const nx = -dy / length
+  const ny = dx / length
+  const offset = bow * Math.min(length * 0.2, 38)
   const midY = (a.y + b.y) / 2
-  return `M ${a.x} ${a.y} C ${a.x} ${midY}, ${b.x} ${midY}, ${b.x} ${b.y}`
+  const c1x = a.x + nx * offset
+  const c1y = midY + ny * offset
+  const c2x = b.x + nx * offset
+  const c2y = midY + ny * offset
+  return `M ${a.x} ${a.y} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${b.x} ${b.y}`
 }
 
 export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOpen }: KnowledgeGraphProps) {
   const { t: tr } = useTranslation()
   const wrapRef = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState({ w: 0, h: 0 })
-  const [transform, setTransform] = useState<Transform | null>(null)
+  const [transform, setTransform] = useState<{ x: number; y: number; k: number } | null>(null)
   const [settling, setSettling] = useState<Set<string>>(new Set())
+  const [emerging, setEmerging] = useState<Set<string>>(new Set())
   const pointers = useRef(new Map<number, { x: number; y: number }>())
   const pinchDist = useRef(0)
   const panning = useRef(false)
@@ -61,25 +92,51 @@ export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOp
 
   useEffect(() => {
     if (transform || size.w === 0 || positions.size === 0) return
-    setTransform(fitPoints([...positions.values()], size.w, size.h))
-  }, [transform, size, positions])
+    const all = [...positions.values()]
+    const natural = fitPoints(all, size.w, size.h, 96, CARD_W, CARD_H)
+    if (natural.k >= MIN_FIT_K) {
+      setTransform(natural)
+      return
+    }
+    // The whole tree will not fit at a scale where a card is still legible and
+    // still a real touch target, which is the normal case on a phone. Rather
+    // than shrink it into confetti, hold the scale and open on the part of the
+    // map that can actually be acted on. Everything else is a pan away.
+    const focus = nodes.filter((n) => statusOf(n.id) !== 'locked').map((n) => pos(n.id))
+    const points = focus.length > 0 ? focus : all
+    const cx = points.reduce((sum, p) => sum + p.x, 0) / points.length
+    const cy = points.reduce((sum, p) => sum + p.y, 0) / points.length
+    setTransform({ k: MIN_FIT_K, x: size.w / 2 - cx * MIN_FIT_K, y: size.h / 2 - cy * MIN_FIT_K })
+  }, [transform, size, positions, nodes, statusOf, pos])
 
+  // Two moments worth marking: a node stepping out of the fog for the first
+  // time, and a node being finished perfectly. Everything else changes quietly.
   useEffect(() => {
     const timers: number[] = []
+    const clear = (set: (updater: (s: Set<string>) => Set<string>) => void, id: string, ms: number) => {
+      timers.push(
+        window.setTimeout(() => {
+          set((s) => {
+            const next = new Set(s)
+            next.delete(id)
+            return next
+          })
+        }, ms),
+      )
+    }
+
     for (const node of nodes) {
       const status = statusOf(node.id)
       const prev = prevStatuses.current.get(node.id)
-      if (prev && prev !== 'mastered' && status === 'mastered') {
-        setSettling((s) => new Set(s).add(node.id))
-        timers.push(
-          window.setTimeout(() => {
-            setSettling((s) => {
-              const next = new Set(s)
-              next.delete(node.id)
-              return next
-            })
-          }, 700),
-        )
+      if (prev && prev !== status) {
+        if (prev === 'locked' && status !== 'locked') {
+          setEmerging((s) => new Set(s).add(node.id))
+          clear(setEmerging, node.id, 900)
+        }
+        if (prev !== 'mastered' && status === 'mastered') {
+          setSettling((s) => new Set(s).add(node.id))
+          clear(setSettling, node.id, 700)
+        }
       }
       prevStatuses.current.set(node.id, status)
     }
@@ -158,20 +215,21 @@ export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOp
   // circles.
   const branches: FogBranch[] = useMemo(() => {
     const out: FogBranch[] = []
-    const clears = (s: NodeStatus) => s === 'completed' || s === 'mastered'
     for (const edge of edges) {
       const sa = statusOf(edge.source_node_id)
       const sb = statusOf(edge.target_node_id)
-      if (clears(sa) && clears(sb)) {
+      if (cleared(sa) && cleared(sb)) {
         out.push({ key: `link-${edge.id}`, from: pos(edge.source_node_id), to: pos(edge.target_node_id) })
-      } else if (clears(sa) && sb === 'available') {
+      } else if (cleared(sa) && sb === 'available') {
         out.push({ key: `${edge.source_node_id}-${edge.target_node_id}`, from: pos(edge.source_node_id), to: pos(edge.target_node_id) })
-      } else if (clears(sb) && sa === 'available') {
+      } else if (cleared(sb) && sa === 'available') {
         out.push({ key: `${edge.target_node_id}-${edge.source_node_id}`, from: pos(edge.target_node_id), to: pos(edge.source_node_id) })
       }
     }
     return out
   }, [edges, statusOf, pos])
+
+  const fog = useFogLayers({ width: size.w, height: size.h, transform: t, nodes: fogNodes, branches })
 
   return (
     <div
@@ -185,6 +243,10 @@ export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOp
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
     >
+      {/* Layer 0: the haze that passes behind the cards, so the graph sits
+          inside the weather instead of on top of it. */}
+      <canvas ref={fog.backRef} className={styles.fogBack} aria-hidden="true" />
+
       {/* Layer 1: branches only, pure SVG. Decorative, no input. */}
       <svg className={styles.edges} aria-hidden="true">
         <g transform={`translate(${t.x} ${t.y}) scale(${t.k})`}>
@@ -193,10 +255,32 @@ export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOp
             const b = pos(edge.target_node_id)
             const sa = statusOf(edge.source_node_id)
             const sb = statusOf(edge.target_node_id)
-            const cls = [styles.edge, sa === 'mastered' && sb === 'mastered' ? styles.edgeMastered : '']
-              .filter(Boolean)
-              .join(' ')
-            return <path key={edge.id} className={cls} d={branchPath(a, b)} fill="none" />
+            const bow = bowOf(edge.id)
+            const d = branchPath(a, b, bow)
+            // A limb drawn by hand is never one weight the whole way.
+            const width = 1.15 + Math.abs(bow) * 0.75
+
+            const grown = cleared(sa) && cleared(sb)
+            const leading = (cleared(sa) && sb === 'available') || (cleared(sb) && sa === 'available')
+
+            return (
+              <g key={edge.id}>
+                {grown || leading ? (
+                  <path className={styles.edgeGlow} d={d} fill="none" strokeWidth={width * 6} />
+                ) : null}
+                <path
+                  className={[styles.edge, grown || leading ? styles.edgeLit : ''].filter(Boolean).join(' ')}
+                  d={d}
+                  fill="none"
+                  strokeWidth={width}
+                />
+                {/* A spark travelling the limb toward what opens next. Drawn
+                    over the solid stroke, so the branch never reads as dashed. */}
+                {leading ? (
+                  <path className={styles.edgeSpark} d={d} fill="none" strokeWidth={width * 1.5} />
+                ) : null}
+              </g>
+            )
           })}
         </g>
       </svg>
@@ -215,6 +299,7 @@ export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOp
             styles.card,
             styles[`card_${status}`],
             settling.has(node.id) ? styles.cardSettle : '',
+            emerging.has(node.id) ? styles.cardEmerge : '',
           ]
             .filter(Boolean)
             .join(' ')
@@ -236,7 +321,9 @@ export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOp
                 }
               }}
             >
-              <Icon className={styles.cardIcon} size={17} aria-hidden="true" />
+              <span className={styles.cardIconWrap} aria-hidden="true">
+                <Icon className={styles.cardIcon} size={17} />
+              </span>
               <div className={styles.cardBody}>
                 <span className={styles.cardTitle}>{node.title}</span>
                 {status !== 'locked' && hint.total > 0 ? (
@@ -250,9 +337,9 @@ export function KnowledgeGraph({ nodes, edges, positions, statusOf, hintOf, onOp
         })}
       </div>
 
-      {/* Layer 3: fog, decorative and click through, painted above the cards so
-          it visibly shrouds them while local pockets clear. */}
-      <GraphFog width={size.w} height={size.h} transform={t} nodes={fogNodes} branches={branches} />
+      {/* Layer 3: the weather itself, decorative and click through, painted
+          above the cards so it visibly shrouds them while pockets tear open. */}
+      <canvas ref={fog.frontRef} className={styles.fogFront} aria-hidden="true" />
 
       <div className={styles.controls}>
         <button type="button" className={styles.controlButton} aria-label={tr('graph.zoomIn')} onClick={() => zoomAround(size.w / 2, size.h / 2, 1.2)}>

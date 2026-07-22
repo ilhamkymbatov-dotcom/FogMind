@@ -65,6 +65,17 @@ export interface Point {
   y: number
 }
 
+/** The footprint of a node card, in graph units. */
+export const CARD_W = 212
+export const CARD_H = 78
+
+/**
+ * Half the diagonal of a card. The fog guarantees a clearing at least this
+ * wide around a revealed node, so no card text can ever sit under mist, in any
+ * language and at any string length.
+ */
+export const CARD_REACH = Math.hypot(CARD_W, CARD_H) / 2
+
 const X_GAP = 210
 const Y_GAP = 150
 

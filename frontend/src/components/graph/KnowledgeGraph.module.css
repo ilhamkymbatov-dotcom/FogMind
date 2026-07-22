@@ -13,6 +13,26 @@
   cursor: grabbing;
 }
 
+/* Layer 0 and 3: the two halves of the weather. The cards live between them,
+   so the graph sits inside a volume of cloud rather than under a sheet. */
+
+.fogBack,
+.fogFront {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.fogBack {
+  z-index: 0;
+}
+
+.fogFront {
+  z-index: 3;
+}
+
 /* Layer 1: branches. Pure SVG, no input. --------------------------------- */
 
 .edges {
@@ -22,17 +42,44 @@
   height: 100%;
   overflow: visible;
   pointer-events: none;
+  z-index: 1;
 }
 
 .edge {
-  stroke: var(--color-border);
-  stroke-width: 1.25;
-  transition: stroke 300ms ease;
+  stroke: var(--color-border-strong);
+  stroke-linecap: round;
+  opacity: 0.7;
+  transition: stroke 400ms ease, opacity 400ms ease;
 }
 
-.edgeMastered {
+/* A branch that has been grown, or that leads to where you can go next. */
+.edgeLit {
   stroke: var(--color-accent);
-  stroke-width: 1.5;
+  opacity: 0.8;
+}
+
+/* The travelling highlight. A short dash sliding along a stroke that is solid
+   underneath it, so the limb reads as lit rather than broken. */
+.edgeSpark {
+  stroke: var(--color-accent);
+  stroke-linecap: round;
+  opacity: 0.5;
+  stroke-dasharray: 16 150;
+  animation: flow 3.2s linear infinite;
+}
+
+/* A wide, faint underlay rather than an SVG filter: the same halo at a
+   fraction of the cost, and it never triggers a filter repaint on pan. */
+.edgeGlow {
+  stroke: var(--color-accent);
+  stroke-linecap: round;
+  opacity: 0.09;
+}
+
+@keyframes flow {
+  to {
+    stroke-dashoffset: -166;
+  }
 }
 
 /* Layer 2: node cards as plain HTML, moved with one CSS transform. -------- */
@@ -42,6 +89,7 @@
   inset: 0;
   transform-origin: 0 0;
   pointer-events: none;
+  z-index: 2;
 }
 
 .card {
@@ -55,15 +103,43 @@
      softens. Deliberately not var(--radius). */
   border-radius: var(--radius-graph);
   background-color: var(--color-surface);
+  box-shadow: var(--shadow-md);
   pointer-events: auto;
   transition:
-    border-color 160ms ease,
-    transform 160ms ease;
+    border-color 200ms ease,
+    box-shadow 200ms ease,
+    transform 200ms ease;
+}
+
+/* The halo. A gradient rather than a blur filter, so it costs nothing to
+   composite and stays smooth while the map is panned. */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: -18px;
+  border-radius: inherit;
+  background: radial-gradient(closest-side, rgba(0, 85, 255, 0.3), rgba(0, 85, 255, 0));
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+  transition: opacity 300ms ease;
+}
+
+.cardIconWrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-graph);
+  background-color: var(--color-sunken);
+  color: var(--color-muted);
+  transition: background-color 200ms ease, color 200ms ease;
 }
 
 .cardIcon {
-  flex-shrink: 0;
-  color: var(--color-muted);
+  display: block;
 }
 
 .cardBody {
@@ -93,50 +169,82 @@
   color: var(--color-muted);
 }
 
+/* Still under the fog: barely there, no lift, nothing to invite a click. */
 .card_locked {
-  opacity: 0.5;
-  border-color: #ededed;
+  opacity: 0.46;
+  border-color: var(--color-border);
+  box-shadow: none;
 }
 
 .card_locked .cardTitle {
   color: var(--color-muted);
 }
 
+/* Reachable. The one card the eye should find, breathing quietly so it reads
+   as somewhere to go rather than something already done. */
 .card_available {
   cursor: pointer;
-  border-color: var(--color-muted);
+  border-color: rgba(0, 85, 255, 0.42);
+  box-shadow: var(--shadow-md);
 }
 
-.card_available .cardIcon {
-  color: var(--color-fg);
+.card_available::before {
+  opacity: 1;
+  animation: breathe 4.2s ease-in-out infinite;
+}
+
+.card_available .cardIconWrap {
+  background-color: var(--color-accent-tint);
+  color: var(--color-accent);
 }
 
 .card_available:hover {
-  transform: translateY(-1px);
-  border-color: var(--color-fg);
+  transform: translateY(-2px);
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-lg);
 }
 
 .card_available:active {
-  transform: scale(0.99);
+  transform: translateY(0) scale(0.99);
 }
 
-/* Completed with mistakes: fog cleared, a quiet muted check, no accent. */
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.97);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+}
+
+/* Answered, but not all of it right. Out of the fog and solid, deliberately
+   without the accent, so it never reads as finished. */
 .card_completed {
-  border-color: var(--color-border);
+  border-color: var(--color-border-strong);
 }
 
-.card_completed .cardIcon {
-  color: var(--color-muted);
+.card_completed .cardIconWrap {
+  background-color: var(--color-sunken);
+  color: var(--color-fg);
 }
 
-/* Mastered: all correct. The accent state, a left accent bar and accent icon. */
+/* Mastered: every answer correct. The accent state, lit and settled. */
 .card_mastered {
-  border-color: var(--color-border);
+  border-color: rgba(0, 85, 255, 0.3);
   border-left: 2px solid var(--color-accent);
+  box-shadow: var(--shadow-md);
 }
 
-.card_mastered .cardIcon {
-  color: var(--color-accent);
+.card_mastered::before {
+  opacity: 0.6;
+}
+
+.card_mastered .cardIconWrap {
+  background-color: var(--color-accent);
+  color: var(--color-surface);
 }
 
 .card_mastered .cardTitle {
@@ -159,12 +267,32 @@
   }
 }
 
+/* Coming out of the fog for the first time: it surfaces rather than appears. */
+.cardEmerge {
+  animation: emerge 900ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes emerge {
+  0% {
+    opacity: 0.2;
+    transform: translateY(7px) scale(0.94);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 /* Controls ---------------------------------------------------------------- */
 
 .controls {
   position: absolute;
   right: var(--space-3);
   bottom: var(--space-3);
+  z-index: 4;
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
@@ -180,6 +308,7 @@
   border-radius: var(--radius);
   background-color: var(--color-surface);
   color: var(--color-fg);
+  box-shadow: var(--shadow-sm);
   cursor: pointer;
 }
 
@@ -191,6 +320,7 @@
   position: absolute;
   left: var(--space-3);
   bottom: var(--space-3);
+  z-index: 4;
   font-size: var(--text-xs);
   line-height: var(--leading-xs);
   color: var(--color-muted);
@@ -199,14 +329,18 @@
 
 @media (prefers-reduced-motion: reduce) {
   .card,
-  .edge {
+  .edge,
+  .cardIconWrap,
+  .card::before {
     transition: none;
   }
-  .cardSettle {
+  .cardSettle,
+  .cardEmerge,
+  .edgeSpark,
+  .card_available::before {
     animation: none;
   }
   .card_available:hover,
-  .card_revealed:hover,
   .card_available:active {
     transform: none;
   }
