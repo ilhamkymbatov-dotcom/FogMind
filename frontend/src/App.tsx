@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
+import { StreakProvider } from './context/StreakContext'
 import { AppShell } from './components/AppShell'
 import { ProtectedRoute, PublicOnlyRoute } from './components/RouteGuards'
 import { LandingLayout } from './landing/LandingLayout'
@@ -62,7 +63,9 @@ function App() {
                 path="/app"
                 element={
                   <ProtectedRoute>
-                    <AppShell />
+                    <StreakProvider>
+                      <AppShell />
+                    </StreakProvider>
                   </ProtectedRoute>
                 }
               >

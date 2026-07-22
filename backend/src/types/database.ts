@@ -141,6 +141,22 @@ export type ProgressUpdate = Partial<Progress>
 export type QuestionAnswerInsert = Optional<QuestionAnswer, 'id' | 'answered_at'>
 export type QuestionAnswerUpdate = Partial<QuestionAnswer>
 
+/**
+ * One calendar day on which the user answered at least one question.
+ *
+ * activity_date is a plain date string, YYYY-MM-DD, in the reader's own local
+ * calendar rather than UTC. Streaks are derived from these rows and never
+ * stored, so the counts cannot drift from the activity they describe.
+ */
+export type ActivityDay = {
+  id: string
+  user_id: string
+  activity_date: string
+  created_at: string
+}
+export type ActivityDayInsert = Optional<ActivityDay, 'id' | 'created_at'>
+export type ActivityDayUpdate = Partial<ActivityDay>
+
 // ---------------------------------------------------------------------------
 // Schema shape consumed by createClient
 // ---------------------------------------------------------------------------
@@ -173,6 +189,12 @@ export type Database = {
         Row: QuestionAnswer
         Insert: QuestionAnswerInsert
         Update: QuestionAnswerUpdate
+        Relationships: []
+      }
+      activity_days: {
+        Row: ActivityDay
+        Insert: ActivityDayInsert
+        Update: ActivityDayUpdate
         Relationships: []
       }
     }

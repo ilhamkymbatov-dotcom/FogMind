@@ -7,6 +7,7 @@ import { errorKey, useTranslation, type TranslationKey } from '../i18n'
 import { supabase } from '../lib/supabase'
 import { Button } from '../components/Button'
 import { UploadModal } from '../components/UploadModal'
+import { StreakCard } from '../components/StreakCard'
 import styles from './DashboardPage.module.css'
 
 interface DocumentRow extends Document {
@@ -95,6 +96,8 @@ function DashboardPage() {
           {t('dash.upload')}
         </Button>
       </div>
+
+      <StreakCard />
 
       {loading ? (
         <p className={styles.state}>{t('dash.loading')}</p>

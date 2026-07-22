@@ -19,6 +19,10 @@
 }
 
 .wordmark {
+  /* A full height row, so the brand is a comfortable tap target. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   font-size: var(--text-lg);
   line-height: var(--leading-lg);
   font-weight: var(--weight-bold);
@@ -61,6 +65,24 @@
 /* The email label eats space on narrow phones; hide it and keep the action. */
 @media (max-width: 480px) {
   .email {
+    display: none;
+  }
+}
+
+/* The bar carries five things at once now. Below this width the sign out label
+   folds to its icon and the gaps tighten, so the streak and the language
+   switcher both keep their full targets without the row overflowing. */
+@media (max-width: 560px) {
+  .bar {
+    gap: var(--space-2);
+    padding-inline: var(--space-3);
+  }
+
+  .right {
+    gap: var(--space-2);
+  }
+
+  .signOutLabel {
     display: none;
   }
 }

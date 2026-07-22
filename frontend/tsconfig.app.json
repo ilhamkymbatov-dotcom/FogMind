@@ -32,5 +32,8 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "../backend/src"]
+  // The streak checker is a standalone script run by npm run check:streak,
+  // not part of the app bundle.
+  "include": ["src", "../backend/src"],
+  "exclude": ["src/**/*.check.ts"]
 }

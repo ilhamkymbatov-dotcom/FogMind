@@ -15,6 +15,7 @@ import {
   type Question,
 } from '@fogmind/backend'
 import { supabase } from './supabase'
+import { useStreak } from '../context/StreakContext'
 import { errorKey } from '../i18n'
 import type { TranslationKey } from '../i18n'
 import {
@@ -53,6 +54,7 @@ export interface GraphGame {
 }
 
 export function useGraphGame(documentId: string | undefined): GraphGame {
+  const { markActiveToday } = useStreak()
   const [document, setDocument] = useState<Document | null>(null)
   const [nodes, setNodes] = useState<Node[]>([])
   const [edges, setEdges] = useState<Edge[]>([])
@@ -206,6 +208,11 @@ export function useGraphGame(documentId: string | undefined): GraphGame {
           is_correct: isCorrect,
         })
 
+        // Today counts the moment a question is answered, right or wrong. This
+        // is a no op once the day is already recorded, so it costs nothing on
+        // every answer after the first.
+        markActiveToday()
+
         // Mirror the node level outcome onto its progress row so it persists in
         // the shape the rest of the app expects.
         const nodeId = question.node_id
@@ -250,7 +257,7 @@ export function useGraphGame(documentId: string | undefined): GraphGame {
         throw err instanceof Error ? err : new Error('panel.errSave')
       }
     },
-    [answers, progressByNode, questionsByNode, userId],
+    [answers, progressByNode, questionsByNode, userId, markActiveToday],
   )
 
   return {

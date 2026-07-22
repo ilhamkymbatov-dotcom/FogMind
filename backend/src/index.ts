@@ -34,6 +34,9 @@ export type {
   QuestionAnswer,
   QuestionAnswerInsert,
   QuestionAnswerUpdate,
+  ActivityDay,
+  ActivityDayInsert,
+  ActivityDayUpdate,
   Database,
 } from './types/database'
 
@@ -59,3 +62,4 @@ export {
   type InitialProgressInput,
 } from './queries/progress'
 export { upsertQuestionAnswer, listAnswersForQuestions } from './queries/questionAnswers'
+export { recordActivityDay, listActivityDates } from './queries/activityDays'

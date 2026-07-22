@@ -438,6 +438,33 @@ export const en = {
   'demo.upload.l1': 'Photosynthesis converts light energy into chemical energy.',
   'demo.upload.l2': 'It takes place in the chloroplast, inside the thylakoid membrane.',
   'demo.upload.l3': 'The light reactions produce ATP and NADPH for the Calvin cycle.',
+
+  // Learning streak ------------------------------------------------------------
+  'streak.aria': 'Current streak: {count} days',
+  'streak.ariaNone': 'No streak yet',
+  'streak.title': 'Your streak',
+  'streak.current': 'Running now',
+  'streak.longest': 'Best so far',
+  'streak.dayUnit': 'days',
+  'streak.empty': 'Answer one question today and your streak starts.',
+  'streak.freezeNote': 'A missed day is covered, so your streak is still going. Pick it up whenever suits you.',
+  'streak.celebrateFirst': 'Streak started',
+  'streak.celebrate': '{count} day streak',
+  'streak.celebrateBody': 'That is today done. See you tomorrow.',
+  'streak.dayActive': 'Active',
+  'streak.dayBridged': 'Covered',
+  'streak.dayMissed': 'No activity',
+  'streak.today': 'Today',
+  // Weekday initials for the week view, indexed by getDay(). Held here rather
+  // than taken from Intl because not every runtime ships Kazakh calendar data,
+  // and a silent fallback there prints English day names into a Kazakh page.
+  'streak.wd0': 'S',
+  'streak.wd1': 'M',
+  'streak.wd2': 'T',
+  'streak.wd3': 'W',
+  'streak.wd4': 'T',
+  'streak.wd5': 'F',
+  'streak.wd6': 'S',
 } as const
 
 export type TranslationKey = keyof typeof en
